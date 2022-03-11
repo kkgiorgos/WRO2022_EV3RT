@@ -1,0 +1,47 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "windows": {
+                "command": "./BuildScripts/make.ps1"
+            },
+            "linux": {
+                "command": "./BuildScripts/make.sh"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "uploadBT",
+            "type": "shell",
+            "windows": {
+                "command": "./BuildScripts/uploadBT.ps1"
+            },
+            "linux": {
+                "command": "./BuildScripts/uploadBT.sh"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "uploadUSB",
+            "type": "shell",
+            "windows": {
+                "command": "./BuildScripts/uploadUSB.ps1"
+            },
+            "linux": {
+                "command": "./BuildScripts/uploadUSB.sh"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

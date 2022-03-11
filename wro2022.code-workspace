@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"chrono": "cpp",
+			"array": "cpp",
+			"string": "cpp",
+			"string_view": "cpp",
+			"iosfwd": "cpp",
+			"ev3api.h": "c",
+			"type_traits": "cpp",
+			"cstdlib": "cpp"
+		}
+	}
+}
