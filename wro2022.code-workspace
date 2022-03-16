@@ -13,7 +13,8 @@
 			"iosfwd": "cpp",
 			"ev3api.h": "c",
 			"type_traits": "cpp",
-			"cstdlib": "cpp"
+			"cstdlib": "cpp",
+			"queue": "cpp"
 		}
 	}
 }

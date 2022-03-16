@@ -32,6 +32,11 @@ colorSensor leftScanner(SensorPort::S1, false, "WRO2022");
 colorSensor rightScanner(SensorPort::S4, false, "WRO2022");
 lineFollower lifo(400, &robot, &leftSensor, &rightSensor);
 
+
+queue<items> rampQueue;
+colors laundryBaskets[3];
+//map<colors, room> rooms;
+
 double KP = 2;
 double KI = 2;
 double KD = 200;
@@ -47,7 +52,12 @@ BrickButton btnEnter(BrickButtons::ENTER);
 
 void startData()
 {
-    
+    /*rooms.insert(pair<colors, room>(RED, room(RED)));
+    rooms.insert(pair<colors, room>(GREEN, room(GREEN)));
+    rooms.insert(pair<colors, room>(BLUE, room(BLUE)));
+    rooms.insert(pair<colors, room>(YELLOW, room(YELLOW)));*/
+
+    currentPos = S;
 }
 
 void init()
@@ -58,8 +68,6 @@ void init()
     robot.setLinearAccelParams(100, 0, 0);
     robot.setAngularAccelParams(1000, 0, 0);
     robot.setStallTolerance(10, 200, 6, 40, 0.5);
-
-    startData();
 
     lifo.setDoubleFollowMode("SL", "SR");
     lifo.initializeMotionMode(speedMode::CONTROLLED);
@@ -98,6 +106,7 @@ void main_task(intptr_t unused)
     startData();
 
     //Mission Code
+
 
     format(bt, "Mission Time: %  \r\n")%missionTimer.secElapsed();
 
