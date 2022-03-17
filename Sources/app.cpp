@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <queue>
+#include <list>
+#include <map>
 #include <cstdio>
 #include <climits>
 
@@ -33,9 +35,9 @@ colorSensor rightScanner(SensorPort::S4, false, "WRO2022");
 lineFollower lifo(400, &robot, &leftSensor, &rightSensor);
 
 
-queue<items> rampQueue;
+queue<items, list<items>> rampQueue;
 colors laundryBaskets[3];
-//map<colors, room> rooms;
+map<colors, room> rooms;
 
 double KP = 2;
 double KI = 2;
@@ -52,10 +54,10 @@ BrickButton btnEnter(BrickButtons::ENTER);
 
 void startData()
 {
-    /*rooms.insert(pair<colors, room>(RED, room(RED)));
+    rooms.insert(pair<colors, room>(RED, room(RED)));
     rooms.insert(pair<colors, room>(GREEN, room(GREEN)));
     rooms.insert(pair<colors, room>(BLUE, room(BLUE)));
-    rooms.insert(pair<colors, room>(YELLOW, room(YELLOW)));*/
+    rooms.insert(pair<colors, room>(YELLOW, room(YELLOW)));
 
     currentPos = S;
 }
@@ -106,7 +108,12 @@ void main_task(intptr_t unused)
     startData();
 
     //Mission Code
+    //TODO
 
+    FILE *bluetooth = ev3_serial_open_file(EV3_SERIAL_BT);
+
+    fprintf(bluetooth, "This is evidently a flipping test!!!\n");
+    
 
     format(bt, "Mission Time: %  \r\n")%missionTimer.secElapsed();
 

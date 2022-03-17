@@ -1,7 +1,9 @@
 #pragma once
 
 #include "routes.h"
+#include <map>
 #include <queue>
+#include <list>
 #include <string>
 
 //Mission related variables / data
@@ -49,6 +51,7 @@ private:
     state currentState;
 
 public:
+    room() : currentState(WAITING) {}
     room(ev3ys::colors col);
     void report();
 
@@ -70,11 +73,12 @@ public:
     void executeAllActions();
 };
 
-extern std::queue<items> rampQueue;
+extern std::queue<items, std::list<items>> rampQueue;
 extern ev3ys::colors laundryBaskets[3];
-//extern std::map<ev3ys::colors, room> rooms;
+extern std::map<ev3ys::colors, room> rooms;
 
 //Helper functions
+void printRampQueue();
 
 extern matPos startPos;
 extern matPos currentPos;

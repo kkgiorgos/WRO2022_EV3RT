@@ -94,7 +94,7 @@ matPos room::getPosition()
 
 void room::scanTask()
 {
-    printf("Scanning %d room: ", name);
+    printf("Scanning %s room: ", name);
     currentState = SCANNING;
 
     //Scan code
@@ -153,6 +153,7 @@ void room::leaveWater()
     currentState = LEAVING_WATER;
 
     //Leave Water Code
+    rampQueue.pop();
 
 }
 
@@ -209,6 +210,36 @@ void room::executeAllActions()
     exitRoom();
 }
 
+//Helper functions
+
+void printRampQueue()
+{
+    queue<items, list<items>> temp = rampQueue;
+    int size = temp.size();
+    printf("Current State of the Ramp Queue: [front, ");
+    for(int i = 0; i < size; i++)
+    {
+        switch(temp.front())
+        {
+            case BOTTLE:
+                printf("BOTTLE, ");
+                break;
+            case LAUNDRY_BLACK:
+                printf("LAUNDRY_BLACK, ");
+                break;
+            case LAUNDRY_RED:
+                printf("LAUNDRY_RED, ");
+                break;
+            case LAUNDRY_YELLOW:
+                printf("LAUNDRY_YELLOW, ");
+                break;
+        }
+        temp.pop();
+    }
+    printf("back]");
+}
+
+
 //Actual tasks start here
 
 void startProcedure()
@@ -216,7 +247,7 @@ void startProcedure()
     printf("Starting movement!!!\n");
 
     //Get out of the start position
-    //currentDirection = NORTH;
+    currentDirection = NORTH;
 
 }
 
@@ -226,11 +257,11 @@ void pickWater()
 
     //Pick First Bottle
     printf("First bottle of water has been loaded.\n");
-    //rampQueue.push(BOTTLE);
+    rampQueue.push(BOTTLE);
 
     //Pick Second Bottle
     printf("Second bottle of water has been loaded.\n");
-    //rampQueue.push(BOTTLE);
+    rampQueue.push(BOTTLE);
 }
 
 
@@ -294,7 +325,7 @@ void leaveLaundry()
 {
     printf("Leaving Laundry.\n");
     
-
+    //TODO
 }
 
 void finishProcedure()
