@@ -41,22 +41,22 @@ room::room(colors col)
 
 void room::report()
 {
-    printf("\nReporting %s room's status:\n", name);
-    printf("Currently ");
+    DEBUGPRINT("\nReporting %s room's status:\n", name);
+    DEBUGPRINT("Currently ");
     switch (currentState)
     {
         case WAITING:
-            printf("the room has not been visited.\n");
+            DEBUGPRINT("the room has not been visited.\n");
             break;
         case SCANNING:
-            printf("the room is being scanned and the task is");
+            DEBUGPRINT("the room is being scanned and the task is");
             switch(task)
             {
                 case WATER:
-                    printf(" to depose water.\n");
+                    DEBUGPRINT(" to depose water.\n");
                     break;
                 case BALL:
-                    printf(" to play a game.\n");
+                    DEBUGPRINT(" to play a game.\n");
                     break;
             }
             break;
@@ -64,25 +64,25 @@ void room::report()
             switch(laundry)
             {
                 case RED:
-                    printf("red ");
+                    DEBUGPRINT("red ");
                     break;
                 case BLACK:
-                    printf("black ");
+                    DEBUGPRINT("black ");
                     break;
                 case YELLOW:
-                    printf("yellow ");
+                    DEBUGPRINT("yellow ");
                     break;
             }
-            printf("laundry is being picked.\n");
+            DEBUGPRINT("laundry is being picked.\n");
             break;
         case LEAVING_WATER:
-            printf("water is being deposited.\n");
+            DEBUGPRINT("water is being deposited.\n");
             break;
         case PLAYING_BALL:
-            printf("a game is being played.\n");
+            DEBUGPRINT("a game is being played.\n");
             break;
         case COMPLETE:
-            printf("all tasks are complete.\n");
+            DEBUGPRINT("all tasks are complete.\n");
             break;
     }
 }
@@ -94,7 +94,7 @@ matPos room::getPosition()
 
 void room::scanTask()
 {
-    printf("Scanning %s room: ", name);
+    DEBUGPRINT("\nScanning %s room: ", name);
     currentState = SCANNING;
 
     //Scan code
@@ -102,11 +102,11 @@ void room::scanTask()
     //Set task
     task = WATER;
 
-    printf("task is ");
+    DEBUGPRINT("task is ");
     if(task == WATER)
-        printf("to dispose water.\n");
+        DEBUGPRINT("to dispose water.\n");
     else if(task == BALL)
-        printf("to play a game.\n");
+        DEBUGPRINT("to play a game.\n");
 }
 
 tasks room::getTask()
@@ -116,7 +116,7 @@ tasks room::getTask()
 
 void room::pickLaundry()
 {
-    printf("Picking laundry from %s room: ", name);
+    DEBUGPRINT("Picking laundry from %s room: ", name);
     currentState = PICKING_LAUNDRY;
 
     //Pick Laundry Code
@@ -124,20 +124,20 @@ void room::pickLaundry()
     //Set laundry color and add the item to the ramp queue
     laundry = RED;
 
-    printf("laundry color is ");
+    DEBUGPRINT("laundry color is ");
     switch(laundry)
     {
         case RED:
-            printf("red.\n");
-            //rampQueue.push(LAUNDRY_RED);
+            DEBUGPRINT("red.\n");
+            rampQueue.push(LAUNDRY_RED);
             break;
         case BLACK:
-            printf("black.\n");
-            //rampQueue.push(LAUNDRY_BLACK);
+            DEBUGPRINT("black.\n");
+            rampQueue.push(LAUNDRY_BLACK);
             break;
         case YELLOW:
-            printf("yellow.\n");
-            //rampQueue.push(LAUNDRY_YELLOW);
+            DEBUGPRINT("yellow.\n");
+            rampQueue.push(LAUNDRY_YELLOW);
             break;
     }
 }
@@ -149,7 +149,7 @@ colors room::getLaundryColor()
 
 void room::leaveWater()
 {
-    printf("Leaving water at the %s room.\n", name);
+    DEBUGPRINT("Leaving water at the %s room.\n", name);
     currentState = LEAVING_WATER;
 
     //Leave Water Code
@@ -159,7 +159,7 @@ void room::leaveWater()
 
 void room::pickBall()
 {
-    printf("Picking the ball at the %s room.\n", name);
+    DEBUGPRINT("Picking the ball at the %s room.\n", name);
     currentState = PLAYING_BALL;
 
     //Pick Ball Code
@@ -168,7 +168,7 @@ void room::pickBall()
 
 void room::leaveBall()
 {
-    printf("Leave the ball at the %s room.\n", name);
+    DEBUGPRINT("Leave the ball at the %s room.\n", name);
     currentState = PLAYING_BALL;
 
     //Leave Ball Code
@@ -177,7 +177,7 @@ void room::leaveBall()
 
 void room::exitRoom()
 {
-    printf("Exiting the %s room.\n", name);
+    DEBUGPRINT("Exiting the %s room.\n", name);
     currentState = COMPLETE;
 
     //Exiting code
@@ -192,6 +192,8 @@ void room::exitRoom()
         //Exiting code after BALL - GAME task
 
     }
+
+    //Fix currentOrientation
 }
 
 void room::executeAllActions()
@@ -216,27 +218,58 @@ void printRampQueue()
 {
     queue<items, list<items>> temp = rampQueue;
     int size = temp.size();
-    printf("Current State of the Ramp Queue: [front, ");
+    DEBUGPRINT("\nCurrent State of the Ramp Queue: [front, ");
     for(int i = 0; i < size; i++)
     {
         switch(temp.front())
         {
             case BOTTLE:
-                printf("BOTTLE, ");
+                DEBUGPRINT("BOTTLE, ");
                 break;
             case LAUNDRY_BLACK:
-                printf("LAUNDRY_BLACK, ");
+                DEBUGPRINT("LAUNDRY_BLACK, ");
                 break;
             case LAUNDRY_RED:
-                printf("LAUNDRY_RED, ");
+                DEBUGPRINT("LAUNDRY_RED, ");
                 break;
             case LAUNDRY_YELLOW:
-                printf("LAUNDRY_YELLOW, ");
+                DEBUGPRINT("LAUNDRY_YELLOW, ");
                 break;
         }
         temp.pop();
     }
-    printf("back]");
+    DEBUGPRINT("back]\n");
+}
+
+colors findColorOfItem(items item)
+{
+    switch(item)
+    {
+        case LAUNDRY_BLACK:
+            return BLACK;
+        case LAUNDRY_RED:
+            return RED;
+        case LAUNDRY_YELLOW:
+            return YELLOW;
+        default:
+            return WHITE;   //Should not happen
+    }
+}
+
+baskets findBasket(colors color)
+{
+    int result = -1;
+    for(int i = 0; i < 3; i++)
+    {
+        if(laundryBaskets[i] == color)
+            result = i;
+    }
+    return static_cast<baskets>(result);
+}
+
+void turnToBasket(baskets current, baskets target)
+{
+    //TODO
 }
 
 
@@ -244,7 +277,7 @@ void printRampQueue()
 
 void startProcedure()
 {
-    printf("Starting movement!!!\n");
+    DEBUGPRINT("\nStarting movement!!!\n");
 
     //Get out of the start position
     currentDirection = NORTH;
@@ -253,84 +286,126 @@ void startProcedure()
 
 void pickWater()
 {
-    printf("Picking water bottles.\n");
+    DEBUGPRINT("\nPicking water bottles.\n");
 
     //Pick First Bottle
-    printf("First bottle of water has been loaded.\n");
+    DEBUGPRINT("First bottle of water has been loaded.\n");
     rampQueue.push(BOTTLE);
 
     //Pick Second Bottle
-    printf("Second bottle of water has been loaded.\n");
+    DEBUGPRINT("Second bottle of water has been loaded.\n");
     rampQueue.push(BOTTLE);
 }
 
 
 void scanLaundryBaskets()
 {
-    printf("Scanning laundry baskets.\n");
+    DEBUGPRINT("\nScanning laundry baskets.\n");
 
     //180 turn for scanning
     //Scan first basket (left most)
-    printf("First laundry basket was scanned and it has the color: ");
-    laundryBaskets[0] = RED;
-    switch(laundryBaskets[0])
+    DEBUGPRINT("First laundry basket was scanned and it has the color: ");
+    laundryBaskets[BASKET_LEFT] = RED;
+    switch(laundryBaskets[BASKET_LEFT])
     {
         case RED:
-            printf("red.\n");
+            DEBUGPRINT("red.\n");
             break;
         case BLACK:
-            printf("black.\n");
+            DEBUGPRINT("black.\n");
             break;
         case YELLOW:
-            printf("yellow.\n");
+            DEBUGPRINT("yellow.\n");
             break;
     }
 
     //Scan second basket (middle one)
-    printf("Second laundry basket was scanned and it has the color: ");
-    laundryBaskets[1] = BLACK;
-    switch(laundryBaskets[1])
+    DEBUGPRINT("Second laundry basket was scanned and it has the color: ");
+    laundryBaskets[BASKET_MIDDLE] = BLACK;
+    switch(laundryBaskets[BASKET_MIDDLE])
     {
         case RED:
-            printf("red.\n");
+            DEBUGPRINT("red.\n");
             break;
         case BLACK:
-            printf("black.\n");
+            DEBUGPRINT("black.\n");
             break;
         case YELLOW:
-            printf("yellow.\n");
+            DEBUGPRINT("yellow.\n");
             break;
     }
 
     //Scan third basket (last one)
-    printf("Last laundry basket was scanned and it has the color: ");
-    laundryBaskets[2] = YELLOW;
-    switch(laundryBaskets[2])
+    DEBUGPRINT("Last laundry basket was scanned and it has the color: ");
+    laundryBaskets[BASKET_RIGHT] = YELLOW;
+    switch(laundryBaskets[BASKET_RIGHT])
     {
         case RED:
-            printf("red.\n");
+            DEBUGPRINT("red.\n");
             break;
         case BLACK:
-            printf("black.\n");
+            DEBUGPRINT("black.\n");
             break;
         case YELLOW:
-            printf("yellow.\n");
+            DEBUGPRINT("yellow.\n");
             break;
     }
 
-    printf("Finished Scanning laundry baskets.\n");
+    DEBUGPRINT("Finished Scanning laundry baskets.\n");
 }
 
 void leaveLaundry()
 {
-    printf("Leaving Laundry.\n");
+    DEBUGPRINT("\nLeaving Laundry.\n");
     
-    //TODO
+    //Turn to the closest basket based on where scanning ends.
+    baskets currentBasket = BASKET_RIGHT;
+    baskets targetBasket;
+
+    while(!rampQueue.empty())   //Repeat for every item
+    {
+        //Goto the basket of the current ramp item
+        targetBasket = findBasket(findColorOfItem(rampQueue.front()));
+        DEBUGPRINT("Turning to ");
+        switch(findColorOfItem(rampQueue.front()))
+        {
+            case RED:
+                DEBUGPRINT("red");
+                break;
+            case BLACK:
+                DEBUGPRINT("black");
+                break;
+            case YELLOW:
+                DEBUGPRINT("yellow");
+                break;
+        }
+        DEBUGPRINT(" basket located ");
+        switch(targetBasket)
+        {
+            case BASKET_LEFT:
+                DEBUGPRINT("on the left.\n");
+                break;
+            case BASKET_MIDDLE:
+                DEBUGPRINT("in the middle.\n");
+                break;
+            case BASKET_RIGHT:
+                DEBUGPRINT("on the right.\n");
+                break;
+        }
+        turnToBasket(currentBasket, targetBasket);
+        currentBasket = targetBasket;
+        rampQueue.pop();
+        //Leave the laundry
+    }
+    
+    //Turn to the middle to leave and fix currentOrientation
+    turnToBasket(currentBasket, BASKET_MIDDLE);
+    DEBUGPRINT("Finished leaving the laundry.\n");
 }
 
 void finishProcedure()
 {
-    printf("Ending movement :(");
+    DEBUGPRINT("\nEnding movement :(\n");
 
     //Getting inside finishing square
 }

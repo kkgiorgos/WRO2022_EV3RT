@@ -58,7 +58,6 @@ int dijkstra(int source, int target, vector<int> *path)
         Q.pop();
         for(auto w : graph[m])
         {
-            if(w == S) continue;
             if(dist[w] == INT_MAX)
             {
                 dist[w] = dist[m] + 1;
@@ -166,7 +165,7 @@ void fullRoute(int source, int target, orientation dir)
 {
     vector<int> path;
     int distance = dijkstra(source, target, &path);
-    printf("\n\nNew Route with distance: %d\n", distance);
+    DEBUGPRINT("\n\nNew Route with distance: %d\n", distance);
     routeFunc route[distance];
     constructRoute(route, &path, distance);
     currentDirection = executeRoute(route, distance, dir);
@@ -184,17 +183,17 @@ void standardTurn(orientation start, orientation finish)
     currentDirection = finish;
     if(turnDifference == -1 || turnDifference == 3)
     {
-        printf("Turning left 90\n");
+        DEBUGPRINT("Turning left 90\n");
         leftTurn();
     }
     else if(turnDifference == 1 || turnDifference == -3)
     {
-        printf("Turning right 90\n");
+        DEBUGPRINT("Turning right 90\n");
         rightTurn();
     }
     else if(turnDifference == -2 || turnDifference == 2)
     {
-        printf("Reversing\n");
+        DEBUGPRINT("Reversing\n");
         reverse();
     }
 }
@@ -205,17 +204,17 @@ void specialTurn(orientation start, orientation finish)
     currentDirection = finish;
     if(turnDifference == -1 || turnDifference == 3)
     {
-        printf("Turning left 90 no align\n");
+        DEBUGPRINT("Turning left 90 no align\n");
         leftTurn(false, false);
     }
     else if(turnDifference == 1 || turnDifference == -3)
     {
-        printf("Turning right 90 no align\n");
+        DEBUGPRINT("Turning right 90 no align\n");
         rightTurn(false, false);
     }
     else if(turnDifference == -2 || turnDifference == 2)
     {
-        printf("Reversing no align\n");
+        DEBUGPRINT("Reversing no align\n");
         reverse(false, false);
     }
 }
@@ -224,133 +223,133 @@ void house_beach()
 {
     lifo1LineDist(15); //17
 
-    printf("House - Beach");
+    DEBUGPRINT("House - Beach");
 }
 
 orientation S_W(orientation dir)
 {
-    printf("\nS_W\n");
+    DEBUGPRINT("\nS_W\n");
 
     return NORTH;
 }
 
 orientation W_CL(orientation dir)
 {
-    printf("\nW_CL\n");
+    DEBUGPRINT("\nW_CL\n");
 
     return WEST;
 }
 orientation W_CR(orientation dir)
 {
-    printf("\nW_CR\n");
+    DEBUGPRINT("\nW_CR\n");
 
     return EAST;
 }
 
 orientation L_S(orientation dir)
 {
-    printf("\nL_S\n");
+    DEBUGPRINT("\nL_S\n");
     
     return NO;
 }
 
 orientation CL_CR(orientation dir)
 {
-    printf("\nCL_CR\n");
+    DEBUGPRINT("\nCL_CR\n");
 
     return EAST;
 }
 orientation CL_FL(orientation dir)
 {
-    printf("\nCL_FL\n");
+    DEBUGPRINT("\nCL_FL\n");
     
     return WEST;
 }
 orientation CL_L(orientation dir)
 {
-    printf("\nCL_L\n");
+    DEBUGPRINT("\nCL_L\n");
     
     return SOUTH;
 }
 
 orientation CR_CL(orientation dir)
 {
-    printf("\nCR_CL\n");
+    DEBUGPRINT("\nCR_CL\n");
 
     return WEST;
 }
 orientation CR_FR(orientation dir)
 {
-    printf("\nCR_FR\n");
+    DEBUGPRINT("\nCR_FR\n");
     
     return EAST;
 }
 orientation CR_L(orientation dir)
 {
-    printf("\nCR_L\n");
+    DEBUGPRINT("\nCR_L\n");
     
     return SOUTH;
 }
 
 orientation FL_CL(orientation dir)
 {
-    printf("\nFL_CL\n");
+    DEBUGPRINT("\nFL_CL\n");
 
     return EAST;
 }
 orientation FL_YR(orientation dir)
 {
-    printf("\nFL_YR\n");
+    DEBUGPRINT("\nFL_YR\n");
 
     return NORTH;
 }
 orientation FL_BR(orientation dir)
 {
-    printf("\nFL_BR\n");
+    DEBUGPRINT("\nFL_BR\n");
 
     return SOUTH;
 }
 
 orientation FR_CR(orientation dir)
 {
-    printf("\nFR_CR\n");
+    DEBUGPRINT("\nFR_CR\n");
 
     return WEST;
 }
 orientation FR_RR(orientation dir)
 {
-    printf("\nFR_RR\n");
+    DEBUGPRINT("\nFR_RR\n");
 
     return NORTH;
 }
 orientation FR_GR(orientation dir)
 {
-    printf("\nFR_GR\n");
+    DEBUGPRINT("\nFR_GR\n");
 
     return SOUTH;
 }
 
 orientation YR_FL(orientation dir)
 {
-    printf("\nYR_FL\n");
+    DEBUGPRINT("\nYR_FL\n");
 
     return SOUTH;
 }
 orientation BR_FL(orientation dir)
 {
-    printf("\nBR_FL\n");
+    DEBUGPRINT("\nBR_FL\n");
 
     return NORTH;
 }
 orientation RR_FR(orientation dir)
 {
-    printf("\nRR_FR\n");
+    DEBUGPRINT("\nRR_FR\n");
 
     return SOUTH;
 }
 orientation GR_FR(orientation dir)
 {
-    printf("\nGR_FR\n");
+    DEBUGPRINT("\nGR_FR\n");
 
     return NORTH;
 }

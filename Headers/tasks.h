@@ -16,6 +16,13 @@ enum items
     LAUNDRY_BLACK
 };
 
+enum baskets
+{
+    BASKET_LEFT,
+    BASKET_MIDDLE,
+    BASKET_RIGHT
+};
+
 enum tasks
 {
     WATER,
@@ -79,6 +86,10 @@ extern std::map<ev3ys::colors, room> rooms;
 
 //Helper functions
 void printRampQueue();
+ev3ys::colors findColorOfItem(items item);
+baskets findBasket(ev3ys::colors color);
+
+void turnToBasket(baskets current, baskets target);
 
 extern matPos startPos;
 extern matPos currentPos;

@@ -22,6 +22,7 @@ using namespace std;
 //#define CALIBRATION 
 
 Bluetooth bt;
+FILE *bluetooth;
 
 motor grabber(MotorPort::A, true);
 motor ramp(MotorPort::D, false);
@@ -64,7 +65,10 @@ void startData()
 
 void init()
 {
-    freopen("logOut.txt","w+",stdout);
+    freopen("logOut.txt","w+", stderr);
+    #ifdef DEBUG_BLUETOOTH
+        bluetooth = ev3_serial_open_file(EV3_SERIAL_BT);
+    #endif
 
     robot.setMode(speedMode::CONTROLLED);
     robot.setLinearAccelParams(100, 0, 0);
@@ -109,11 +113,22 @@ void main_task(intptr_t unused)
 
     //Mission Code
     //TODO
-
-    FILE *bluetooth = ev3_serial_open_file(EV3_SERIAL_BT);
-
-    fprintf(bluetooth, "This is evidently a flipping test!!!\n");
-    
+    startProcedure();
+    fullRouteStandard(W);
+    pickWater();
+    fullRouteStandard(RR);
+    rooms[RED].executeAllActions();
+    fullRouteStandard(GR);
+    rooms[GREEN].executeAllActions();
+    fullRouteStandard(YR);
+    rooms[YELLOW].executeAllActions();
+    fullRouteStandard(BR);
+    rooms[BLUE].executeAllActions();
+    fullRouteStandard(L);
+    scanLaundryBaskets();
+    leaveLaundry();
+    fullRouteStandard(S);
+    finishProcedure();
 
     format(bt, "Mission Time: %  \r\n")%missionTimer.secElapsed();
 

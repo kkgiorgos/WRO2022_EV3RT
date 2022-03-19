@@ -13,3 +13,16 @@ extern ev3ys::colorSensor leftScanner;
 extern ev3ys::colorSensor rightScanner;
 extern ev3ys::lineFollower lifo;
 extern ev3cxx::Bluetooth bt;
+
+extern FILE* bluetooth;
+
+#define DEBUG_BLUETOOTH
+//#define DEBUG_FILE
+
+#ifdef DEBUG_BLUETOOTH
+#define DEBUGPRINT(...)  fprintf(bluetooth, __VA_ARGS__)
+#elif defined DEBUG_FILE
+#define DEBUGPRINT(...)  fprintf(stderr, __VA_ARGS__)
+#else
+#define DEBUGPRINT(...)
+#endif
