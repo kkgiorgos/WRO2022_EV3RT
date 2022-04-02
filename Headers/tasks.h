@@ -30,7 +30,7 @@ enum tasks
 };
 
 class room
-{ 
+{
 private:
     enum orientation
     {
@@ -57,6 +57,11 @@ private:
     ev3ys::colors laundry;
     state currentState;
 
+    void leaveWater();
+
+    void pickBall();
+    void leaveBall();
+
 public:
     room() : currentState(WAITING) {}
     room(ev3ys::colors col);
@@ -69,11 +74,8 @@ public:
 
     void pickLaundry();
     ev3ys::colors getLaundryColor();
-    
-    void leaveWater();
 
-    void pickBall();
-    void leaveBall();
+    void executeTask();
 
     void exitRoom();
 

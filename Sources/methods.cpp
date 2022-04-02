@@ -125,3 +125,42 @@ void lifo1LineDist(double distance)
     lifo.lines(50, 1, COAST);
 }
 
+void openGrabber()
+{
+    grabber.moveUntilStalled(-300);
+}
+void pickBlock()
+{
+    grabber.moveDegrees(250, 110, breakMode::NONE);
+    grabber.moveDegrees(70, 40, breakMode::BRAKE);
+}
+
+void emptyRamp()
+{
+    timer t;
+    ramp.moveDegrees(150, 60, BRAKE);
+    t.secDelay(0.5);
+    ramp.moveUntilStalled(-300, BRAKE);
+}
+
+colors scanBlock(colorSensor &scanner)
+{
+    colorspaceHSV hsv = scanner.getHSV();
+
+    if(hsv.saturation > 90)
+    {
+        if(hsv.hue > 110 && hsv.hue < 130)
+            return GREEN;
+        else if(hsv.hue >= 0 && hsv.hue < 10)
+            return RED;
+        else if(hsv.hue >= 10  && hsv.hue < 70)
+            return YELLOW;
+    }
+    else
+    {
+        if(hsv.value < 30)
+            return BLACK;
+        else
+            return WHITE;
+    }
+}

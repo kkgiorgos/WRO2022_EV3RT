@@ -17,3 +17,10 @@ void leftTurn(bool stop = false, bool alignEnd = true);
 void rightTurn(bool stop = false, bool alignEnd = true);
 
 void lifo1LineDist(double distance);
+
+void openGrabber();
+void pickBlock();
+
+void emptyRamp();
+
+ev3ys::colors scanBlock(ev3ys::colorSensor &scanner);

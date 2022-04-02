@@ -40,9 +40,9 @@ queue<items, list<items>> rampQueue;
 colors laundryBaskets[3];
 map<colors, room> rooms;
 
-double KP = 2;
-double KI = 2;
-double KD = 200;
+double KP = 2;  //OLD: 2
+double KI = 2;  //OLD: 2
+double KD = 200;//OLD: 200
 
 double colorCoef = 1;
 matPos startPos;
@@ -88,6 +88,11 @@ void init()
     rightSensor.setNormalisation(true);
     rightSensor.setFiltering(false);
     rightSensor.setCutoffValue(27);
+
+    leftScanner.setFiltering(false);
+    rightScanner.setFiltering(false);
+    //leftScanner.setNormalisation(true);
+    rightScanner.setNormalisation(true);
     
     grabber.setMode(REGULATED);
     ramp.setMode(REGULATED);
@@ -110,10 +115,37 @@ void main_task(intptr_t unused)
     vector<int> path;
     graphInit();
     startData();
+/*
+    //INITIALIZATION OF RAMP
+    ramp.moveUntilStalled(800);
+    ramp.moveUntilStalled(-500, BRAKE);
 
+    btnEnter.waitForPress();
+
+    //INITIALIZATION OF GRABBER
+    grabber.moveUntilStalled(500);
+    t.secDelay(0.2);
+    grabber.moveUntilStalled(-300);
+
+    btnEnter.waitForPress();
+
+    for(int i = 0; i < 4; i++)
+    {
+        openGrabber();
+        btnEnter.waitForPress();
+        pickBlock();
+        btnEnter.waitForPress();
+    }
+
+    for(int i = 0; i < 4; i++)
+    {
+        emptyRamp();
+        btnEnter.waitForPress();
+    }
+
+*/
     //Mission Code
-    //TODO
-    startProcedure();
+    /*startProcedure();
     fullRouteStandard(W);
     pickWater();
     fullRouteStandard(RR);
@@ -128,7 +160,7 @@ void main_task(intptr_t unused)
     scanLaundryBaskets();
     leaveLaundry();
     fullRouteStandard(S);
-    finishProcedure();
+    finishProcedure();*/
 
     format(bt, "Mission Time: %  \r\n")%missionTimer.secElapsed();
 

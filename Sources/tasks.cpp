@@ -175,6 +175,17 @@ void room::leaveBall()
 
 }
 
+void room::executeTask()
+{
+    if(task == WATER)
+        leaveWater();
+    else
+    {
+        pickBall();
+        leaveBall();
+    }
+}
+
 void room::exitRoom()
 {
     DEBUGPRINT("Exiting the %s room.\n", name);
@@ -201,13 +212,7 @@ void room::executeAllActions()
     scanTask();
     pickLaundry();
 
-    if(task == WATER)
-        leaveWater();
-    else
-    {
-        pickBall();
-        leaveBall();
-    }
+    executeTask();
 
     exitRoom();
 }
@@ -357,7 +362,7 @@ void scanLaundryBaskets()
 void leaveLaundry()
 {
     DEBUGPRINT("\nLeaving Laundry.\n");
-    
+
     //Turn to the closest basket based on where scanning ends.
     baskets currentBasket = BASKET_RIGHT;
     baskets targetBasket;
@@ -397,7 +402,7 @@ void leaveLaundry()
         rampQueue.pop();
         //Leave the laundry
     }
-    
+
     //Turn to the middle to leave and fix currentOrientation
     turnToBasket(currentBasket, BASKET_MIDDLE);
     DEBUGPRINT("Finished leaving the laundry.\n");

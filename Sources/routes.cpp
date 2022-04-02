@@ -219,13 +219,6 @@ void specialTurn(orientation start, orientation finish)
     }
 }
 
-void house_beach()
-{
-    lifo1LineDist(15); //17
-
-    DEBUGPRINT("House - Beach");
-}
-
 orientation S_W(orientation dir)
 {
     DEBUGPRINT("\nS_W\n");
