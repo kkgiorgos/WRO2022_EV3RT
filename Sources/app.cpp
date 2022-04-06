@@ -142,8 +142,22 @@ void main_task(intptr_t unused)
         emptyRamp();
         btnEnter.waitForPress();
     }
-
 */
+
+    lifo.setDoubleFollowMode("SL", "SR");
+    lifo.initializeMotionMode(speedMode::CONTROLLED);
+    lifo.setSensorMode(sensorModes::WHITE_RGB);
+    lifo.setAccelParams(125, 0, 0);
+    //lifo.setPIDparams(0.6, 0.06, 6, 75);  //UNREGULATED VALUES
+    lifo.setPIDparams(1, 1, 100, 1000);      //REGULATED VALUES
+
+    lifo.setAccelParams(600, 0, 50);
+    lifo.distance(50, 50, NONE);
+    lifo.setAccelParams(600, 50, 50);
+    lifo.lines(50, 1, COAST);
+
+    rightTurn(true);
+
     //Mission Code
     /*startProcedure();
     fullRouteStandard(W);
