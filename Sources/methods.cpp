@@ -120,7 +120,7 @@ void rightTurn(bool stop, bool alignEnd)
 
 void lifo1LineDist(double distance)
 {
-    lifo.setAccelParams(600, 0, 60);
+    lifo.setAccelParams(250, 5, 60);
     lifo.distance(60, distance, NONE);
     lifo.setAccelParams(600, 60, 60);
     lifo.lines(60, 1, COAST);
