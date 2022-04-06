@@ -146,17 +146,23 @@ void main_task(intptr_t unused)
 
     lifo.setDoubleFollowMode("SL", "SR");
     lifo.initializeMotionMode(speedMode::CONTROLLED);
-    lifo.setSensorMode(sensorModes::WHITE_RGB);
+    lifo.setSensorMode(sensorModes::REFLECTED);
     lifo.setAccelParams(125, 0, 0);
     //lifo.setPIDparams(0.6, 0.06, 6, 75);  //UNREGULATED VALUES
     lifo.setPIDparams(1, 1, 100, 1000);      //REGULATED VALUES
 
-    lifo.setAccelParams(600, 0, 50);
-    lifo.distance(50, 50, NONE);
-    lifo.setAccelParams(600, 50, 50);
-    lifo.lines(50, 1, COAST);
+    lifo.setPIDparams(1.5, 0, 0, 500);
+    lifo.initializeMotionMode(speedMode::REGULATED);
+    lifo.distance(500, 60, BRAKE);
 
-    rightTurn(true);
+
+/*
+    for(int i = 0; i < 1; i++)
+    {
+        lifo1LineDist(50);
+        leftTurn();
+    }
+    robot.stop(BRAKE);*/
 
     //Mission Code
     /*startProcedure();

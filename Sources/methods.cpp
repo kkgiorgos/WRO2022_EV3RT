@@ -22,10 +22,11 @@ void align(double time, bool stop)
     double kp = 2 * colorCoef;
     while(t.secElapsed() < time)
     {
-        int error = leftSensor.getRGB().white - rightSensor.getRGB().white;
+        int error = leftSensor.getReflected() - rightSensor.getReflected();
         leftMotor.moveUnlimited(error * kp);
         rightMotor.moveUnlimited(error * kp * -1);
-        tslp_tsk(1);
+        //tslp_tsk(1);
+        t.secDelay(0.001);
     }
     robot.stop(stop ? BRAKE : COAST);
     robot.setMode(prevMode);
@@ -37,14 +38,14 @@ void alignOnMove(int speed) //This will change the robot mode to CONTROLLED
     robot.setMode(speedMode::CONTROLLED);
     robot.tankUnlim(speed, speed, true);
 
-    while(rightSensor.getRGB().white > 5 && leftSensor.getRGB().white > 5);
-    bool isRight = rightSensor.getRGB().white < 25;
+    while(rightSensor.getReflected() > 5 && leftSensor.getReflected() > 5);
+    bool isRight = rightSensor.getReflected() < 25;
 
     robot.resetPosition();
     if(isRight)
-        while(leftSensor.getRGB().white > 5);
+        while(leftSensor.getReflected() > 5);
     else
-        while(rightSensor.getRGB().white > 5);
+        while(rightSensor.getReflected() > 5);
 
     double length = robot.getPosition();
     double sensDiff = 1.3;
@@ -82,7 +83,7 @@ void leftTurn(bool stop, bool alignEnd)
         double center;
         double angle;
 
-        center = -5;
+        center = -4;
         angle = 75;
 
         robot.setMode(REGULATED);
@@ -108,7 +109,7 @@ void rightTurn(bool stop, bool alignEnd)
         double center;
         double angle;
 
-        center = 5;
+        center = 4;
         angle = 75;
 
         robot.setMode(REGULATED);
@@ -119,10 +120,10 @@ void rightTurn(bool stop, bool alignEnd)
 
 void lifo1LineDist(double distance)
 {
-    lifo.setAccelParams(600, 0, 50);
-    lifo.distance(50, distance, NONE);
-    lifo.setAccelParams(600, 50, 50);
-    lifo.lines(50, 1, COAST);
+    lifo.setAccelParams(600, 0, 60);
+    lifo.distance(60, distance, NONE);
+    lifo.setAccelParams(600, 60, 60);
+    lifo.lines(60, 1, COAST);
 }
 
 void openGrabber()
