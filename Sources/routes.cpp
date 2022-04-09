@@ -223,18 +223,44 @@ orientation S_W(orientation dir)
 {
     DEBUGPRINT("\nS_W\n");
 
+    lifo1LineDist(10);
+
     return NORTH;
 }
 
 orientation W_CL(orientation dir)
 {
     DEBUGPRINT("\nW_CL\n");
-
+    //MAYBE USELESS
     return WEST;
 }
 orientation W_CR(orientation dir)
 {
     DEBUGPRINT("\nW_CR\n");
+
+    robot.setLinearAccelParams(200, 0, 0);
+    robot.setAngularAccelParams(1000, 0, 50);
+    /*robot.arc(50, 80, 4.5);
+    robot.arc(60, 38, 80, NONE);
+    alignOnMove(40);
+    robot.setAngularAccelParams(1000, 0, 50);
+    robot.turn(500, -90, NONE);
+    align(0.2);*/
+
+    robot.arc(50, 90, 4.5);
+    robot.setLinearAccelParams(200, 0, 40);
+    robot.straight(50, 20, NONE);
+    robot.setMode(REGULATED);
+    robot.tankUnlim(robot.cmToTacho(40), robot.cmToTacho(40));
+    while(rightSensor.getReflected() > 5 && leftSensor.getReflected() > 5);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(200, 40, 0);
+    robot.straight(40, 5);
+    robot.turn(500, 45, NONE);
+
+    lifo1LineDist(15);
+    leftTurn();
+    lifo1LineDist(20);
 
     return EAST;
 }
@@ -243,12 +269,35 @@ orientation L_S(orientation dir)
 {
     DEBUGPRINT("\nL_S\n");
     
+    lifo.distance(50, 12, NONE);
+
     return NO;
 }
 
 orientation CL_CR(orientation dir)
 {
     DEBUGPRINT("\nCL_CR\n");
+    //MAYBE USELESS
+
+    standardTurn(dir, EAST);
+    lifo1LineDist(20);
+    lifo.distance(50, 20, NONE);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(200, 50, 0);
+    robot.straight(50, 30);
+    robot.setAngularAccelParams(1000, 0, 50);
+    robot.turn(500, 45);
+    robot.setLinearAccelParams(200, 0, 40);
+    robot.arc(50, 70, -30, NONE);
+    robot.setMode(REGULATED);
+    robot.tankUnlim(robot.cmToTacho(40), robot.cmToTacho(40));
+    while(rightSensor.getReflected() > 5 && leftSensor.getReflected() > 5);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(200, 40, 0);
+    robot.straight(40, 7);
+    robot.turn(500, 30, NONE);
+
+    lifo1LineDist(20);
 
     return EAST;
 }
@@ -262,12 +311,41 @@ orientation CL_L(orientation dir)
 {
     DEBUGPRINT("\nCL_L\n");
     
+    standardTurn(dir, EAST);
+    lifo1LineDist(20);
+    lifo.distance(50, 20, NONE);
+    robot.setMode(REGULATED);
+    robot.tank(robot.cmToTacho(50), robot.cmToTacho(50), robot.cmToTacho(5));
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(200, 50, 0);
+    robot.arc(50, 90, 20, NONE);
+    
+    lifo1LineDist(10);
+
     return SOUTH;
 }
 
 orientation CR_CL(orientation dir)
 {
     DEBUGPRINT("\nCR_CL\n");
+
+    standardTurn(dir, WEST);
+    lifo1LineDist(20);
+
+    robot.setMode(CONTROLLED);
+    robot.setAngularAccelParams(1000, 0, 50);
+    robot.turn(500, -30, NONE);
+    robot.setLinearAccelParams(200, 0, 40);
+    robot.arc(60, 50, 70, NONE);
+    robot.setMode(REGULATED);
+    robot.tankUnlim(robot.cmToTacho(40), robot.cmToTacho(40));
+    while(rightSensor.getReflected() > 5 && leftSensor.getReflected() > 5);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(200, 40, 0);
+    robot.straight(40, 7);
+    robot.turn(500, -30, NONE);
+
+    lifo1LineDist(30);
 
     return WEST;
 }
@@ -280,7 +358,7 @@ orientation CR_FR(orientation dir)
 orientation CR_L(orientation dir)
 {
     DEBUGPRINT("\nCR_L\n");
-    
+    //MAYBE USELESS
     return SOUTH;
 }
 

@@ -272,9 +272,45 @@ baskets findBasket(colors color)
     return static_cast<baskets>(result);
 }
 
+colors clasifyBasket(colorspaceHSV hsv)
+{
+    if(hsv.saturation > 40)
+    {
+        if(hsv.hue > 4)
+            return YELLOW;
+        else 
+            return RED;
+    }
+    else
+        return BLACK;
+}
+
+colors findTheLastColor(colors *cols, int numOfCols)
+{
+    colors available[] = {RED, YELLOW, BLACK};
+    bool hasAppeared[] = {false, false, false};
+    colors last;
+    for(int i = 0; i < numOfCols - 1; i++)
+    {
+        for(int j = 0; j < numOfCols; j++)
+        {
+            if(available[j] == cols[i])
+                hasAppeared[j] = true;
+        }
+    }
+    for(int i = 0; i < numOfCols; i++)
+    {
+        if(!hasAppeared[i])
+            return available[i];
+    }
+}
+
 void turnToBasket(baskets current, baskets target)
 {
     //TODO
+    int turnDifference = target - current;
+    if(turnDifference != 0)
+        robot.turn(300, -36.5 * turnDifference);
 }
 
 
@@ -283,6 +319,13 @@ void turnToBasket(baskets current, baskets target)
 void startProcedure()
 {
     DEBUGPRINT("\nStarting movement!!!\n");
+
+    robot.setMode(CONTROLLED);
+    robot.setAngularAccelParams(1000, 0, 50);
+    robot.turn(500, -45);
+
+    robot.setLinearAccelParams(200, 0, 0);
+    robot.straight(50, 15);
 
     //Get out of the start position
     currentDirection = NORTH;
@@ -294,10 +337,19 @@ void pickWater()
     DEBUGPRINT("\nPicking water bottles.\n");
 
     //Pick First Bottle
+    robot.setLinearAccelParams(200, 0, 0);
+    robot.straight(50, 5);
+    pickBlock();
     DEBUGPRINT("First bottle of water has been loaded.\n");
     rampQueue.push(BOTTLE);
 
     //Pick Second Bottle
+    robot.setAngularAccelParams(1000, 0, 50);
+    robot.arc(50, -37, -9);
+    openGrabber();
+    robot.straight(35, 15);
+    robot.straight(-10, 1);
+    pickBlock();
     DEBUGPRINT("Second bottle of water has been loaded.\n");
     rampQueue.push(BOTTLE);
 }
@@ -307,10 +359,34 @@ void scanLaundryBaskets()
 {
     DEBUGPRINT("\nScanning laundry baskets.\n");
 
-    //180 turn for scanning
+    timer t;
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(200, 50, 0);
+    robot.setAngularAccelParams(1000, 0, 100);
+
+    robot.straight(50, 2.5);
+    t.secDelay(0.2);
+    robot.turn(200, -27);
     //Scan first basket (left most)
+    colorspaceHSV hsvLeft = rightScanner.getHSV();
+    robot.turn(200, 57);
+    //Scan third basket (right one)
+    //colorspaceHSV hsvRight = leftScanner.getHSV();
+    colorspaceHSV hsvRight = {0, 0, 0};
+    robot.turn(500, 150);
+    align(0.2, true);
+
+    //Calculating Colors
+    laundryBaskets[BASKET_LEFT] = clasifyBasket(hsvLeft);
+    laundryBaskets[BASKET_RIGHT] = clasifyBasket(hsvRight);
+
+    colors temp[2];
+    temp[0] = laundryBaskets[BASKET_LEFT];
+    temp[1] = laundryBaskets[BASKET_RIGHT];
+    laundryBaskets[BASKET_MIDDLE] = findTheLastColor(temp, 3);
+
+
     DEBUGPRINT("First laundry basket was scanned and it has the color: ");
-    laundryBaskets[BASKET_LEFT] = RED;
     switch(laundryBaskets[BASKET_LEFT])
     {
         case RED:
@@ -324,9 +400,7 @@ void scanLaundryBaskets()
             break;
     }
 
-    //Scan second basket (middle one)
     DEBUGPRINT("Second laundry basket was scanned and it has the color: ");
-    laundryBaskets[BASKET_MIDDLE] = BLACK;
     switch(laundryBaskets[BASKET_MIDDLE])
     {
         case RED:
@@ -339,10 +413,8 @@ void scanLaundryBaskets()
             DEBUGPRINT("yellow.\n");
             break;
     }
-
-    //Scan third basket (last one)
+    
     DEBUGPRINT("Last laundry basket was scanned and it has the color: ");
-    laundryBaskets[BASKET_RIGHT] = YELLOW;
     switch(laundryBaskets[BASKET_RIGHT])
     {
         case RED:
@@ -363,9 +435,13 @@ void leaveLaundry()
 {
     DEBUGPRINT("\nLeaving Laundry.\n");
 
-    //Turn to the closest basket based on where scanning ends.
-    baskets currentBasket = BASKET_RIGHT;
+    baskets currentBasket = BASKET_MIDDLE;
     baskets targetBasket;
+
+    robot.stop(BRAKE);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.setAngularAccelParams(1000, 0, 100);
 
     while(!rampQueue.empty())   //Repeat for every item
     {
@@ -400,11 +476,23 @@ void leaveLaundry()
         turnToBasket(currentBasket, targetBasket);
         currentBasket = targetBasket;
         rampQueue.pop();
+
         //Leave the laundry
+        if(currentBasket == BASKET_MIDDLE)
+        {
+            robot.straight(30, 4);
+            emptyRamp();
+            robot.straight(-30, 4);
+        }
+        else
+        {
+            emptyRamp();
+        }
     }
 
     //Turn to the middle to leave and fix currentOrientation
     turnToBasket(currentBasket, BASKET_MIDDLE);
+    align(0.2);
     DEBUGPRINT("Finished leaving the laundry.\n");
 }
 
@@ -413,4 +501,9 @@ void finishProcedure()
     DEBUGPRINT("\nEnding movement :(\n");
 
     //Getting inside finishing square
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 50, 0);
+    robot.straight(50, 27);
+    robot.setAngularAccelParams(1000, 0, 50);
+    robot.turn(500, 45);
 }

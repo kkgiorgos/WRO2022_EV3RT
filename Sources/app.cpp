@@ -77,10 +77,10 @@ void init()
 
     lifo.setDoubleFollowMode("SL", "SR");
     lifo.initializeMotionMode(speedMode::CONTROLLED);
-    lifo.setSensorMode(sensorModes::WHITE_RGB);
-    lifo.setAccelParams(125, 0, 0);
-    //lifo.setPIDparams(0.6, 0.06, 6, 75);  //UNREGULATED VALUES
-    lifo.setPIDparams(KP, KI, KD, 1000);      //REGULATED VALUES
+    lifo.setSensorMode(sensorModes::REFLECTED);
+    lifo.setAccelParams(100, 5, 50);
+    lifo.setPIDparams(0.5, 0.05, 5, 75);  //UNREGULATED VALUES
+    //lifo.setPIDparams(1, 1, 100, 1000);      //REGULATED VALUES
 
     leftSensor.setNormalisation(true);
     leftSensor.setFiltering(false);
@@ -100,6 +100,24 @@ void init()
 
     display.format("WAIT FOR SENSORS\n");
     btnEnter.waitForPress();
+    act_tsk(INIT_GRAB_TASK);
+    act_tsk(INIT_RAMP_TASK);
+}
+
+void init_grab_task(intptr_t unused)
+{
+    //INITIALIZATION OF GRABBER
+    //grabber.moveUntilStalled(500, BRAKE, 0.4);
+    //timer t;
+    //t.secDelay(0.05);
+    grabber.moveUntilStalled(-300);
+}
+
+void init_ramp_task(intptr_t unused)
+{
+    //INITIALIZATION OF RAMP
+    ramp.moveUntilStalled(800, COAST);
+    ramp.moveUntilStalled(-500, BRAKE); 
 }
 
 void main_task(intptr_t unused) 
@@ -115,49 +133,29 @@ void main_task(intptr_t unused)
     vector<int> path;
     graphInit();
     startData();
-/*
-    //INITIALIZATION OF RAMP
-    ramp.moveUntilStalled(800);
-    ramp.moveUntilStalled(-500, BRAKE);
 
-    btnEnter.waitForPress();
+    startProcedure();
+    fullRouteStandard(W);
+    pickWater();
+    fullRouteStandard(CR);
+    fullRouteStandard(CL);
+    fullRouteStandard(CR);
+    fullRouteStandard(CL);
 
-    //INITIALIZATION OF GRABBER
-    grabber.moveUntilStalled(500);
-    t.secDelay(0.2);
-    grabber.moveUntilStalled(-300);
-
-    btnEnter.waitForPress();
-
-    for(int i = 0; i < 4; i++)
-    {
-        openGrabber();
-        btnEnter.waitForPress();
-        pickBlock();
-        btnEnter.waitForPress();
-    }
-
-    for(int i = 0; i < 4; i++)
-    {
-        emptyRamp();
-        btnEnter.waitForPress();
-    }
-*/
-
-
-    lifo.setDoubleFollowMode("SL", "SR");
-    lifo.initializeMotionMode(speedMode::CONTROLLED);
-    lifo.setSensorMode(sensorModes::REFLECTED);
-    lifo.setAccelParams(100, 5, 50);
-    lifo.setPIDparams(0.6, 0.06, 6, 75);  //UNREGULATED VALUES
-    //lifo.setPIDparams(1, 1, 100, 1000);      //REGULATED VALUES
-
-    for(int i = 0; i < 16; i++)
-    {
-        lifo1LineDist(50);
-        reverse();
-    }
     robot.stop(BRAKE);
+    btnEnter.waitForPress();
+    rampQueue.pop();
+    rampQueue.pop();
+
+    rampQueue.push(LAUNDRY_BLACK);
+    rampQueue.push(LAUNDRY_RED);
+    rampQueue.push(LAUNDRY_YELLOW);
+    
+    fullRouteStandard(L);
+    scanLaundryBaskets();
+    leaveLaundry();
+    fullRouteStandard(S);
+    finishProcedure();
 
     //Mission Code
     /*startProcedure();

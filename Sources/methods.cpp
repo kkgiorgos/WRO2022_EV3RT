@@ -32,11 +32,11 @@ void align(double time, bool stop)
     robot.setMode(prevMode);
 }
 
-void alignOnMove(int speed) //This will change the robot mode to CONTROLLED
+void alignOnMove(double speed) //This will change the robot mode to CONTROLLED
 {
     speedMode lastMode = robot.getMode();
     robot.setMode(speedMode::CONTROLLED);
-    robot.tankUnlim(speed, speed, true);
+    robot.tankUnlim(robot.cmToTacho(speed), robot.cmToTacho(speed), true);
 
     while(rightSensor.getReflected() > 5 && leftSensor.getReflected() > 5);
     bool isRight = rightSensor.getReflected() < 25;
@@ -120,10 +120,10 @@ void rightTurn(bool stop, bool alignEnd)
 
 void lifo1LineDist(double distance)
 {
-    lifo.setAccelParams(250, 5, 60);
-    lifo.distance(60, distance, NONE);
-    lifo.setAccelParams(600, 60, 60);
-    lifo.lines(60, 1, COAST);
+    lifo.setAccelParams(250, 5, 50);
+    lifo.distance(50, distance, NONE);
+    lifo.setAccelParams(600, 50, 50);
+    lifo.lines(50, 1, COAST);
 }
 
 void openGrabber()
