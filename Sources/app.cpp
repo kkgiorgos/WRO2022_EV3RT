@@ -40,9 +40,10 @@ queue<items, list<items>> rampQueue;
 colors laundryBaskets[3];
 map<colors, room> rooms;
 
-double KP = 2;  //OLD: 2
-double KI = 2;  //OLD: 2
-double KD = 200;//OLD: 200
+double KP = 0.5;  //OLD: 2
+double KI = 0.05;  //OLD: 2
+double KD = 5;//OLD: 200
+double PIDspeed = 75;
 
 double colorCoef = 1;
 matPos startPos;
@@ -91,7 +92,7 @@ void init()
 
     leftScanner.setFiltering(false);
     rightScanner.setFiltering(false);
-    //leftScanner.setNormalisation(true);
+    leftScanner.setNormalisation(true);
     rightScanner.setNormalisation(true);
     
     grabber.setMode(REGULATED);
@@ -138,11 +139,13 @@ void main_task(intptr_t unused)
     fullRouteStandard(W);
     pickWater();
     fullRouteStandard(CR);
-    fullRouteStandard(CL);
-    fullRouteStandard(CR);
-    fullRouteStandard(CL);
-
     robot.stop(BRAKE);
+    btnEnter.waitForPress();
+    fullRouteStandard(BR);
+
+    rooms[BLUE].executeAllActions();
+
+    /*robot.stop(BRAKE);
     btnEnter.waitForPress();
     rampQueue.pop();
     rampQueue.pop();
@@ -155,7 +158,115 @@ void main_task(intptr_t unused)
     scanLaundryBaskets();
     leaveLaundry();
     fullRouteStandard(S);
-    finishProcedure();
+    finishProcedure();*/
+
+    /*currentPos = CL;
+    currentDirection = WEST;
+    //lifo1LineDist(15);
+    fullRouteStandard(YR);
+
+    //rooms[YELLOW].enterRoom();
+
+    for(int i = 0; i < 15; i++)
+    {
+        ramp.moveDegrees(120, 80, BRAKE);
+        t.secDelay(0.2);
+        ramp.moveUntilStalled(-300, BRAKE);
+        btnEnter.waitForPress();
+    }*/
+
+    /*display.resetScreen();
+    while(true)
+    {
+        display.format("%  \n%  \n\n\n") %static_cast<int>(scanLaundryBlock(leftScanner)) %static_cast<int>(scanLaundryBlock(rightScanner));
+        tslp_tsk(10);
+    }*/
+
+    /*lifo.setDoubleFollowMode("66", "SR");
+    lifo.setPIDparams(KP*1.75, KI*1.75, KD*1.75, PIDspeed);
+    lifo.unlimited(50, true);
+    lifo.setAccelParams(600, 50, 50);
+    do
+    {
+        leftSensor.getReflected();
+        rightSensor.getReflected();
+        lifo.unlimited(50);
+    }
+    while(!leftSensor.getLineDetected() && !rightSensor.getLineDetected());
+
+    CL_FL(WEST);
+
+    robot.stop(BRAKE);
+    robot.setMode(REGULATED);
+    robot.arc(800, -87, 2, BRAKE);
+
+    lifo.setDoubleFollowMode("66", "SR");
+    lifo.setPIDparams(KP*1.75, KI*1.75, KD*1.75, PIDspeed);
+    lifo.setAccelParams(600, 40, 40);
+    lifo.unlimited(40, true);
+    while(!detectColorLine(leftSensor, BLUE))
+        lifo.unlimited(40);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(200, 40, 40);
+    robot.straightUnlim(40, true);    
+    colors laundryBlue = WHITE;
+    map<colors, int> appearances;
+    colors current;
+    bool notWhite = false;
+    while(leftSensor.getReflected() < 80)
+    {
+        if((current = scanLaundryBlock(leftScanner)) != WHITE)
+        {
+            appearances[current]++;
+            notWhite = true;
+        }
+        robot.straightUnlim(40);
+    }
+    if(notWhite)
+    {
+        int maxCount = 0;
+        for(auto x: appearances)
+        {
+            if(x.second > maxCount)
+            {
+                maxCount = x.second;
+                laundryBlue = x.first;    
+            }
+        }
+    }
+    display.resetScreen();
+    display.format("%  \n")%static_cast<int>(laundryBlue);
+    robot.stop(BRAKE);
+
+    robot.setMode(REGULATED);
+    robot.arc(800, -90, 3, BRAKE);*/
+
+    /*display.resetScreen();
+    while(true)
+    {
+        tslp_tsk(10);
+        display.format("L:%  \n\n\n\nR:%  \n\n\n\n")%leftSensor.getReflected() %rightSensor.getReflected();
+    }*/
+    /*leftScanner.setNormalisation(false);
+    rightScanner.setNormalisation(false);
+    display.resetScreen();
+    while(true)
+    {
+        colorspaceHSV left = leftScanner.getHSV();
+        colorspaceHSV right = rightScanner.getHSV();
+        tslp_tsk(10);
+        display.format("L\nH:%  \nS:%  \nV:%  \nR\nH:%  \nS:%  \nV:%  \n")%left.hue %left.saturation %left.value %right.hue %right.saturation %right.value;
+    }*/
+
+    robot.stop(BRAKE);
+
+
+    /*lifo.setDoubleFollowMode("66", "SR");
+    lifo.setPIDparams(KP*1.75, KI*1.75, KD*1.75, PIDspeed);
+
+    lifo1LineDist(30);*/
+    
 
     //Mission Code
     /*startProcedure();
@@ -184,6 +295,26 @@ void main_task(intptr_t unused)
 }
 
 //COLOR SENSOR TEST LOOPS
+/*leftScanner.setNormalisation(false);
+rightScanner.setNormalisation(true);
+display.resetScreen();
+while(true)
+{
+    colorspaceRGB left = leftScanner.getRGB();
+    colorspaceRGB right = rightScanner.getRGB();
+    tslp_tsk(10);
+    display.format("L\nR:%  \nG:%  \nB:%  \nR\nR:%  \nG:%  \nB:%  \n")%left.red %left.green %left.blue %right.red %right.green %right.blue;
+}*/
+/*leftScanner.setNormalisation(false);
+rightScanner.setNormalisation(false);
+display.resetScreen();
+while(true)
+{
+    colorspaceHSV left = leftScanner.getHSV();
+    colorspaceHSV right = rightScanner.getHSV();
+    tslp_tsk(10);
+    display.format("L\nH:%  \nS:%  \nV:%  \nR\nH:%  \nS:%  \nV:%  \n")%left.hue %left.saturation %left.value %right.hue %right.saturation %right.value;
+}*/
 //leftSensor.setFiltering(false);
 //leftSensor.setNormalisation(true);
 //rightSensor.setFiltering(false);
@@ -237,6 +368,7 @@ rightSensor.setColorCalParams(cols, 5, 50, 18);*/
 
 
 //CALIBRATION
+
 /*leftSensor.setNormalisation(false);
 rightSensor.setNormalisation(false);
 double minLeft[4] = {1000, 1000, 1000, 1000};

@@ -55,7 +55,11 @@ private:
     char name[8];
     tasks task;
     ev3ys::colors laundry;
+    bool doLaundry;
     state currentState;
+
+    void scanLaundry();
+    void pickLaundry();
 
     void leaveWater();
 
@@ -69,11 +73,12 @@ public:
 
     matPos getPosition();
 
-    void scanTask();
+    void setTask(ev3ys::colors code);
     tasks getTask();
 
-    void pickLaundry();
     ev3ys::colors getLaundryColor();
+
+    void enterRoom();
 
     void executeTask();
 
@@ -88,6 +93,7 @@ extern std::map<ev3ys::colors, room> rooms;
 
 //Helper functions
 void printRampQueue();
+tasks findTask(ev3ys::colors color);
 ev3ys::colors findColorOfItem(items item);
 baskets findBasket(ev3ys::colors color);
 ev3ys::colors clasifyBasket(ev3ys::colorspaceHSV hsv);

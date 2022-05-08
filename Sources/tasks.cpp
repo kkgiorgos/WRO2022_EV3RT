@@ -13,6 +13,7 @@ using namespace std;
 room::room(colors col)
 {
     currentState = WAITING;
+    doLaundry = false;
     color = col;
     switch(color)
     {
@@ -92,15 +93,13 @@ matPos room::getPosition()
     return position;
 }
 
-void room::scanTask()
+void room::setTask(colors code)
 {
     DEBUGPRINT("\nScanning %s room: ", name);
     currentState = SCANNING;
 
-    //Scan code
-
     //Set task
-    task = WATER;
+    task = (code == WHITE) ? WATER : BALL;
 
     DEBUGPRINT("task is ");
     if(task == WATER)
@@ -114,31 +113,77 @@ tasks room::getTask()
     return task;
 }
 
+void room::scanLaundry()
+{
+    DEBUGPRINT("Scanning laundry from %s room: ", name);
+    //Scan laundry color and add the item to the ramp queue
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(200, 40, 40);
+    robot.straightUnlim(40, true);    
+    laundry = WHITE;
+    map<colors, int> appearances;
+    colors current;
+    bool notWhite = false;
+    while((roomOrientation == RIGHT ? leftSensor : rightSensor).getReflected() < 80)
+    {
+        if((current = scanLaundryBlock(roomOrientation == RIGHT ? leftScanner : rightScanner)) != WHITE)
+        {
+            appearances[current]++;
+            notWhite = true;
+        }
+        robot.straightUnlim(40);
+    }
+    if(notWhite)
+    {
+        int maxCount = 0;
+        for(auto x: appearances)
+        {
+            if(x.second > maxCount)
+            {
+                maxCount = x.second;
+                laundry = x.first;    
+            }
+        }
+    }
+    robot.stop(BRAKE);
+
+    //Set if there is laundry to be done
+    doLaundry = laundry != WHITE; //WHITE signifies no laundry
+    if(doLaundry)
+    {
+        DEBUGPRINT("laundry color is ");
+        switch(laundry)
+        {
+            case RED:
+                DEBUGPRINT("red.\n");
+                rampQueue.push(LAUNDRY_RED);
+                break;
+            case BLACK:
+                DEBUGPRINT("black.\n");
+                rampQueue.push(LAUNDRY_BLACK);
+                break;
+            case YELLOW:
+                DEBUGPRINT("yellow.\n");
+                rampQueue.push(LAUNDRY_YELLOW);
+                break;
+        }
+    }
+    else
+    {
+        DEBUGPRINT("no available laundry to be done!\n");
+    }
+}
+
 void room::pickLaundry()
 {
-    DEBUGPRINT("Picking laundry from %s room: ", name);
-    currentState = PICKING_LAUNDRY;
-
-    //Pick Laundry Code
-
-    //Set laundry color and add the item to the ramp queue
-    laundry = RED;
-
-    DEBUGPRINT("laundry color is ");
-    switch(laundry)
+    if(doLaundry)
     {
-        case RED:
-            DEBUGPRINT("red.\n");
-            rampQueue.push(LAUNDRY_RED);
-            break;
-        case BLACK:
-            DEBUGPRINT("black.\n");
-            rampQueue.push(LAUNDRY_BLACK);
-            break;
-        case YELLOW:
-            DEBUGPRINT("yellow.\n");
-            rampQueue.push(LAUNDRY_YELLOW);
-            break;
+        DEBUGPRINT("Picking laundry from %s room: ", name);
+        currentState = PICKING_LAUNDRY;
+
+        //Pick Laundry Code
+
     }
 }
 
@@ -175,12 +220,51 @@ void room::leaveBall()
 
 }
 
+void room::enterRoom()
+{
+    //Setup code for everything to happen inside the room
+    //Robot assumes position either to pickLaundry or to move further inside
+    
+    scanLaundry();
+}
+
 void room::executeTask()
 {
     if(task == WATER)
+    {
+        //Turn to correct direction
+        if(roomOrientation == RIGHT)
+        {
+            robot.setMode(REGULATED);
+            robot.arc(800, -90, 3, BRAKE);
+        }
+        else
+        {
+            //TODO
+        }
         leaveWater();
+        pickLaundry();
+    }
     else
     {
+        if(doLaundry)
+        {
+            if(roomOrientation == RIGHT)
+            {
+                robot.setMode(REGULATED);
+                robot.arc(800, -90, 3, BRAKE);
+            }
+            else
+            {
+                //TODO
+            }
+            pickLaundry();
+            //Turn to the expected BALL direction
+        }
+        else
+        {
+            //Turn to the expected BALL direction
+        }
         pickBall();
         leaveBall();
     }
@@ -209,8 +293,7 @@ void room::exitRoom()
 
 void room::executeAllActions()
 {
-    scanTask();
-    pickLaundry();
+    enterRoom();
 
     executeTask();
 
@@ -244,6 +327,14 @@ void printRampQueue()
         temp.pop();
     }
     DEBUGPRINT("back]\n");
+}
+
+tasks findTask(colors color)
+{
+    if(color == WHITE)
+        return WATER;
+    else if(color == GREEN)
+        return BALL;
 }
 
 colors findColorOfItem(items item)
@@ -371,8 +462,7 @@ void scanLaundryBaskets()
     colorspaceHSV hsvLeft = rightScanner.getHSV();
     robot.turn(200, 57);
     //Scan third basket (right one)
-    //colorspaceHSV hsvRight = leftScanner.getHSV();
-    colorspaceHSV hsvRight = {0, 0, 0};
+    colorspaceHSV hsvRight = leftScanner.getHSV();
     robot.turn(500, 150);
     align(0.2, true);
 
@@ -481,12 +571,12 @@ void leaveLaundry()
         if(currentBasket == BASKET_MIDDLE)
         {
             robot.straight(30, 4);
-            emptyRamp();
+            emptyRampLaundry();
             robot.straight(-30, 4);
         }
         else
         {
-            emptyRamp();
+            emptyRampLaundry();
         }
     }
 

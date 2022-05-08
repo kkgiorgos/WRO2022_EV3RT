@@ -9,10 +9,26 @@ using namespace ev3cxx;
 
 void resetLifo()
 {
-    lifo.setPIDparams(KP , KI , KD , 1000);
+    lifo.setDoubleFollowMode("SL", "SR");
+    lifo.setPIDparams(KP , KI , KD , PIDspeed);
     colorCoef = 1;
 
-    printf("Reset Color of Line Followed\n");
+    //printf("Reset Color of Line Followed\n");
+}
+
+bool detectColorLine(colorSensor &sensor, colors target)
+{
+    switch(target)
+    {
+        case RED:
+            return sensor.getReflected() > 50;
+        case GREEN:
+            return sensor.getReflected() < 20;
+        case BLUE:
+            return sensor.getReflected() < 20;
+        case YELLOW:
+            return sensor.getReflected() > 80;
+    }
 }
 
 void align(double time, bool stop)
@@ -32,23 +48,51 @@ void align(double time, bool stop)
     robot.setMode(prevMode);
 }
 
+void alignPerpendicular(double time, bool stop)
+{
+    timer t;
+    speedMode prevMode = robot.getMode();
+    double kp = 0.5 * colorCoef;
+    int target = 50;
+    robot.setMode(speedMode::UNREGULATED);
+    while(t.secElapsed() < time)
+    {
+        int leftError = leftSensor.getReflected() - target;
+        int rightError = rightSensor.getReflected() - target;
+        robot.tankUnlim(leftError * kp, rightError * kp);
+        t.secDelay(0.001);
+    }
+    robot.stop(stop ? BRAKE : COAST);
+    robot.setMode(prevMode);
+}
+
 void alignOnMove(double speed) //This will change the robot mode to CONTROLLED
 {
     speedMode lastMode = robot.getMode();
     robot.setMode(speedMode::CONTROLLED);
     robot.tankUnlim(robot.cmToTacho(speed), robot.cmToTacho(speed), true);
 
-    while(rightSensor.getReflected() > 5 && leftSensor.getReflected() > 5);
-    bool isRight = rightSensor.getReflected() < 25;
+    rightSensor.getReflected();
+    leftSensor.getReflected();
+    while(!rightSensor.getLineDetected() && !leftSensor.getLineDetected())
+    {
+        rightSensor.getReflected();
+        leftSensor.getReflected();
+    }
+    bool isRight = rightSensor.getLineDetected();
 
+    rightSensor.getReflected();
+    leftSensor.getReflected();
     robot.resetPosition();
     if(isRight)
-        while(leftSensor.getReflected() > 5);
+        while(!leftSensor.getLineDetected())
+            leftSensor.getReflected();
     else
-        while(rightSensor.getReflected() > 5);
+        while(!rightSensor.getLineDetected())
+            rightSensor.getReflected();
 
     double length = robot.getPosition();
-    double sensDiff = 1.3;
+    double sensDiff = 2.5;
     double angle = atan(length / sensDiff) * (180 / MATH_PI);
     double radius = (isRight) ? 9 : -9;
     robot.arc(speed, angle, radius, COAST);
@@ -136,7 +180,7 @@ void pickBlock()
     grabber.moveDegrees(70, 40, breakMode::BRAKE);
 }
 
-void emptyRamp()
+void emptyRampLaundry()
 {
     timer t;
     ramp.moveDegrees(150, 60, BRAKE);
@@ -144,24 +188,50 @@ void emptyRamp()
     ramp.moveUntilStalled(-300, BRAKE);
 }
 
-colors scanBlock(colorSensor &scanner)
+void emptyRampWater()
 {
+    timer t;
+    ramp.moveDegrees(120, 80, BRAKE);
+    t.secDelay(0.2);
+    ramp.moveUntilStalled(-300, BRAKE);
+}
+
+colors scanLaundryBlock(colorSensor &scanner)
+{
+    scanner.setNormalisation(false);
+    colorspaceHSV hsv = scanner.getHSV();
+    
+    if(hsv.saturation > 10)
+    {
+        if(hsv.value < 20)
+            return BLACK;
+        if(hsv.hue < 20)
+            return RED;
+        else
+            return YELLOW;
+    }
+
+    return WHITE;
+}
+
+colors scanCodeBlock(colorSensor &scanner)
+{
+    scanner.setNormalisation(true);
     colorspaceHSV hsv = scanner.getHSV();
 
-    if(hsv.saturation > 90)
+    if(hsv.value > 60 && hsv.saturation < 20)
     {
-        if(hsv.hue > 110 && hsv.hue < 130)
-            return GREEN;
-        else if(hsv.hue >= 0 && hsv.hue < 10)
-            return RED;
-        else if(hsv.hue >= 10  && hsv.hue < 70)
-            return YELLOW;
+        return WHITE;
     }
     else
     {
-        if(hsv.value < 30)
-            return BLACK;
+        if(hsv.hue > 110 && hsv.hue < 170 && hsv.saturation > 70)
+        {
+            return GREEN;
+        }
         else
-            return WHITE;
+        {
+            return BLACK;
+        }
     }
 }
