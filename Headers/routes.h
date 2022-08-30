@@ -74,3 +74,6 @@ orientation YR_FL(orientation dir);
 orientation BR_FL(orientation dir);
 orientation RR_FR(orientation dir);
 orientation GR_FR(orientation dir);
+
+orientation BR_YR(orientation dir);
+orientation GR_RR(orientation dir);

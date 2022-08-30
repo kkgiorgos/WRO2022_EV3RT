@@ -121,6 +121,12 @@ void init_ramp_task(intptr_t unused)
     ramp.moveUntilStalled(-500, BRAKE); 
 }
 
+void close_ramp_task(intptr_t unused)
+{
+    //CLOSES RAMP
+    ramp.moveUntilStalled(-300, BRAKE);
+}
+
 void main_task(intptr_t unused) 
 {
     bt.open();
@@ -138,12 +144,106 @@ void main_task(intptr_t unused)
     startProcedure();
     fullRouteStandard(W);
     pickWater();
-    fullRouteStandard(CR);
-    robot.stop(BRAKE);
-    btnEnter.waitForPress();
-    fullRouteStandard(BR);
 
+    fullRouteStandard(GR);
+    rooms[GREEN].executeAllActions();
+    fullRouteStandard(RR);
+    rooms[RED].executeAllActions();
+    fullRouteStandard(BR);
     rooms[BLUE].executeAllActions();
+    fullRouteStandard(YR);
+    rooms[YELLOW].executeAllActions();
+    fullRouteStandard(L);
+
+    // currentPos = GR;
+    // currentDirection = NORTH;
+    // fullRouteStandard(RR);
+
+    // rooms[RED].setTask(WHITE);
+    // rooms[RED].enterRoom();
+
+    // robot.setMode(REGULATED);
+    // robot.arc(800, -90, 2.8, BRAKE);
+
+    // display.resetScreen();
+    // while(true)
+    // {
+    //     colorspaceHSV left = leftSensor.getHSV();
+    //     colorspaceHSV right = rightSensor.getHSV();
+    //     tslp_tsk(10);
+    //     display.format("L\nH:%  \nS:%  \nV:%  \nR\nH:%  \nS:%  \nV:%  \n")%left.hue %left.saturation %left.value %right.hue %right.saturation %right.value;
+    // }
+    
+    // currentPos = BR;
+    // currentDirection = NORTH;
+    // fullRouteStandard(YR);
+
+    // rooms[YELLOW].setTask(WHITE);
+    // rooms[YELLOW].executeAllActions();
+
+    // fullRouteStandard(L);
+
+    // robot.setMode(REGULATED);
+    // robot.arc(800, -87, -3, BRAKE);
+
+    // openGrabber();
+    // robot.setLinearAccelParams(200, 0, 0);
+    // robot.straight(35, 10);
+    // robot.straight(-10, 1);
+    // pickBlock();
+    // robot.straight(-40, 9);
+
+    // robot.setMode(CONTROLLED);
+    // robot.setAngularAccelParams(1000, 0, 50);
+    // robot.turn(500, -52);
+
+    // robot.setMode(REGULATED);
+    // robot.arc(800, 35, 3, BRAKE);
+
+    // openGrabber();
+    // robot.setMode(CONTROLLED);
+    // robot.setLinearAccelParams(100, 0, 0);
+    // robot.straight(50, 11.5);
+    // grabber.moveDegrees(140, 100, breakMode::BRAKE);
+
+    // robot.setMode(CONTROLLED);
+    // robot.setAngularAccelParams(1000, 0, 50);    
+    // robot.turn(500, -113);
+
+    // robot.setMode(CONTROLLED);
+    // robot.setLinearAccelParams(200, 0, 0);
+    // robot.straight(50, 15);
+
+    // grabber.moveUntilStalled(120);
+
+
+    // fullRouteStandard(RR);
+
+    // rooms[RED].setTask(WHITE);
+    // rooms[RED].executeAllActions();
+
+    // setLifoRight();
+    // lifo.setAlignMode(true);
+    // lifo.initializeMotionMode(UNREGULATED);
+    // lifo.seconds(0, 0.2, NONE);
+    // resetLifo();
+
+    // while(true)
+    // {  
+    //     btnEnter.waitForPress();
+    //     timer::secDelay(0.1);
+    //     emptyRampWater();
+    // }
+
+    // while(true)
+    // {  
+    //     btnEnter.waitForPress();
+    //     openGrabber();
+    //     btnEnter.waitForPress();
+    //     pickBlock();
+    // }
+    
+    robot.stop(BRAKE);
 
     /*robot.stop(BRAKE);
     btnEnter.waitForPress();
@@ -258,8 +358,6 @@ void main_task(intptr_t unused)
         tslp_tsk(10);
         display.format("L\nH:%  \nS:%  \nV:%  \nR\nH:%  \nS:%  \nV:%  \n")%left.hue %left.saturation %left.value %right.hue %right.saturation %right.value;
     }*/
-
-    robot.stop(BRAKE);
 
 
     /*lifo.setDoubleFollowMode("66", "SR");

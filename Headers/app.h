@@ -44,6 +44,7 @@ extern "C" {
 extern void	main_task(intptr_t);
 extern void init_grab_task(intptr_t);
 extern void init_ramp_task(intptr_t);
+extern void close_ramp_task(intptr_t);
 
 #endif /* TOPPERS_MACRO_ONLY */
 

@@ -120,12 +120,13 @@ void room::scanLaundry()
 
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(200, 40, 40);
+    robot.straight(40, 4, NONE);
     robot.straightUnlim(40, true);    
     laundry = WHITE;
     map<colors, int> appearances;
     colors current;
     bool notWhite = false;
-    while((roomOrientation == RIGHT ? leftSensor : rightSensor).getReflected() < 80)
+    while((roomOrientation == RIGHT ? leftSensor : rightSensor).getHSV().saturation > 65) //65
     {
         if((current = scanLaundryBlock(roomOrientation == RIGHT ? leftScanner : rightScanner)) != WHITE)
         {
@@ -146,7 +147,8 @@ void room::scanLaundry()
             }
         }
     }
-    robot.stop(BRAKE);
+    robot.setLinearAccelParams(200, 40, 0);
+    robot.straight(40, 2);
 
     //Set if there is laundry to be done
     doLaundry = laundry != WHITE; //WHITE signifies no laundry
@@ -183,7 +185,12 @@ void room::pickLaundry()
         currentState = PICKING_LAUNDRY;
 
         //Pick Laundry Code
-
+        openGrabber();
+        robot.setLinearAccelParams(200, 0, 0);
+        robot.straight(35, 10);
+        robot.straight(-10, 1);
+        pickBlock();
+        robot.straight(-40, 9);
     }
 }
 
@@ -198,6 +205,9 @@ void room::leaveWater()
     currentState = LEAVING_WATER;
 
     //Leave Water Code
+
+    emptyRampWater();
+
     rampQueue.pop();
 
 }
@@ -207,8 +217,15 @@ void room::pickBall()
     DEBUGPRINT("Picking the ball at the %s room.\n", name);
     currentState = PLAYING_BALL;
 
-    //Pick Ball Code
+    timer t;
 
+    //Pick Ball Code
+    openGrabber();
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(50, doLaundry ? 17.5 : 11.5);
+
+    grabber.moveDegrees(140, 102, breakMode::BRAKE);
 }
 
 void room::leaveBall()
@@ -217,7 +234,11 @@ void room::leaveBall()
     currentState = PLAYING_BALL;
 
     //Leave Ball Code
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(200, 0, 0);
+    robot.straight(50, 15);
 
+    grabber.moveUntilStalled(110);
 }
 
 void room::enterRoom()
@@ -236,11 +257,12 @@ void room::executeTask()
         if(roomOrientation == RIGHT)
         {
             robot.setMode(REGULATED);
-            robot.arc(800, -90, 3, BRAKE);
+            robot.arc(800, -87, 3, BRAKE);
         }
         else
         {
-            //TODO
+            robot.setMode(REGULATED);
+            robot.arc(800, -87, -3, BRAKE);
         }
         leaveWater();
         pickLaundry();
@@ -252,20 +274,51 @@ void room::executeTask()
             if(roomOrientation == RIGHT)
             {
                 robot.setMode(REGULATED);
-                robot.arc(800, -90, 3, BRAKE);
+                robot.arc(800, -87, 3, BRAKE);
             }
             else
             {
-                //TODO
+                robot.setMode(REGULATED);
+                robot.arc(800, -87, -3, BRAKE);
             }
             pickLaundry();
             //Turn to the expected BALL direction
+            if(roomOrientation == RIGHT)
+            {
+                
+            }
+            else
+            {
+                robot.setMode(CONTROLLED);
+                robot.setAngularAccelParams(1000, 0, 50);
+                robot.turn(500, -52);
+            }
         }
         else
         {
             //Turn to the expected BALL direction
+            if(roomOrientation == RIGHT)
+            {
+                
+            }
+            else
+            {
+                robot.setMode(REGULATED);
+                robot.arc(800, 35, 3, BRAKE);
+            }
         }
         pickBall();
+        //Turn to the basket
+        if(roomOrientation == RIGHT)
+        {
+
+        }
+        else
+        {
+            robot.setMode(CONTROLLED);
+            robot.setAngularAccelParams(1000, 0, 50);    
+            robot.turn(500, -113);
+        }
         leaveBall();
     }
 }
@@ -280,12 +333,38 @@ void room::exitRoom()
     if(task == WATER)
     {
         //Exiting code after WATER task
-
+        //Turn to correct direction
+        if(roomOrientation == RIGHT)
+        {
+            timer::secDelay(0.2);
+            robot.setMode(REGULATED);
+            robot.arc(800, 87, -4, BRAKE);
+        }
+        else
+        {
+            timer::secDelay(0.2);
+            robot.setMode(REGULATED);
+            robot.arc(800, 87, 4, BRAKE); //2.4
+        }
     }
     else
     {
         //Exiting code after BALL - GAME task
+        if(roomOrientation == RIGHT)
+        {
 
+        }
+        else
+        {
+            robot.setMode(CONTROLLED);
+            robot.setLinearAccelParams(200, 0, 0);
+            robot.straight(-50, 7.5);
+
+            robot.setAngularAccelParams(1000, 0, 50);    
+            robot.turn(500, -100);
+
+            robot.straight(50, 19);
+        }
     }
 
     //Fix currentOrientation

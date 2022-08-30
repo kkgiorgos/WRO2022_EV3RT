@@ -10,6 +10,13 @@ extern double PIDspeed;
 extern double colorCoef;
 
 void resetLifo();
+void setLifoLeft();
+void setLifoLeftExtreme();
+void setLifoRight();
+void setLifoRightExtreme();
+
+void executeLifoLeftUnlim(int velocity = 50);
+void executeLifoRightUnlim(int velocity = 50);
 
 bool detectColorLine(ev3ys::colorSensor &sensor, ev3ys::colors target);
 

@@ -1,5 +1,6 @@
 #include "methods.h"
 #include "ev3ys.h"
+#include "tasks.h"
 #include "globalRobot.h"
 #include <cmath>
 
@@ -12,8 +13,54 @@ void resetLifo()
     lifo.setDoubleFollowMode("SL", "SR");
     lifo.setPIDparams(KP , KI , KD , PIDspeed);
     colorCoef = 1;
+    lifo.setAlignMode(false);
+    lifo.initializeMotionMode(CONTROLLED);
 
     //printf("Reset Color of Line Followed\n");
+}
+
+void setLifoLeft()
+{
+    lifo.setDoubleFollowMode("SL", "62");
+    lifo.setPIDparams(KP*1.78, KI*1.78, KD*2, PIDspeed);
+}
+
+void setLifoLeftExtreme()
+{
+    lifo.setDoubleFollowMode("SL", "62");
+    lifo.setPIDparams(KP*3, KI*1.5, KD*5, PIDspeed);   
+}
+
+void setLifoRight()
+{
+    lifo.setDoubleFollowMode("66", "SR");
+    lifo.setPIDparams(KP*1.75, KI*1.75, KD*2, PIDspeed);
+}
+
+void setLifoRightExtreme()
+{
+    lifo.setDoubleFollowMode("66", "SR");
+    lifo.setPIDparams(KP*3, KI*1.5, KD*5, PIDspeed);
+}
+
+void executeLifoLeftUnlim(int velocity)
+{
+    int refRight = rightSensor.getReflected();
+    if(refRight < 15 || refRight > 80)
+        lifo.setDoubleFollowMode("N", "N");
+    else
+        lifo.setDoubleFollowMode("SL", "62");
+    lifo.unlimited(50);
+}
+
+void executeLifoRightUnlim(int velocity)
+{
+    int refLeft = leftSensor.getReflected();
+    if(refLeft < 15 || refLeft > 80)
+        lifo.setDoubleFollowMode("N", "N");
+    else
+        lifo.setDoubleFollowMode("66", "SR");
+    lifo.unlimited(50);
 }
 
 bool detectColorLine(colorSensor &sensor, colors target)
@@ -52,13 +99,37 @@ void alignPerpendicular(double time, bool stop)
 {
     timer t;
     speedMode prevMode = robot.getMode();
-    double kp = 0.5 * colorCoef;
-    int target = 50;
+    double kp = -0.5 * colorCoef;
+    int leftTarget, rightTarget;
     robot.setMode(speedMode::UNREGULATED);
+
+    robot.tankUnlim(-40, -40, true);
+    int leftMin = 100, leftMax = 0, rightMin = 100, rightMax = 0;
+    while(t.secElapsed() < 0.3)
+    {
+        int left = leftSensor.getReflected();
+        int right = rightSensor.getReflected();
+
+        if(left < leftMin)
+            leftMin = left;
+        else if(left > leftMax)
+            leftMax = left;
+
+        if(right < rightMin)
+            rightMin = right;
+        else if(right > rightMax)
+            rightMax = right;
+
+        robot.tankUnlim(-40, -40);
+    }
+
+    leftTarget = (leftMin + leftMax) / 2;
+    rightTarget = (rightMin + rightMax) / 2;
+    t.reset();
     while(t.secElapsed() < time)
     {
-        int leftError = leftSensor.getReflected() - target;
-        int rightError = rightSensor.getReflected() - target;
+        int leftError = leftSensor.getReflected() - leftTarget;
+        int rightError = rightSensor.getReflected() - rightTarget;
         robot.tankUnlim(leftError * kp, rightError * kp);
         t.secDelay(0.001);
     }
@@ -142,7 +213,7 @@ void rightTurn(bool stop, bool alignEnd)
     {
         double angle;
 
-        angle = 90;
+        angle = 95;
 
         robot.setMode(CONTROLLED);
         robot.setAngularAccelParams(1000, 0, 50);
@@ -176,14 +247,22 @@ void openGrabber()
 }
 void pickBlock()
 {
-    grabber.moveDegrees(250, 110, breakMode::NONE);
-    grabber.moveDegrees(70, 40, breakMode::BRAKE);
+    if(rampQueue.size() < 2)
+    {
+        grabber.moveDegrees(250, 110, breakMode::NONE);
+        grabber.moveDegrees(70, 40, breakMode::BRAKE);  
+    }
+    else
+    {
+        grabber.moveDegrees(250, 100, NONE);
+        grabber.moveDegrees(60, 50, BRAKE);
+    }
 }
 
 void emptyRampLaundry()
 {
     timer t;
-    ramp.moveDegrees(150, 60, BRAKE);
+    ramp.moveDegrees(150, 80);
     t.secDelay(0.5);
     ramp.moveUntilStalled(-300, BRAKE);
 }
@@ -192,8 +271,9 @@ void emptyRampWater()
 {
     timer t;
     ramp.moveDegrees(120, 80, BRAKE);
-    t.secDelay(0.2);
-    ramp.moveUntilStalled(-300, BRAKE);
+    act_tsk(CLOSE_RAMP_TASK);
+    //t.secDelay(0.2);
+    //ramp.moveUntilStalled(-300, BRAKE);
 }
 
 colors scanLaundryBlock(colorSensor &scanner)
