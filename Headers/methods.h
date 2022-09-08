@@ -7,9 +7,14 @@ extern double KI; //2
 extern double KD; //200
 extern double PIDspeed;
 
+extern double slowKP;
+extern double slowKI;
+extern double slowKD;
+
 extern double colorCoef;
 
 void resetLifo();
+void setLifoSlow();
 void setLifoLeft();
 void setLifoLeftExtreme();
 void setLifoRight();
@@ -19,6 +24,7 @@ void executeLifoLeftUnlim(int velocity = 50);
 void executeLifoRightUnlim(int velocity = 50);
 
 bool detectColorLine(ev3ys::colorSensor &sensor, ev3ys::colors target);
+bool detectWhiteRoomBed(ev3ys::colorSensor &sensor);
 
 void align(double time, bool stop = false);
 void alignPerpendicular(double time, bool stop = false);
@@ -29,6 +35,8 @@ void leftTurn(bool stop = false, bool alignEnd = true);
 void rightTurn(bool stop = false, bool alignEnd = true);
 
 void lifo1LineDist(double distance);
+void lifo1WhiteLineLeftSlow(double startVelocity, double distance, double slowVelocity = 20, ev3ys::breakMode stopMode = ev3ys::breakMode::BRAKE_COAST);
+void lifo1WhiteLineRightSlow(double startVelocity, double distance, double slowVelocity = 20, ev3ys::breakMode stopMode = ev3ys::breakMode::BRAKE_COAST);
 
 void openGrabber();
 void pickBlock();

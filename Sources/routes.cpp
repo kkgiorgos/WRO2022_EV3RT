@@ -228,7 +228,18 @@ orientation S_W(orientation dir)
 {
     DEBUGPRINT("\nS_W\n");
 
-    lifo1LineDist(10);
+    timer t;
+    resetLifo();
+    lifo.distance(400, 5, NONE);
+    robot.resetPosition();
+    t.reset();
+    lifo.distance(500, 2, NONE);
+    double currentVelocity = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setAccelParams(250, currentVelocity, 20);
+    lifo.distance(currentVelocity, 7, NONE);
+    lifo.setAccelParams(200, 20, 20);
+    lifo.lines(20, 1, NONE);
 
     return NORTH;
 }
@@ -243,86 +254,54 @@ orientation W_CR(orientation dir)
 {
     DEBUGPRINT("\nW_CR\n");
 
-    robot.setLinearAccelParams(200, 0, 0);
-    robot.setAngularAccelParams(1000, 0, 50);
-    robot.arc(50, 83, 4.5);
-    robot.setLinearAccelParams(200, 0, 40);
-    robot.straight(50, 23, NONE);
-
-    robot.setMode(speedMode::CONTROLLED);
-    robot.setLinearAccelParams(100, 0, 0);
-    robot.setAngularAccelParams(1000, 0, 0);
-    alignOnMove(30);
-
-    robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(200, 0, 50);
-    robot.straight(50, 10, NONE);
-    robot.setLinearAccelParams(200, 50, 50);
-    robot.straightUnlim(50, true);    
+    robot.setLinearAccelParams(100, 0, 35);
+    robot.arc(50, 93, 4.5, NONE);
+    robot.setLinearAccelParams(100, 35, 40);
+    robot.straight(40, 25, NONE);
+    alignOnMove(40);
+    robot.setLinearAccelParams(100, 40, 30);
+    robot.straight(30, 10, NONE);
+    robot.setLinearAccelParams(100, 30, 30);
+    robot.straightUnlim(30, true);    
     while(leftSensor.getHSV().saturation < 30)
-        robot.straightUnlim(50);
-    robot.setLinearAccelParams(200, 50, 0);
-    robot.straight(50, 4);
+        robot.straightUnlim(30);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(30, 6.5);
 
-    rightTurn(true, false);
-
-    // robot.setLinearAccelParams(200, 10, 0);
-    // robot.arc(40, 100, 4.5);
+    robot.setAngularAccelParams(1000, 0, 50);
+    robot.turn(300, 90);
 
     colors current;
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(200, 0, 50);
-    robot.straightUnlim(50, true);
+    robot.setLinearAccelParams(100, 0, 40);
+    robot.straightUnlim(40, true);
     while((current = scanCodeBlock(leftScanner)) == BLACK)
-        robot.straightUnlim(50);
+        robot.straightUnlim(40);
 
     rooms[RED].setTask(scanCodeBlock(leftScanner));
     display.resetScreen();
     display.format("%  \n")%static_cast<int>(scanCodeBlock(leftScanner));
-    do
-    {
-        leftSensor.getReflected();
-        rightSensor.getReflected();
+
+    robot.setLinearAccelParams(100, 40, 50);
+    robot.straight(50, 15, NONE);
+    robot.straightUnlim(50, true);
+    while(leftSensor.getReflected() > 10)
         robot.straightUnlim(50);
-    }
-    while(!leftSensor.getLineDetected() && !rightSensor.getLineDetected());
-    
-    do
-    {
-        leftSensor.getReflected();
-        rightSensor.getReflected();
-        robot.straightUnlim(50);
-    }
-    while(leftSensor.getLineDetected() || rightSensor.getLineDetected());
+    robot.setLinearAccelParams(100, 50, 0);
+    robot.straight(50, 11);
 
-    while(leftSensor.getReflected() > 50 && rightSensor.getReflected() > 50)
-        robot.straightUnlim(50);
+    robot.setAngularAccelParams(1000, 0, 50);
+    robot.turn(300, -90);
 
-    robot.setLinearAccelParams(200, 50, 0);
-    robot.straight(50, 8);
-    leftTurn(false, false);
-
-    setLifoLeft();
-    lifo.setAlignMode(true);
-    lifo.initializeMotionMode(UNREGULATED);
-    lifo.seconds(0, 0.2, NONE);
-    resetLifo();
-
-    setLifoLeft();
-    lifo.setAccelParams(250, 5, 50); 
-    lifo.unlimited(50, true);
+    lifo1WhiteLineLeftSlow(20, 3, 20, NONE);
+    robot.setLinearAccelParams(200, 20, 30);
+    robot.straightUnlim(30, true);
     while((current = scanCodeBlock(rightScanner)) == BLACK)
-        executeLifoLeftUnlim();
+        robot.straightUnlim(30);
     rooms[GREEN].setTask(scanCodeBlock(rightScanner));
-    
     display.format("%  \n")%static_cast<int>(scanCodeBlock(rightScanner));
-    do
-    {
-        leftSensor.getReflected();
-        rightSensor.getReflected();
-        executeLifoLeftUnlim();
-    }
-    while(!leftSensor.getLineDetected() && !rightSensor.getLineDetected());
+    while(robot.getPosition() < 8)
+        robot.straightUnlim(30);
 
     resetLifo();
 
@@ -459,26 +438,7 @@ orientation CR_FR(orientation dir)
 {
     DEBUGPRINT("\nCR_FR\n");
 
-    setLifoLeft();
-    lifo.setAccelParams(250, 50, 50); 
-    lifo.unlimited(50, true);
-    do
-    {
-        leftSensor.getReflected();
-        rightSensor.getReflected();
-        executeLifoLeftUnlim();
-    }
-    while(leftSensor.getLineDetected() || rightSensor.getLineDetected());
-
-    do
-    {
-        leftSensor.getReflected();
-        rightSensor.getReflected();
-        executeLifoLeftUnlim();
-    }
-    while(!leftSensor.getLineDetected() && !rightSensor.getLineDetected());
-
-    resetLifo();
+    lifo1WhiteLineLeftSlow(30, 12);
 
     return EAST;
 }
@@ -583,9 +543,9 @@ orientation FR_GR(orientation dir)
 {
     DEBUGPRINT("\nFR_GR\n");
 
-    robot.stop(BRAKE);
-    robot.setMode(REGULATED);
-    robot.arc(800, -85, -1.5, BRAKE); //1.6
+    // robot.stop(BRAKE);
+    // robot.setMode(REGULATED);
+    // robot.arc(800, -85, -1.5, BRAKE); //1.6
 
     // setLifoLeft();
     // lifo.setAlignMode(true);
@@ -593,17 +553,34 @@ orientation FR_GR(orientation dir)
     // lifo.seconds(0, 0.2, NONE);
     // resetLifo();
     
-    setLifoLeftExtreme();
-    robot.resetPosition();
-    lifo.setAccelParams(600, 0, 50);
-    lifo.unlimited(50, true);
+    // setLifoLeftExtreme();
+    // robot.resetPosition();
+    // lifo.setAccelParams(600, 0, 50);
+    // lifo.unlimited(50, true);
     
-    while(robot.getPosition() < 7)
-        executeLifoLeftUnlim();
+    // while(robot.getPosition() < 7)
+    //     executeLifoLeftUnlim();
 
-    setLifoLeft();
-    while(!detectColorLine(rightSensor, GREEN))
-        executeLifoLeftUnlim();
+    // setLifoLeft();
+    // while(!detectColorLine(rightSensor, GREEN))
+    //     executeLifoLeftUnlim();
+
+    // resetLifo();
+
+
+    robot.setLinearAccelParams(100, 20, 0);
+    robot.straight(20, 3.7);
+    robot.setAngularAccelParams(1000, 0, 50);
+    robot.turn(300, 90);
+
+    lifo.initializeMotionMode(CONTROLLED);
+    lifo.setDoubleFollowMode("SL", "62");
+    lifo.setAlignMode(true);
+    lifo.setPIDparams(slowKP*3, slowKI*1.8, slowKD*5, 1);
+    lifo.setAccelParams(200, 20, 20);
+    lifo.distance(20, 7, NONE);
+    lifo.setPIDparams(slowKP*2, slowKI*2, slowKD*2, 1);
+    lifo.distance(20, 3, NONE);
 
     resetLifo();
 

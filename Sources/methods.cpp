@@ -10,13 +10,27 @@ using namespace ev3cxx;
 
 void resetLifo()
 {
-    lifo.setDoubleFollowMode("SL", "SR");
-    lifo.setPIDparams(KP , KI , KD , PIDspeed);
+    // lifo.setDoubleFollowMode("SL", "SR");
+    // lifo.setPIDparams(KP , KI , KD , PIDspeed);
     colorCoef = 1;
-    lifo.setAlignMode(false);
-    lifo.initializeMotionMode(CONTROLLED);
+    // lifo.setAlignMode(false);
+    // lifo.initializeMotionMode(CONTROLLED);
+
+    lifo.setDoubleFollowMode("SL", "SR");
+    lifo.initializeMotionMode(UNREGULATED);
+    lifo.setAlignMode(true);
+    robot.setUnregulatedDPS(true);
+    lifo.setPIDparams(KP, KI, KD, PIDspeed);
 
     //printf("Reset Color of Line Followed\n");
+}
+
+void setLifoSlow()
+{
+    lifo.setDoubleFollowMode("SL", "SR");
+    lifo.setPIDparams(slowKP, slowKI, slowKD, PIDspeed);
+    lifo.initializeMotionMode(CONTROLLED);
+    lifo.setAlignMode(true);
 }
 
 void setLifoLeft()
@@ -50,7 +64,7 @@ void executeLifoLeftUnlim(int velocity)
         lifo.setDoubleFollowMode("N", "N");
     else
         lifo.setDoubleFollowMode("SL", "62");
-    lifo.unlimited(50);
+    lifo.unlimited(velocity);
 }
 
 void executeLifoRightUnlim(int velocity)
@@ -60,22 +74,28 @@ void executeLifoRightUnlim(int velocity)
         lifo.setDoubleFollowMode("N", "N");
     else
         lifo.setDoubleFollowMode("66", "SR");
-    lifo.unlimited(50);
+    lifo.unlimited(velocity);
 }
 
 bool detectColorLine(colorSensor &sensor, colors target)
 {
-    switch(target)
-    {
-        case RED:
-            return sensor.getReflected() > 50;
-        case GREEN:
-            return sensor.getReflected() < 20;
-        case BLUE:
-            return sensor.getReflected() < 20;
-        case YELLOW:
-            return sensor.getReflected() > 80;
-    }
+    // switch(target)
+    // {
+    //     case RED:
+    //         return sensor.getReflected() > 50;
+    //     case GREEN:
+    //         return sensor.getReflected() < 20;
+    //     case BLUE:
+    //         return sensor.getReflected() < 20;
+    //     case YELLOW:
+    //         return sensor.getReflected() > 80;
+    // }
+    return abs(sensor.getReflected() - 33) > 5;
+}
+
+bool detectWhiteRoomBed(colorSensor &sensor)
+{
+    return sensor.getColor() == WHITE;
 }
 
 void align(double time, bool stop)
@@ -140,7 +160,7 @@ void alignPerpendicular(double time, bool stop)
 void alignOnMove(double speed) //This will change the robot mode to CONTROLLED
 {
     speedMode lastMode = robot.getMode();
-    robot.setMode(speedMode::CONTROLLED);
+    robot.setMode(speedMode::REGULATED);
     robot.tankUnlim(robot.cmToTacho(speed), robot.cmToTacho(speed), true);
 
     rightSensor.getReflected();
@@ -166,7 +186,7 @@ void alignOnMove(double speed) //This will change the robot mode to CONTROLLED
     double sensDiff = 2.5;
     double angle = atan(length / sensDiff) * (180 / MATH_PI);
     double radius = (isRight) ? 9 : -9;
-    robot.arc(speed, angle, radius, COAST);
+    robot.arc(robot.cmToTacho(speed), angle, radius, NONE);
 }
 
 void reverse(bool stop, bool alignEnd)
@@ -241,6 +261,39 @@ void lifo1LineDist(double distance)
     lifo.lines(50, 1, COAST);
 }
 
+void lifo1WhiteLineLeftSlow(double startVelocity, double distance, double slowVelocity, breakMode stopMode)
+{
+    lifo.initializeMotionMode(CONTROLLED);
+    lifo.setDoubleFollowMode("SL", "62");
+    lifo.setAlignMode(true);
+    lifo.setPIDparams(slowKP*1.78, slowKI*1.78, slowKD*2, 1);
+    lifo.setAccelParams(200, startVelocity, slowVelocity);
+    lifo.distance(startVelocity, distance, NONE);
+    lifo.unlimited(slowVelocity, true);
+    while(rightSensor.getReflected() < 60)
+    {
+        executeLifoLeftUnlim(slowVelocity);
+    }
+    robot.stop(stopMode);
+}
+
+void lifo1WhiteLineRightSlow(double startVelocity, double distance, double slowVelocity, breakMode stopMode)
+{
+    lifo.initializeMotionMode(CONTROLLED);
+    lifo.setDoubleFollowMode("66", "SR");
+    lifo.setAlignMode(true);
+    lifo.setPIDparams(slowKP*1.75, slowKI*1.75, slowKD*2, 1);
+    lifo.setAccelParams(200, startVelocity, slowVelocity);
+    lifo.distance(startVelocity, distance, NONE);
+    lifo.unlimited(slowVelocity, true);
+    while(leftSensor.getReflected() < 60)
+    {
+        executeLifoRightUnlim(slowVelocity);
+    }
+    robot.stop(stopMode);
+}
+
+
 void openGrabber()
 {
     grabber.moveUntilStalled(-300);
@@ -261,16 +314,15 @@ void pickBlock()
 
 void emptyRampLaundry()
 {
-    timer t;
     ramp.moveDegrees(150, 80);
-    t.secDelay(0.5);
+    timer::secDelay(0.5);
     ramp.moveUntilStalled(-300, BRAKE);
 }
 
 void emptyRampWater()
 {
-    timer t;
-    ramp.moveDegrees(120, 80, BRAKE);
+    //ramp.moveDegrees(120, 80, BRAKE);
+    ramp.moveDegrees(300, 120, BRAKE);
     act_tsk(CLOSE_RAMP_TASK);
     //t.secDelay(0.2);
     //ramp.moveUntilStalled(-300, BRAKE);
