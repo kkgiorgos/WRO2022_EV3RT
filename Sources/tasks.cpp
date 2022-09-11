@@ -119,9 +119,9 @@ void room::scanLaundry()
     //Scan laundry color and add the item to the ramp queue
 
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(200, 20, 30);
-    robot.straight(30, 5, NONE);
-    robot.straightUnlim(30, true);    
+    robot.setLinearAccelParams(200, 35, 35);
+    robot.straight(35, 5, NONE);
+    robot.straightUnlim(35, true);    
     laundry = WHITE;
     map<colors, int> appearances;
     colors current;
@@ -133,7 +133,7 @@ void room::scanLaundry()
             appearances[current]++;
             notWhite = true;
         }
-        robot.straightUnlim(30);
+        robot.straightUnlim(35);
     }
     if(notWhite)
     {
@@ -147,8 +147,8 @@ void room::scanLaundry()
             }
         }
     }
-    robot.setLinearAccelParams(200, 30, 0);
-    robot.straight(30, 5);
+    robot.setLinearAccelParams(200, 35, 10);
+    robot.straight(35, 3.5);
 
     //Set if there is laundry to be done
     doLaundry = laundry != WHITE; //WHITE signifies no laundry
@@ -263,13 +263,20 @@ void room::executeTask()
     if(task == WATER)
     {
         //Turn to correct direction
-        if(doLaundry) act_tsk(OPEN_GRABBER_TASK);
         if(roomOrientation == RIGHT)
         {
-            
+            robot.setMode(CONTROLLED);
+            robot.setAngularAccelParams(1000, -150, 0);
+            robot.turn(300, -25, NONE);
+            robot.setLinearAccelParams(100, -10, -10);
+            robot.straight(-45, 4.5, NONE);
+            if(doLaundry) act_tsk(OPEN_GRABBER_TASK);
+            robot.turn(300, -75, NONE);
+            robot.straight(-45, 3.5, BRAKE);
         }
         else
         {
+            if(doLaundry) act_tsk(OPEN_GRABBER_TASK);
             robot.setMode(CONTROLLED);
             robot.setLinearAccelParams(100, 0, 0);
             robot.setAngularAccelParams(1000, 0, 50);
@@ -558,7 +565,7 @@ void pickWater()
 
     //Pick Second Bottle
      robot.setLinearAccelParams(100, 0, 0);
-    act_tsk(INIT_GRAB_TASK);
+    act_tsk(OPEN_GRABBER_TASK);
     robot.arc(50, -37, -9, BRAKE_COAST);
     robot.straight(50, 15);
     robot.setLinearAccelParams(200, 0, 0);

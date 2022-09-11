@@ -25,6 +25,14 @@ void resetLifo()
     //printf("Reset Color of Line Followed\n");
 }
 
+void setLifoNormalReg()
+{
+    lifo.setDoubleFollowMode("SL", "SR");
+    lifo.initializeMotionMode(CONTROLLED);
+    lifo.setAlignMode(true);
+    lifo.setPIDparams(1.5, 3, 150, PIDspeed);
+}
+
 void setLifoSlow()
 {
     lifo.setDoubleFollowMode("SL", "SR");
@@ -33,28 +41,40 @@ void setLifoSlow()
     lifo.setAlignMode(true);
 }
 
-void setLifoLeft()
+void setLifoLeft(bool slow)
 {
-    lifo.setDoubleFollowMode("SL", "62");
-    lifo.setPIDparams(KP*1.78, KI*1.78, KD*2, PIDspeed);
+    lifo.setDoubleFollowMode("SL", "70");
+    if(slow)
+        lifo.setPIDparams(slowKP*1.7, slowKI*1.7, slowKD*2, PIDspeed);
+    else
+        lifo.setPIDparams(KP*1.7, KI*1.7, KD*2, PIDspeed);
 }
 
-void setLifoLeftExtreme()
+void setLifoLeftExtreme(bool slow)
 {
-    lifo.setDoubleFollowMode("SL", "62");
-    lifo.setPIDparams(KP*3, KI*1.5, KD*5, PIDspeed);   
+    lifo.setDoubleFollowMode("SL", "70");
+    if(slow)
+        lifo.setPIDparams(slowKP*3, slowKI*1.5, slowKD*5, PIDspeed);   
+    else
+        lifo.setPIDparams(KP*3, KI*1.5, KD*5, PIDspeed);   
 }
 
-void setLifoRight()
+void setLifoRight(bool slow)
 {
-    lifo.setDoubleFollowMode("66", "SR");
-    lifo.setPIDparams(KP*1.75, KI*1.75, KD*2, PIDspeed);
+    lifo.setDoubleFollowMode("70", "SR");
+    if(slow)
+        lifo.setPIDparams(slowKP*1.7, slowKI*1.7, slowKD*2, PIDspeed);
+    else
+        lifo.setPIDparams(KP*1.7, KI*1.7, KD*2, PIDspeed);
 }
 
-void setLifoRightExtreme()
+void setLifoRightExtreme(bool slow)
 {
-    lifo.setDoubleFollowMode("66", "SR");
-    lifo.setPIDparams(KP*3, KI*1.5, KD*5, PIDspeed);
+    lifo.setDoubleFollowMode("70", "SR");
+    if(slow)
+        lifo.setPIDparams(slowKP*3, slowKI*1.5, slowKD*5, PIDspeed);   
+    else
+        lifo.setPIDparams(KP*3, KI*1.5, KD*5, PIDspeed);   
 }
 
 void executeLifoLeftUnlim(int velocity)
@@ -63,7 +83,7 @@ void executeLifoLeftUnlim(int velocity)
     if(refRight < 15 || refRight > 80)
         lifo.setDoubleFollowMode("N", "N");
     else
-        lifo.setDoubleFollowMode("SL", "62");
+        lifo.setDoubleFollowMode("SL", "70");
     lifo.unlimited(velocity);
 }
 
@@ -73,7 +93,7 @@ void executeLifoRightUnlim(int velocity)
     if(refLeft < 15 || refLeft > 80)
         lifo.setDoubleFollowMode("N", "N");
     else
-        lifo.setDoubleFollowMode("66", "SR");
+        lifo.setDoubleFollowMode("70", "SR");
     lifo.unlimited(velocity);
 }
 
@@ -264,9 +284,9 @@ void lifo1LineDist(double distance)
 void lifo1WhiteLineLeftSlow(double startVelocity, double distance, double slowVelocity, breakMode stopMode)
 {
     lifo.initializeMotionMode(CONTROLLED);
-    lifo.setDoubleFollowMode("SL", "62");
+    lifo.setDoubleFollowMode("SL", "70");
     lifo.setAlignMode(true);
-    lifo.setPIDparams(slowKP*1.78, slowKI*1.78, slowKD*2, 1);
+    lifo.setPIDparams(slowKP*1.7, slowKI*1.7, slowKD*2, 1);
     lifo.setAccelParams(200, startVelocity, slowVelocity);
     lifo.distance(startVelocity, distance, NONE);
     lifo.unlimited(slowVelocity, true);
@@ -280,9 +300,9 @@ void lifo1WhiteLineLeftSlow(double startVelocity, double distance, double slowVe
 void lifo1WhiteLineRightSlow(double startVelocity, double distance, double slowVelocity, breakMode stopMode)
 {
     lifo.initializeMotionMode(CONTROLLED);
-    lifo.setDoubleFollowMode("66", "SR");
+    lifo.setDoubleFollowMode("70", "SR");
     lifo.setAlignMode(true);
-    lifo.setPIDparams(slowKP*1.75, slowKI*1.75, slowKD*2, 1);
+    lifo.setPIDparams(slowKP*1.7, slowKI*1.7, slowKD*2, 1);
     lifo.setAccelParams(200, startVelocity, slowVelocity);
     lifo.distance(startVelocity, distance, NONE);
     lifo.unlimited(slowVelocity, true);
@@ -296,20 +316,78 @@ void lifo1WhiteLineRightSlow(double startVelocity, double distance, double slowV
 
 void openGrabber()
 {
-    grabber.moveUntilStalled(-300);
+    grabber.setStallTolerance(150, 10, 0.1);
+    grabber.setSpeedLimiter(false);
+    grabber.setMode(REGULATED);
+    grabber.moveDegrees(-1400, 300, NONE);
+    grabber.moveUntilStalled(-500, BRAKE);
 }
+
+void openGrabberAsync()
+{
+    act_tsk(OPEN_GRABBER_TASK);
+    while(!grabberUsed) tslp_tsk(10);
+}
+
 void pickBlock()
 {
-    if(rampQueue.size() < 2)
+    int tacho;
+    int startSpeed = 1400;
+    int endSpeed = 700;
+    int distance = 250;
+    int decelDistance = 100;
+    int speed;
+    grabber.moveUnlimited(startSpeed, true);
+    while(tacho = grabber.getTachoCount() < (distance - decelDistance))
+        grabber.moveUnlimited(startSpeed);
+    grabber.resetTachoCount();
+    speed = startSpeed;
+    while(tacho = grabber.getTachoCount() < decelDistance)
     {
-        grabber.moveDegrees(250, 110, breakMode::NONE);
-        grabber.moveDegrees(70, 40, breakMode::BRAKE);  
+        speed = (decelDistance - tacho) / decelDistance * (startSpeed - endSpeed) + endSpeed;
+        grabber.moveUnlimited(speed);
+        if(grabber.isStalled(speed))
+            break;
     }
-    else
-    {
-        grabber.moveDegrees(250, 100, NONE);
-        grabber.moveDegrees(60, 50, BRAKE);
-    }
+    grabber.moveUntilStalled(endSpeed, BRAKE);
+}
+
+void pickBlockStage1()
+{
+    grabber.moveDegrees(450, 90, NONE);
+    grabber.moveDegrees(60, 30, NONE);
+    grabberUsed = true;
+    grabber.moveUntilStalled(60, BRAKE_COAST, 0.3);
+    act_tsk(PICK_BLOCK_TASK);
+}
+void pickBlockStage2()
+{
+    grabberUsed = false;
+    ev3_speaker_play_tone(300, 10);
+} 
+
+void openGrabberAndPickBlock()
+{
+    startPicking = false;
+    grabber.setStallTolerance(150, 10, 0.1);
+    grabber.setSpeedLimiter(false);
+    grabber.setMode(REGULATED);
+    grabber.moveDegrees(-1400, 300, NONE);
+    grabber.moveUntilStalled(-500, BRAKE);
+    while(!startPicking) tslp_tsk(10);
+
+    int tacho;
+    int startSpeed = 1400;
+    int endSpeed = 700;
+    int distance = 300;
+    int decelDistance = 100;
+    grabber.moveUnlimited(startSpeed, true);
+    while(tacho = grabber.getTachoCount() < (distance - decelDistance))
+        grabber.moveUnlimited(startSpeed);
+    grabber.resetTachoCount();
+    while(tacho = grabber.getTachoCount() < decelDistance)
+        grabber.moveUnlimited((decelDistance - tacho) / decelDistance * (startSpeed - endSpeed) + endSpeed);
+    grabber.moveUntilStalled(endSpeed, BRAKE);
 }
 
 void emptyRampLaundry()

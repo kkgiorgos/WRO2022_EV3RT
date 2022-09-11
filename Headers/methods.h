@@ -14,11 +14,12 @@ extern double slowKD;
 extern double colorCoef;
 
 void resetLifo();
+void setLifoNormalReg();
 void setLifoSlow();
-void setLifoLeft();
-void setLifoLeftExtreme();
-void setLifoRight();
-void setLifoRightExtreme();
+void setLifoLeft(bool slow = false);
+void setLifoLeftExtreme(bool slow = false);
+void setLifoRight(bool slow = false);
+void setLifoRightExtreme(bool slow = false);
 
 void executeLifoLeftUnlim(int velocity = 50);
 void executeLifoRightUnlim(int velocity = 50);
@@ -39,7 +40,12 @@ void lifo1WhiteLineLeftSlow(double startVelocity, double distance, double slowVe
 void lifo1WhiteLineRightSlow(double startVelocity, double distance, double slowVelocity = 20, ev3ys::breakMode stopMode = ev3ys::breakMode::BRAKE_COAST);
 
 void openGrabber();
+void openGrabberAsync();
 void pickBlock();
+void pickBlockStage1();
+void pickBlockStage2();
+
+void openGrabberAndPickBlock();
 
 void emptyRampLaundry();
 void emptyRampWater();

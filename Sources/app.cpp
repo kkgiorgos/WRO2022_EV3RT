@@ -6,6 +6,7 @@
 #include <map>
 #include <cstdio>
 #include <climits>
+#include <cmath>
 
 #include "routes.h"
 #include "tasks.h"
@@ -26,8 +27,8 @@ FILE *bluetooth;
 
 motor grabber(MotorPort::A, true);
 motor ramp(MotorPort::D, false);
-motor leftMotor(MotorPort::B, true, MotorType::LARGE);
-motor rightMotor(MotorPort::C, false, MotorType::LARGE);
+motor leftMotor(MotorPort::B, true, MotorType::MEDIUM);
+motor rightMotor(MotorPort::C, false, MotorType::MEDIUM);
 chassis robot(&leftMotor, &rightMotor, 6.24, 18, 0.1, 0.01);
 colorSensor leftSensor(SensorPort::S2, false, "WRO2022");
 colorSensor rightSensor(SensorPort::S3, false, "WRO2022");
@@ -105,25 +106,28 @@ void init()
     //Initialize position of mechanisms (here or after start of mission, e.g. btn press)
 
     display.format("WAIT FOR SENSORS\n");
-    btnEnter.waitForPress();
-    act_tsk(INIT_GRAB_TASK);
-    act_tsk(INIT_RAMP_TASK);
+    btnEnter.waitForClick();
+    // act_tsk(INIT_TASK);
+    tslp_tsk(1);
 }
 
-void init_grab_task(intptr_t unused)
+bool grabberUsed = false;
+bool startPicking = false;
+
+void open_grabber_task(intptr_t unused)
 {
     //INITIALIZATION OF GRABBER
-    //grabber.moveUntilStalled(500, BRAKE, 0.4);
-    //timer t;
-    //t.secDelay(0.05);
-    grabber.moveUntilStalled(-300);
+    openGrabber();
 }
 
-void init_ramp_task(intptr_t unused)
+void init_task(intptr_t unused)
 {
     //INITIALIZATION OF RAMP
-    ramp.moveUntilStalled(800, COAST);
-    ramp.moveUntilStalled(-500, BRAKE); 
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    ramp.moveUnlimited(-200);
+    tslp_tsk(100);
+    ramp.stop(BRAKE); 
 }
 
 void close_ramp_task(intptr_t unused)
@@ -132,10 +136,44 @@ void close_ramp_task(intptr_t unused)
     ramp.moveUntilStalled(-400, BRAKE);
 }
 
-void open_grabber_task(intptr_t unused)
+void water_grabber_task(intptr_t unused)
 {
-    //OPENS GRABBER
-    openGrabber();
+    //PICKS FIRST WATER OPENS GRABBER AND PICKS SECOND WATER WHEN COMMAND IS GIVEN via startPicking
+    startPicking = false;
+    int tacho;
+    int startSpeed = 1400;
+    int endSpeed = 700;
+    int distance = 300;
+    int decelDistance = 100;
+
+    grabber.setStallTolerance(100, 10, 0.1);
+    grabber.setSpeedLimiter(false);
+    grabber.setMode(REGULATED);
+
+    grabber.moveUnlimited(startSpeed, true);
+    while(tacho = grabber.getTachoCount() < (distance - decelDistance))
+        grabber.moveUnlimited(startSpeed);
+    grabber.resetTachoCount();
+    while(tacho = grabber.getTachoCount() < decelDistance)
+        grabber.moveUnlimited((decelDistance - tacho) / decelDistance * (startSpeed - endSpeed) + endSpeed);
+    grabber.moveUntilStalled(endSpeed, BRAKE);
+    tslp_tsk(1);
+    grabber.moveDegrees(-1400, 300, NONE);
+    grabber.moveUntilStalled(-500, BRAKE);
+    while(!startPicking) tslp_tsk(10);
+    
+    grabber.moveUnlimited(startSpeed, true);
+    while(tacho = grabber.getTachoCount() < (distance - decelDistance))
+        grabber.moveUnlimited(startSpeed);
+    grabber.resetTachoCount();
+    while(tacho = grabber.getTachoCount() < decelDistance)
+        grabber.moveUnlimited((decelDistance - tacho) / decelDistance * (startSpeed - endSpeed) + endSpeed);
+    grabber.moveUntilStalled(endSpeed, BRAKE);
+}
+
+void pick_block_task(intptr_t unused)
+{
+    pickBlock();
 }
 
 void main_task(intptr_t unused) 
@@ -153,25 +191,504 @@ void main_task(intptr_t unused)
     startData();
 
     //Mission Code
-    startProcedure();
-    
-    fullRouteStandard(W);
-    pickWater();
+    // startProcedure();
 
-    fullRouteStandard(GR);
-    rooms[GREEN].executeAllActions();
+    // fullRouteStandard(W);
+    // pickWater();
+
+    // grabber.setStallTolerance(20, 35, 0.1);
+    
+    // while(true)
+    // {
+    //     grabber.setStallTolerance(150, 10, 0.1);
+    //     grabber.setSpeedLimiter(false);
+    //     grabber.setMode(REGULATED);
+    //     grabber.moveDegrees(-1400, 300, NONE);
+    //     grabber.moveUntilStalled(-500, BRAKE);
+    //     btnEnter.waitForClick(); 
+    //     int tacho;
+    //     int startSpeed = 1400;
+    //     int endSpeed = 700;
+    //     int distance = 300;
+    //     int decelDistance = 100;
+    //     grabber.moveUnlimited(startSpeed, true);
+    //     while(tacho = grabber.getTachoCount() < (distance - decelDistance))
+    //         grabber.moveUnlimited(startSpeed);
+    //     grabber.resetTachoCount();
+    //     while(tacho = grabber.getTachoCount() < decelDistance)
+    //         grabber.moveUnlimited((decelDistance - tacho) / decelDistance * (startSpeed - endSpeed) + endSpeed);
+    //     grabber.moveUntilStalled(endSpeed, BRAKE);
+    // }
+
+    while(true)
+    {
+        grabber.setMode(REGULATED);
+        grabber.moveUnlimited(700, true);
+        tslp_tsk(50);
+        while(grabber.getCurrentSpeed() > 350)
+        {
+            grabber.moveUnlimited(700);
+            tslp_tsk(1);
+        }
+        grabber.stop(BRAKE_COAST);
+        grabber.moveUnlimited(-700, true);
+        tslp_tsk(50);
+        while(grabber.getCurrentSpeed() < -350)
+        {
+            grabber.moveUnlimited(-700);
+            tslp_tsk(1);
+        }
+        grabber.stop(BRAKE_COAST);
+        btnEnter.waitForClick();
+    }
+
+    
+
+
+
+    // robot.setMode(CONTROLLED);
+    // robot.setAngularAccelParams(600, -200, -200);
+    // robot.turn(300, -45, NONE);
+    // robot.setLinearAccelParams(150, 10, 30);
+    // robot.straight(45, 15, NONE);
+
+    // setLifoNormalReg();
+    // lifo.setAccelParams(150, 30, 30);
+    // lifo.setPIDparams(1, 3, 200, 1);
+    // lifo.distance(30, 12, NONE);
+    // setLifoSlow();
+    // lifo.setAccelParams(150, 30, 30);
+    // lifo.lines(30, 1, NONE);
+
+    // robot.setLinearAccelParams(150, 30, 20);
+    // robot.straight(20, 2, NONE); 
+
+    // int tacho;
+    // int startSpeed = 1400;
+    // int endSpeed = 700;
+    // int distance = 300;
+    // int decelDistance = 100;
+    // robot.setLinearAccelParams(150, 20, 20);
+    // robot.straightUnlim(20, true);
+    // grabber.moveUnlimited(startSpeed, true);
+    // bool startOpening = false;
+    // bool isStopped = false;
+    // bool waitPostStall = true;
+    // timer stallHelp;
+    // while(robot.getPosition() < 2)
+    // {
+    //     robot.straightUnlim(20);
+    //     if(!startOpening && (tacho = grabber.getTachoCount()) < (distance - decelDistance))
+    //         grabber.moveUnlimited(startSpeed);
+    //     else if(!startOpening && (tacho = grabber.getTachoCount()) < distance)
+    //     {
+    //         tacho -= distance - decelDistance;
+    //         grabber.moveUnlimited((decelDistance - tacho) / decelDistance * (startSpeed - endSpeed) + endSpeed);
+    //     }
+    //     else if(!startOpening && !grabber.isStalled(endSpeed))
+    //         grabber.moveUnlimited(endSpeed);
+    //     else if(startOpening)
+    //     {
+    //         if(abs(grabber.getTachoCount()) > 300 && !grabber.isStalled(-600))
+    //         {
+    //             grabber.moveUnlimited(-600);
+    //         }
+    //         else if(abs(grabber.getTachoCount()) > 300 && grabber.isStalled(-600))
+    //         {
+    //             if(!isStopped)
+    //             {
+    //                 if(waitPostStall)
+    //                 {
+    //                     stallHelp.reset();
+    //                     waitPostStall = false;
+    //                 }
+    //                 if(stallHelp.secElapsed() < 0.1)
+    //                 {
+    //                     grabber.stop(BRAKE);
+    //                 }
+    //                 else
+    //                 {
+    //                     isStopped = true;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     else
+    //     {   
+    //         if(waitPostStall)
+    //         {
+    //             stallHelp.reset();
+    //             waitPostStall = false;
+    //         }
+    //         if(stallHelp.secElapsed() < 0.1)
+    //         {
+    //             grabber.stop(BRAKE);
+    //         }
+    //         else
+    //         {
+    //             startOpening = true;
+    //             waitPostStall = true;
+    //             grabber.moveDegrees(-1400, 300, NONE, false);
+    //         }
+    //     }
+    // }
+
+    // robot.stop(ZERO);
+    // robot.stop(BRAKE);
+    // robot.setMode(REGULATED);
+    // robot.arcUnlim(robot.cmToTacho(35), -9, BACKWARD, true);
+    // while(robot.getAngle() < 32)
+    // {
+    //     robot.arcUnlim(robot.cmToTacho(35), -9, BACKWARD);
+    //     if(!startOpening && (tacho = grabber.getTachoCount()) < (distance - decelDistance))
+    //         grabber.moveUnlimited(startSpeed);
+    //     else if(!startOpening && (tacho = grabber.getTachoCount()) < distance)
+    //     {
+    //         tacho -= distance - decelDistance;
+    //         grabber.moveUnlimited((decelDistance - tacho) / decelDistance * (startSpeed - endSpeed) + endSpeed);
+    //     }
+    //     else if(!startOpening && !grabber.isStalled(endSpeed))
+    //         grabber.moveUnlimited(endSpeed);
+    //     else if(startOpening)
+    //     {
+    //         if(abs(grabber.getTachoCount()) > 300 && !grabber.isStalled(-600))
+    //         {
+    //             grabber.moveUnlimited(-600);
+    //         }
+    //         else if(abs(grabber.getTachoCount()) > 300 && grabber.isStalled(-600))
+    //         {
+    //             if(!isStopped)
+    //             {
+    //                 if(waitPostStall)
+    //                 {
+    //                     stallHelp.reset();
+    //                     waitPostStall = false;
+    //                 }
+    //                 if(stallHelp.secElapsed() < 0.1)
+    //                 {
+    //                     grabber.stop(BRAKE);
+    //                 }
+    //                 else
+    //                 {
+    //                     isStopped = true;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     else
+    //     {   
+    //         if(waitPostStall)
+    //         {
+    //             stallHelp.reset();
+    //             waitPostStall = false;
+    //         }
+    //         if(stallHelp.secElapsed() < 0.1)
+    //         {
+    //             grabber.stop(BRAKE);
+    //         }
+    //         else
+    //         {
+    //             startOpening = true;
+    //             waitPostStall = true;
+    //             grabber.moveDegrees(-1400, 300, NONE, false);
+    //         }
+    //     }
+    // }
+    // robot.stop(BRAKE);
+    
+    // while(true)
+    // {
+    //     if(!startOpening && (tacho = grabber.getTachoCount()) < (distance - decelDistance))
+    //         grabber.moveUnlimited(startSpeed);
+    //     else if(!startOpening && (tacho = grabber.getTachoCount()) < distance)
+    //     {
+    //         tacho -= distance - decelDistance;
+    //         grabber.moveUnlimited((decelDistance - tacho) / decelDistance * (startSpeed - endSpeed) + endSpeed);
+    //     }
+    //     else if(!startOpening && !grabber.isStalled(endSpeed))
+    //         grabber.moveUnlimited(endSpeed);
+    //     else if(startOpening)
+    //     {
+    //         if(abs(grabber.getTachoCount()) > 200)
+    //             break;
+    //     }
+    //     else
+    //     {   
+    //         if(waitPostStall)
+    //         {
+    //             stallHelp.reset();
+    //             waitPostStall = false;
+    //         }
+    //         if(stallHelp.secElapsed() < 0.1)
+    //         {
+    //             grabber.stop(BRAKE);
+    //         }
+    //         else
+    //         {
+    //             startOpening = true;
+    //             waitPostStall = true;
+    //             grabber.moveDegrees(-1400, 300, NONE, false);
+    //         }
+    //     }
+    // }
+
+    // robot.setMode(CONTROLLED);
+    // robot.setLinearAccelParams(150, 10, 30);
+    // robot.straightUnlim(25, true);
+    // while(robot.getPosition() < 12)
+    // {
+    //     robot.straightUnlim(25);
+    //     if(abs(grabber.getTachoCount()) > 300 && !grabber.isStalled(-600))
+    //     {
+    //         grabber.moveUnlimited(-600);
+    //     }
+    //     else if(abs(grabber.getTachoCount()) > 300 && grabber.isStalled(-600))
+    //     {
+    //         if(!isStopped)
+    //         {
+    //             if(waitPostStall)
+    //             {
+    //                 stallHelp.reset();
+    //                 waitPostStall = false;
+    //             }
+    //             if(stallHelp.secElapsed() < 0.1)
+    //             {
+    //                 grabber.stop(BRAKE);
+    //             }
+    //             else
+    //             {
+    //                 isStopped = true;
+    //                 break;
+    //             }
+    //         }
+    //     }
+    // }
+
+    // while(robot.getPosition() < 12)
+    //     robot.straightUnlim(25);
+    
+    // grabber.stop(BRAKE);
+    // act_tsk(PICK_BLOCK_TASK);
+    // tslp_tsk(1);
+    // robot.setLinearAccelParams(150, 25, 20);
+    // robot.straight(25, 2, NONE);
+
+    // // robot.stop(BRAKE);
+
+    // // isStopped = false;
+    // // waitPostStall = true;
+    // // grabber.moveUnlimited(startSpeed, true);
+    // // robot.setLinearAccelParams(150, -10, -15);
+    // // robot.straight(20, 2, NONE);
+
+    // // robot.setMode(REGULATED);
+    // // robot.arcUnlim(robot.cmToTacho(25), 9, FORWARD, true);
+    // // while(robot.getAngle() < 20)
+    // // {
+    // //     robot.arcUnlim(robot.cmToTacho(25), 9, FORWARD);
+    // //     if((tacho = grabber.getTachoCount()) < (distance - decelDistance))
+    // //         grabber.moveUnlimited(startSpeed);
+    // //     else if((tacho = grabber.getTachoCount()) < distance)
+    // //     {
+    // //         tacho -= distance - decelDistance;
+    // //         grabber.moveUnlimited((decelDistance - tacho) / decelDistance * (startSpeed - endSpeed) + endSpeed);
+    // //     }
+    // //     else if(!grabber.isStalled(endSpeed))
+    // //         grabber.moveUnlimited(endSpeed);
+    // //     else if(!isStopped)
+    // //     {
+    // //         if(waitPostStall)
+    // //         {
+    // //             stallHelp.reset();
+    // //             waitPostStall = false;
+    // //         }
+    // //         if(stallHelp.secElapsed() < 0.1)
+    // //         {
+    // //             grabber.stop(BRAKE);
+    // //         }
+    // //         else
+    // //         {
+    // //             isStopped = true;
+    // //         }
+    // //     }
+    // // }
+
+    // robot.setMode(REGULATED);
+    // robot.arc(robot.cmToTacho(35), 25, 9, NONE);
+    // robot.arc(robot.cmToTacho(40), 70, 9, NONE);
+    // robot.setMode(CONTROLLED);
+    // robot.setLinearAccelParams(150, 30, 40);
+    // robot.straight(45, 20, NONE);
+    // alignOnMove(40);
+    // robot.setLinearAccelParams(150, 40, 35);
+    // robot.straight(35, 4, NONE);
+    // robot.setLinearAccelParams(100, 35, 35);
+    // robot.straightUnlim(35, true);    
+    // while(leftSensor.getHSV().saturation > 30)
+    //     robot.straightUnlim(30);
+
+    // robot.straight(35, 2.5, NONE);
+
+    // robot.setMode(REGULATED);
+    // robot.arc(robot.cmToTacho(35), 50, 9, NONE);
+
+    // colors current;
+    // robot.arcUnlim(robot.cmToTacho(35), 9, FORWARD, true);
+    // while((current = scanCodeBlock(leftScanner)) == BLACK)
+    //     robot.arcUnlim(robot.cmToTacho(35), 9, FORWARD, false);
+    // rooms[RED].setTask(current);
+    // display.resetScreen();
+    // display.format("%  \n")%static_cast<int>(scanCodeBlock(leftScanner));
+    // while(robot.getAngle() < 60)
+    //     robot.arcUnlim(robot.cmToTacho(35), 9, FORWARD, false);
+
+
+    // robot.setMode(CONTROLLED);
+    // robot.setLinearAccelParams(150, 35, 35);
+    // robot.straight(45, 10, NONE);
+    // alignOnMove(35);
+    // robot.arc(robot.cmToTacho(35), 50, -6, NONE); 
+    // robot.arcUnlim(robot.cmToTacho(35), -6, FORWARD, true);
+    // while(leftSensor.getReflected() < 60)
+    //     robot.arcUnlim(robot.cmToTacho(30), -6, FORWARD);   
+
+    // // colors current;
+
+    // setLifoLeftExtreme(true);
+    // lifo.setAccelParams(150, 30, 30);
+    // lifo.distance(30, 4, NONE);
+    // lifo1WhiteLineLeftSlow(30, 1, 35, NONE);
+
+    // robot.setLinearAccelParams(200, 35, 35);
+    // robot.straightUnlim(35, true);
+    // while((current = scanCodeBlock(rightScanner)) == BLACK)
+    //     robot.straightUnlim(35);
+    // rooms[GREEN].setTask(scanCodeBlock(rightScanner));
+    // display.format("%  \n")%static_cast<int>(scanCodeBlock(rightScanner));
+    // while(robot.getPosition() < 6)
+    //     robot.straightUnlim(35);
+    // while(rightSensor.getReflected() > 45)
+    //     robot.straightUnlim(35);
+    
+    // setLifoLeftExtreme(true);
+    // lifo.setAccelParams(150, 35, 35);
+    // lifo.distance(35, 4, NONE);
+    // setLifoLeft(true);
+    // lifo.distance(35, 4, NONE);
+    // lifo1WhiteLineLeftSlow(35, 5, 35, NONE);
+
+    // robot.setMode(CONTROLLED);
+    // robot.setLinearAccelParams(150, 35, 10);
+    // robot.straight(35, 7.5, NONE);
+
+    // robot.setMode(REGULATED);
+    // robot.arc(robot.cmToTacho(35), -85, -5, NONE); 
+    // robot.arcUnlim(robot.cmToTacho(35), -5, BACKWARD, true);
+    // while(leftSensor.getReflected() > 75)
+    //     robot.arcUnlim(robot.cmToTacho(35), -5, BACKWARD);   
+
+    // setLifoLeftExtreme();
+    // lifo.setAccelParams(150, 15, 35);
+    // lifo.distance(20, 7, NONE);
+    // setLifoLeft();
+    // lifo.setAccelParams(150, 35, 35);
+    // lifo.distance(35, 8, NONE);
+
+    // rooms[GREEN].enterRoom();
+
+    // robot.setMode(REGULATED);
+    // act_tsk(OPEN_GRABBER_TASK);
+    // tslp_tsk(1);
+    // robot.arc(robot.cmToTacho(35), -90, -4, NONE);
+    // robot.setMode(CONTROLLED);
+    // robot.setLinearAccelParams(150, -10, -10);
+    // ramp.moveDegrees(350, 110, BRAKE, false);
+    // robot.straight(20, -1);
+    // while(ramp.getTachoCount() < 110) tslp_tsk(1);
+    // robot.setMode(CONTROLLED);
+    // robot.setLinearAccelParams(150, 10, 35);
+    // robot.straight(35, 4, NONE);
+    // act_tsk(CLOSE_RAMP_TASK);
+    // tslp_tsk(1);
+    // robot.setLinearAccelParams(150, 35, 10);
+    // robot.straight(35, 5, BRAKE);
+    // act_tsk(PICK_BLOCK_TASK);   
+    // tslp_tsk(80);
+    // robot.setLinearAccelParams(150, -10, -10);
+    // robot.straight(30, -5.5, BRAKE);
+    
+    // robot.setMode(REGULATED);
+    // robot.arc(robot.cmToTacho(35), 85, 4, NONE); 
+    // robot.arcUnlim(robot.cmToTacho(35), 4, FORWARD, true);
+    // while(rightSensor.getReflected() < 65)
+    //     robot.arcUnlim(robot.cmToTacho(35), 4, FORWARD);   
+    
+    // setLifoRightExtreme();
+    // lifo.setAccelParams(150, 20, 35);
+    // lifo.distance(20, 7, NONE);
+    // lifo1WhiteLineRightSlow(35, 5, 35, NONE);
+    // robot.setMode(CONTROLLED);
+    // robot.setLinearAccelParams(200, 35, 35);
+    // robot.straight(35, 8, NONE);
+    // lifo.setAccelParams(150, 35, 35);
+    // lifo.distance(35, 14, NONE);
+
+    // rooms[RED].enterRoom();
+
+    // t.secDelay(0.2);
+    // while(true)
+    // {
+    //     btnEnter.waitForClick();
+    //     grabber.moveDegrees(500, 90, NONE);
+    //     btnEnter.waitForClick();
+    //     grabber.moveUntilStalled(-200, BRAKE);
+    // }
 
     // lifo1WhiteLineRightSlow(30, 12, 30, NONE);
     // robot.setLinearAccelParams(200, 30, 30);
     // robot.straight(30, 8, NONE);
     // lifo.initializeMotionMode(CONTROLLED);
-    // lifo.setDoubleFollowMode("66", "SR");
+    // lifo.setDoubleFollowMode("70", "SR");
     // lifo.setAlignMode(true);
     // lifo.setPIDparams(slowKP*3, slowKI*1.8, slowKD*5, 1);
     // lifo.setAccelParams(200, 30, 20);
     // lifo.distance(20, 7, NONE);
-    // lifo.setPIDparams(slowKP*2, slowKI*2, slowKD*2, 1);
+    // lifo.setPIDparams(slowKP*1.7, slowKI*1.7, slowKD*2, 1);
     // lifo.distance(20, 8, NONE);
+
+    // rooms[RED].setTask(WHITE);
+    // rooms[RED].enterRoom();
+
+    
+    
+    // robot.setAngularAccelParams(1000, -150, 0);
+    // robot.turn(300, -25, NONE);
+    // robot.setLinearAccelParams(100, -10, -10);
+    // robot.straight(-45, 4.5, NONE);
+    // act_tsk(OPEN_GRABBER_TASK);
+    // robot.turn(300, -75, NONE);
+    // robot.straight(-45, 3.5, BRAKE);
+
+    // ramp.moveDegrees(300, 110, BRAKE);
+
+    // robot.setLinearAccelParams(100, 10, 20);
+    // robot.straight(20, 3, NONE);
+    // act_tsk(CLOSE_RAMP_TASK);
+    // // robot.setLinearAccelParams(100, 20, 10);
+    // // robot.straight(20, 3, NONE);
+
+    // robot.setLinearAccelParams(100, 20, 10);
+    // robot.straight(45, 6);
+    // grabber.moveDegrees(250, 100, NONE);
+    // grabber.moveDegrees(60, 50, BRAKE, false);
+    // robot.setLinearAccelParams(100, 0, 0);
+    // robot.straight(-45, 3);
+    // robot.setAngularAccelParams(1000, -150, 0);
+    // robot.turn(300, -90, NONE);
+    // robot.setLinearAccelParams(100, 10, 30);
+    // robot.straight(30, 4, NONE);
+
+    
 
     // robot.setMode(CONTROLLED);
     // while(true)
@@ -209,6 +726,166 @@ void main_task(intptr_t unused)
     // robot.turn(300, -360);
     // robot.setAngularAccelParams(600, 100, 100);
     // robot.turn(300, 360);
+
+    robot.setMode(CONTROLLED);
+    // robot.setAngularAccelParams(600, 150, 100);
+    // robot.turn(300, 90, BRAKE_COAST);
+    // robot.setLinearAccelParams(150, 20, 15);
+    // robot.straight(45, 15, BRAKE_COAST);
+    // robot.setAngularAccelParams(600, -150, -100);
+    // robot.turn(300, -90, BRAKE_COAST);
+    // robot.setLinearAccelParams(150, -20, -15);
+    // robot.straight(45, -15, BRAKE_COAST);
+    // robot.setLinearAccelParams(200, 20, 30);
+    // robot.straight(45, 15, NONE);
+    
+    // lifo.setPIDparams(slowKP, slowKI, slowKD, 1);
+    // lifo.setAlignMode();
+    // lifo.setAccelParams(250, 20, 20);
+    // lifo.distance(20, 5, NONE);
+    // lifo.distance(45, 60, NONE);
+    // lifo.lines(20, 1, COAST);
+    // robot.setMode(REGULATED);
+    // robot.arc(robot.cmToTacho(30), 90, -6.5, NONE);
+    // lifo.setAccelParams(250, 20, 20);
+    // lifo.distance(20, 5, NONE);
+    // lifo.distance(45, 5, NONE);
+    // lifo.lines(20, 1, COAST);
+    // robot.setMode(REGULATED);
+    // robot.arc(robot.cmToTacho(30), 90, -6, NONE);
+    // lifo.distance(20, 5, NONE);
+    // lifo.distance(45, 60, NONE);
+    // lifo.lines(20, 1, COAST);
+
+
+    // resetLifo();
+    // lifo.initializeMotionMode(CONTROLLED);
+    // lifo.setDoubleFollowMode("50", "SL");
+    // lifo.setAccelParams(150, 20, 20);
+    // lifo.setPIDparams(1.5, 3, 150, 1);
+    // lifo.distance(20, 8, NONE);
+    // lifo.setAccelParams(150, 20, 45);
+    // lifo.distance(45, 25, NONE);
+    // robot.setMode(CONTROLLED);
+    // robot.setLinearAccelParams(200, 45, 45);
+    // robot.straight(45, 20, NONE);
+    // lifo.setAccelParams(150, 45, 20);
+    // lifo.distance(45, 25, NONE);
+    // lifo.setPIDparams(slowKP, slowKI, slowKD, PIDspeed);
+    // lifo.setAccelParams(150, 20, 20);
+    // lifo.lines(20, 1, NONE);
+
+
+    // resetLifo();
+    // lifo.setDoubleFollowMode("SL", "SR");
+    // lifo.initializeMotionMode(CONTROLLED);
+    // lifo.setPIDparams(1.5, 3, 150, 1);
+    // lifo.setAccelParams(150, 20, 20);
+    // lifo.distance(20, 8, NONE);
+    // lifo.distance(45, 60, NONE);
+    // setLifoSlow();
+    // lifo.setAccelParams(150, 20, 20);
+    // lifo.lines(20, 1, NONE);
+
+    // robot.setMode(REGULATED);
+    // robot.arc(robot.cmToTacho(35), 90, -6.5, NONE);
+
+    // lifo.setPIDparams(1.5, 3, 150, 1);
+    // lifo.distance(30, 8, NONE);
+    // lifo.lines(20, 1, NONE);
+
+    // robot.setMode(REGULATED);
+    // robot.arc(robot.cmToTacho(35), 90, -6.5, NONE);
+
+    // lifo.setDoubleFollowMode("SL", "50");
+    // lifo.setAccelParams(150, 20, 20);
+    // lifo.setPIDparams(1.5, 3, 150, 1);
+    // lifo.distance(20, 8, NONE);
+    // lifo.distance(45, 40, NONE);
+    // setLifoSlow();
+    // lifo.setAccelParams(150, 20, 20);
+    // lifo.lines(20, 1, NONE);
+
+    // robot.setMode(REGULATED);
+    // robot.arc(robot.cmToTacho(35), 90, 6.5, NONE);
+
+    // lifo.setDoubleFollowMode("SL", "SR");
+    // lifo.setPIDparams(1.5, 3, 150, 1);
+    // lifo.distance(30, 13, BRAKE);
+    // robot.setMode(CONTROLLED);
+    // robot.setAngularAccelParams(600, 200, 200);
+    // robot.turn(300, 180);
+
+    // lifo.setAccelParams(150, 20, 20);
+    // lifo.setDoubleFollowMode("SL", "SR");
+    // lifo.setPIDparams(1.5, 3, 150, 1);
+    // lifo.distance(20, 8, NONE);
+    // lifo.distance(45, 5, NONE);
+    // setLifoSlow();
+    // lifo.setAccelParams(150, 20, 20);
+    // lifo.lines(20, 1, NONE);
+
+    // robot.setMode(REGULATED);
+    // robot.arc(robot.cmToTacho(35), 90, -6.5, NONE);
+
+    // lifo.setDoubleFollowMode("50", "SR");
+    // lifo.setAccelParams(150, 20, 20);
+    // lifo.setPIDparams(1.5, 3, 150, 1);
+    // lifo.distance(20, 8, NONE);
+    // lifo.distance(45, 40, NONE);
+    // setLifoSlow();
+    // lifo.setAccelParams(150, 20, 20);
+    // lifo.lines(20, 1, NONE);
+
+    // robot.setMode(REGULATED);
+    // robot.arc(robot.cmToTacho(35), 90, 6.5, NONE);
+
+    // lifo.setDoubleFollowMode("SL", "SR");
+    // lifo.setPIDparams(1.5, 3, 150, 1);
+    // lifo.distance(30, 8, NONE);
+    // lifo.lines(20, 1, NONE);
+
+    // robot.setMode(REGULATED);
+    // robot.arc(robot.cmToTacho(35), 90, 6.5, NONE);
+
+    // lifo.initializeMotionMode(CONTROLLED);
+    // lifo.setPIDparams(1.5, 3, 150, 1);
+    // lifo.setAccelParams(150, 20, 20);
+    // lifo.distance(20, 8, NONE);
+    // lifo.distance(45, 50, NONE);
+    // setLifoSlow();
+    // lifo.setAccelParams(150, 20, 20);
+    // lifo.lines(20, 1, NONE);
+
+
+    // lifo.lines(20, 1, NONE);
+
+
+    // control holder;
+    // holder.setAbsoluteLimits(1150, 3000, 100);
+    // holder.setPID(2, 1.2, 0.07, 0.002);
+    // holder.setTargetTolerance(50, 5);
+    // control controller;
+    // controller.setAbsoluteLimits(1150, 3000, 1150);
+    // controller.setPID(2, 1.2, 0.07, 0.002);
+    // controller.setTargetTolerance(100, 15);
+    // t.reset();
+    // leftMotor.setMode(REGULATED);
+    // rightMotor.setMode(REGULATED);
+    // holder.stop();
+    // leftMotor.resetTachoCount();
+    // rightMotor.resetTachoCount();
+    // controller.startPosition(516, 1000, 2000, 300, 300);
+    // holder.startHold(0);
+    // while(!controller.isDone())
+    // {
+    //     leftMotor.moveUnlimited(holder.update(t.secElapsed(), leftMotor.getTachoCount(), leftMotor.getCurrentSpeed()));
+    //     rightMotor.moveUnlimited(controller.update(t.secElapsed(), rightMotor.getTachoCount(), rightMotor.getCurrentSpeed()));
+    // }
+    // holder.stop();
+    // controller.stop();
+    // leftMotor.stop(BRAKE);
+    // rightMotor.stop(BRAKE);
 
     // fullRouteStandard(RR);
     // rooms[RED].executeAllActions();
@@ -271,8 +948,8 @@ void main_task(intptr_t unused)
     //     tslp_tsk(2);
     // }    
     
-    // ev3_motor_config(EV3_PORT_B, LARGE_MOTOR);
-    // ev3_motor_config(EV3_PORT_C, LARGE_MOTOR);
+    // ev3_motor_config(EV3_PORT_B, UNREGULATED_MOTOR);
+    // ev3_motor_config(EV3_PORT_C, UNREGULATED_MOTOR);
 
     // // FILE *log = fopen("WRO2022/batteryTest.txt", "w");
     // FILE *log = bluetooth;
@@ -422,6 +1099,50 @@ void main_task(intptr_t unused)
     //     lifo.setAccelParams(200, 20, 20);
     //     lifo.lines(20, 1, BRAKE_COAST);
     // }
+
+    // robot.setMode(REGULATED);
+
+    // double linearVelocity = 10;
+    // double angularVelocity;
+    // double k1 = 10, k2 = 100;
+    // double r = 25, delta = 30, theta = -30;
+
+    // double targetXpos = r * sin(delta);
+    // double targetYpos = r * cos(delta);
+    // double targetAngle = -delta + theta;
+
+    // double angle = 0;
+    // double x_pos = 0;
+    // double y_pos = 0;
+    // t.reset();
+    // robot.resetPosition();
+    // while(true)
+    // {
+    //     //Odometry
+    //     angle += 0.02 * (-degToRad(robot.getAngularVelocity()));
+    //     x_pos += 0.02 * (robot.getLinearVelocity() * cos(angle));
+    //     y_pos += 0.02 * (robot.getLinearVelocity() * sin(angle));
+
+    //     //Update Polar
+    //     r = sqrt(pow(targetXpos - x_pos, 2) + pow(targetYpos - y_pos, 2));
+    //     double rAngle = atan2(targetYpos - y_pos , targetXpos - x_pos) - MATH_PI / 2;
+    //     delta = -(rAngle - angle);
+    //     theta = -(rAngle - targetAngle);
+
+    //     //Calculate Angluar Velocity
+    //     angularVelocity = -(linearVelocity / r)*(k2 * (delta - atan(-k1*theta)) + (1 + k1 / (1 + pow(k1 * theta, 2)) * sin(delta)));
+    //     angularVelocity = -radToDeg(angularVelocity);
+
+    //     //Actuate
+    //     robot.actuateKinematically(linearVelocity, angularVelocity);
+
+    //     format(bt, "R: %  \tHeading: %  \n") %r %radToDeg(angle); 
+
+    //     timer::secDelay(0.02);        
+    // }
+    // robot.stop(BRAKE);
+
+    // format(bt, "Heading: %  degrees\t (x, y) = (%  ,%  )\n") %angle %x_pos %y_pos;
 
 
     // lifo.setDoubleFollowMode("SL", "SR");
@@ -585,3 +1306,71 @@ maxRight[3] = rightSensor.getRGB().white;
 
 leftSensor.setRgbCalParams(minLeft, maxLeft);
 rightSensor.setRgbCalParams(minRight, maxRight);*/
+
+//GREATER CALIBRATION
+// leftSensor.setNormalisation(false);
+// rightSensor.setNormalisation(false);
+// double minLeft[4] = {1000, 1000, 1000, 1000};
+// double maxLeft[4] = {0, 0, 0, 0};
+// double minRight[4] = {1000, 1000, 1000, 1000};
+// double maxRight[4] = {0, 0, 0, 0};
+// int minLeftRef = 100;
+// int maxLeftRef = 0;
+// int minRightRef = 100;
+// int maxRightRef = 0;
+
+// robot.setMode(CONTROLLED);
+// robot.setLinearAccelParams(100, 20, 20);
+// robot.straightUnlim(20, true);
+// t.reset();
+
+// while(t.secElapsed() < 5)
+// {
+//     colorspaceRGB leftRGB = leftSensor.getRGB();
+//     colorspaceRGB rightRGB = rightSensor.getRGB();
+
+//     minLeft[0] = min(minLeft[0], leftRGB.red);
+//     minLeft[1] = min(minLeft[1], leftRGB.green);
+//     minLeft[2] = min(minLeft[2], leftRGB.blue);
+//     minLeft[3] = min(minLeft[3], leftRGB.white);
+
+//     minRight[0] = min(minRight[0], rightRGB.red);
+//     minRight[1] = min(minRight[1], rightRGB.green);
+//     minRight[2] = min(minRight[2], rightRGB.blue);
+//     minRight[3] = min(minRight[3], rightRGB.white);
+
+//     maxLeft[0] = max(maxLeft[0], leftRGB.red);
+//     maxLeft[1] = max(maxLeft[1], leftRGB.green);
+//     maxLeft[2] = max(maxLeft[2], leftRGB.blue);
+//     maxLeft[3] = max(maxLeft[3], leftRGB.white);
+
+//     maxRight[0] = max(maxRight[0], rightRGB.red);
+//     maxRight[1] = max(maxRight[1], rightRGB.green);
+//     maxRight[2] = max(maxRight[2], rightRGB.blue);
+//     maxRight[3] = max(maxRight[3], rightRGB.white);
+// }
+
+// robot.stop(BRAKE);
+
+// btnEnter.waitForPress();
+
+// t.reset();
+// robot.straightUnlim(20, true);
+// while(t.secElapsed() < 5)
+// {
+//     int left = leftSensor.getReflected();
+//     int right = rightSensor.getReflected();
+
+//     minLeftRef = min(minLeftRef, left);
+//     minRightRef = min(minRightRef, right);
+
+//     maxLeftRef = max(maxLeftRef, left);
+//     maxRightRef = max(maxRightRef, right);
+// }
+
+// robot.stop(BRAKE);
+
+// leftSensor.setRefCalParams(minLeftRef, maxLeftRef);
+// rightSensor.setRefCalParams(minRightRef, maxRightRef);
+// leftSensor.setRgbCalParams(minLeft, maxLeft);
+// rightSensor.setRgbCalParams(minRight, maxRight);
