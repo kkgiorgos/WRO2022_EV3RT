@@ -34,8 +34,8 @@ class room
 private:
     enum orientation
     {
-        LEFT,
-        RIGHT
+        GREEN_YELLOW,
+        RED_BLUE
     };
 public:
     enum state
@@ -59,12 +59,17 @@ private:
     state currentState;
 
     void scanLaundry();
-    void pickLaundry();
+    void pickLaundry(int stage);
 
-    void leaveWater();
+    void leaveWater(int stage);
 
-    void pickBall();
+    void pickBall(int stage);
     void leaveBall();
+
+    void taskWater();
+    void taskWaterLaundry();
+    void taskBall();
+    void taskBallLaundry();
 
 public:
     room() : currentState(WAITING) {}

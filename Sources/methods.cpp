@@ -430,7 +430,7 @@ void emptyRampWaterStage1(bool wait)
 void emptyRampWaterStage2()
 {
     ramp.moveUnlimited(300, true);
-    tslp_tsk(50);
+    tslp_tsk(150);
     while(abs(ramp.getCurrentSpeed()) > 50)
     {
         ramp.moveUnlimited(300);
