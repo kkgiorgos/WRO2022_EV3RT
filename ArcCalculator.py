@@ -2,8 +2,8 @@ from unicodedata import decimal
 
 
 speedLimit = 1150
-wheelCircumference = 3.14 * 6.28
-chassisRadius = 9
+wheelCircumference = 3.14 * 6.24
+chassisRadius = 16.51/2
 
 def abs(number):
     if number >= 0:

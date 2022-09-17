@@ -120,7 +120,7 @@ void room::scanLaundry()
 
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(200, 35, 35);
-    robot.straight(35, 5, NONE);
+    robot.straight(35, 7, NONE);
     robot.straightUnlim(35, true);    
     laundry = WHITE;
     map<colors, int> appearances;
@@ -147,8 +147,8 @@ void room::scanLaundry()
             }
         }
     }
-    robot.setLinearAccelParams(200, 35, 10);
-    robot.straight(35, 3.5);
+    robot.setLinearAccelParams(150, 35, 15);
+    robot.straight(35, 5, BRAKE);
 
     //Set if there is laundry to be done
     doLaundry = laundry != WHITE; //WHITE signifies no laundry

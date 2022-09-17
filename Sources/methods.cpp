@@ -115,7 +115,9 @@ bool detectColorLine(colorSensor &sensor, colors target)
 
 bool detectWhiteRoomBed(colorSensor &sensor)
 {
-    return sensor.getColor() == WHITE;
+    // return sensor.getColor() == WHITE;
+    colorspaceRGB rgb = sensor.getRGB();
+    return rgb.red > 200 && rgb.green > 200 && rgb.blue > 200;
 }
 
 void align(double time, bool stop)
@@ -392,9 +394,24 @@ void openGrabberAndPickBlock()
 
 void emptyRampLaundry()
 {
-    ramp.moveDegrees(150, 80);
-    timer::secDelay(0.5);
-    ramp.moveUntilStalled(-300, BRAKE);
+    ramp.setMode(REGULATED);
+    ramp.moveUnlimited(300, true);
+    tslp_tsk(50);
+    while(abs(ramp.getCurrentSpeed()) > 50)
+    {
+        ramp.moveUnlimited(300);
+        tslp_tsk(1);
+    }
+    ramp.stop(BRAKE);
+    tslp_tsk(100);
+    ramp.moveUnlimited(-800, true);
+    tslp_tsk(50);
+    while(abs(ramp.getCurrentSpeed()) > 50)
+    {
+        ramp.moveUnlimited(-800);   
+        tslp_tsk(1);
+    }
+    ramp.stop(BRAKE);
 }
 
 void emptyRampWater()
@@ -404,6 +421,22 @@ void emptyRampWater()
     act_tsk(CLOSE_RAMP_TASK);
     //t.secDelay(0.2);
     //ramp.moveUntilStalled(-300, BRAKE);
+}
+
+void emptyRampWaterStage1(bool wait)
+{
+    ramp.moveDegrees(500, 60, BRAKE, wait);
+}
+void emptyRampWaterStage2()
+{
+    ramp.moveUnlimited(300, true);
+    tslp_tsk(50);
+    while(abs(ramp.getCurrentSpeed()) > 50)
+    {
+        ramp.moveUnlimited(300);
+        tslp_tsk(1);
+    }
+    ramp.stop(BRAKE);
 }
 
 colors scanLaundryBlock(colorSensor &scanner)
@@ -426,22 +459,27 @@ colors scanLaundryBlock(colorSensor &scanner)
 
 colors scanCodeBlock(colorSensor &scanner)
 {
-    scanner.setNormalisation(true);
+    scanner.setNormalisation(false);
+    colorspaceRGB rgb = scanner.getRGB();
     colorspaceHSV hsv = scanner.getHSV();
 
-    if(hsv.value > 60 && hsv.saturation < 20)
-    {
-        return WHITE;
-    }
-    else
-    {
-        if(hsv.hue > 110 && hsv.hue < 170 && hsv.saturation > 70)
-        {
-            return GREEN;
-        }
-        else
-        {
-            return BLACK;
-        }
-    }
+    if(rgb.white <= 3) return BLACK;
+    if(rgb.green >= rgb.red + rgb.blue) return GREEN;
+    else return WHITE;
+
+    // if(hsv.value > 60 && hsv.saturation < 20)
+    // {
+    //     return WHITE;
+    // }
+    // else
+    // {
+    //     if(hsv.hue > 110 && hsv.hue < 170 && hsv.saturation > 70)
+    //     {
+    //         return GREEN;
+    //     }
+    //     else
+    //     {
+    //         return BLACK;
+    //     }
+    // }
 }

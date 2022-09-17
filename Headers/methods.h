@@ -49,6 +49,8 @@ void openGrabberAndPickBlock();
 
 void emptyRampLaundry();
 void emptyRampWater();
+void emptyRampWaterStage1(bool wait = true);
+void emptyRampWaterStage2();
 
 ev3ys::colors scanLaundryBlock(ev3ys::colorSensor &scanner);
 ev3ys::colors scanCodeBlock(ev3ys::colorSensor &scanner);
