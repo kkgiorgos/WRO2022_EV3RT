@@ -211,6 +211,20 @@ void alignOnMove(double speed) //This will change the robot mode to CONTROLLED
     robot.arc(robot.cmToTacho(speed), angle, radius, NONE);
 }
 
+void correctionBeforeMovement()
+{
+    speedMode prevMode = robot.getMode();
+    robot.setMode(CONTROLLED);
+    robot.setAngularAccelParams(600, 200, 200);
+    robot.turn(200, 2, NONE);
+    robot.setMode(prevMode);
+}
+
+void correctionOnTheMove()
+{
+    robot.tank(robot.cmToTacho(20), robot.cmToTacho(18), robot.cmToTacho(0.4), NONE);
+}
+
 void reverse(bool stop, bool alignEnd)
 {
     robot.setMode(REGULATED);

@@ -225,19 +225,43 @@ void main_task(intptr_t unused)
     startData();
 
     //Mission Code
-    startProcedure();
+    // startProcedure();
 
-    fullRouteStandard(W);
-    pickWater();
+    // fullRouteStandard(W);
+    // pickWater();
+    rampQueue.push(BOTTLE);
+    rampQueue.push(BOTTLE);
+    grabber.stop(BRAKE);
 
+    // robot.setMode(CONTROLLED);
+    // correctionBeforeMovement();
+    // robot.setLinearAccelParams(150, 10, 20);
+    // robot.straight(20, 5, NONE);
+    // correctionOnTheMove();
+    // robot.setLinearAccelParams(150, 20, 10);
+    // robot.straight(35, 50, BRAKE);
+
+
+    // robot.stop(BRAKE);
+    // btnEnter.waitForClick();
+
+
+    currentPos = FR;
+    currentDirection = SOUTH;
+    rooms[GREEN].setTask(WHITE);
     fullRouteStandard(GR);
     rooms[GREEN].executeAllActions();
+
     fullRouteStandard(RR);
+    rooms[RED].setTask(WHITE);
     rooms[RED].executeAllActions();
-    fullRouteStandard(BR);
-    rooms[BLUE].executeAllActions();
-    fullRouteStandard(YR);
-    rooms[YELLOW].executeAllActions();
+
+    fullRouteStandard(CR);
+
+    // fullRouteStandard(BR);
+    // rooms[BLUE].executeAllActions();
+    // fullRouteStandard(YR);
+    // rooms[YELLOW].executeAllActions();
 
     robot.stop(BRAKE);
 

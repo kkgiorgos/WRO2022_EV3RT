@@ -27,6 +27,9 @@ void executeLifoRightUnlim(int velocity = 50);
 bool detectColorLine(ev3ys::colorSensor &sensor, ev3ys::colors target);
 bool detectWhiteRoomBed(ev3ys::colorSensor &sensor);
 
+void correctionBeforeMovement();
+void correctionOnTheMove();
+
 void align(double time, bool stop = false);
 void alignPerpendicular(double time, bool stop = false);
 void alignOnMove(double speed);

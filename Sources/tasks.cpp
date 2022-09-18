@@ -118,9 +118,11 @@ void room::scanLaundry()
     DEBUGPRINT("Scanning laundry from %s room: ", name);
     //Scan laundry color and add the item to the ramp queue
 
+    correctionOnTheMove();
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(200, 20, 35);
+    robot.setLinearAccelParams(150, 20, 35);
     robot.straight(35, 7, NONE);
+    robot.setLinearAccelParams(150, 35, 35);
     robot.straightUnlim(35, true);    
     laundry = WHITE;
     map<colors, int> appearances;
@@ -147,8 +149,8 @@ void room::scanLaundry()
             }
         }
     }
-    robot.setLinearAccelParams(150, 35, 15);
-    robot.straight(20, (color == RED ? 6 : 6.7), BRAKE); //ADD 0.7cm if room is NOT red
+    robot.setLinearAccelParams(150, 35, 10);
+    robot.straight(20, (color == RED ? 6 : 6.6), BRAKE); //ADD 0.6cm if room is NOT red
 
     //Set if there is laundry to be done
     doLaundry = laundry != WHITE; //WHITE signifies no laundry
@@ -227,12 +229,12 @@ void room::leaveWater(int stage)
     else if(stage == 2)
     {
         emptyRampWaterStage2();
+        rampQueue.pop();
     }
     else
     {
         act_tsk(CLOSE_RAMP_TASK);
         tslp_tsk(1);
-        rampQueue.pop();
     }
 }
 
@@ -274,43 +276,49 @@ void room::taskWater()
 {
     if(roomOrientation == GREEN_YELLOW)
     {
+        correctionBeforeMovement();
         robot.setMode(REGULATED);
-        robot.arc(25, -45, -8.5, NONE);    
+        robot.arc(20, -47, -8.5, NONE);    
 
         leaveWater(1);
         robot.arc(30, -45, -3, BRAKE);
         leaveWater(2);
 
+        correctionBeforeMovement();
         robot.setMode(CONTROLLED);
-        robot.setLinearAccelParams(150, 15, 15);
-        robot.straight(35, 3, NONE);    
+        robot.setLinearAccelParams(150, 10, 20);
+        robot.straight(35, 4, NONE);    
 
         robot.setMode(REGULATED);
-        robot.arc(35, 87, 3.5, NONE);
+        robot.arc(30, 45, 3, NONE);
+        robot.arc(30, 45, 4, NONE);
         leaveWater(3);
-        robot.arcUnlim(35, 3.5, FORWARD, true);
+        robot.arcUnlim(30, 4, FORWARD, true);
         while(rightSensor.getReflected() < 60)
-            robot.arcUnlim(35, 3.5, FORWARD, false);
+            robot.arcUnlim(30, 4, FORWARD, false);
     }
     else //RED_BLUE
     {
+        correctionBeforeMovement();
         robot.setMode(REGULATED);
-        robot.arc(25, -45, 8.5, NONE);    
+        robot.arc(20, -47, 8.5, NONE);    
 
         leaveWater(1);
-        robot.arc(30, -45, 3, BRAKE);
+        robot.arc(30, -45, 4, BRAKE);
         leaveWater(2);
 
+        correctionBeforeMovement();
         robot.setMode(CONTROLLED);
-        robot.setLinearAccelParams(150, 15, 15);
+        robot.setLinearAccelParams(150, 10, 20);
         robot.straight(35, 3, NONE);    
 
         robot.setMode(REGULATED);
-        robot.arc(35, 87, -3.5, NONE);
+        robot.arc(30, 45, -3, NONE);
+        robot.arc(30, 45, -4, NONE);
         leaveWater(3);
-        robot.arcUnlim(35, -3.5, FORWARD, true);
+        robot.arcUnlim(30, -4, FORWARD, true);
         while(leftSensor.getReflected() < 60)
-            robot.arcUnlim(35, -3.5, FORWARD, false);
+            robot.arcUnlim(30, -4, FORWARD, false);
     }
 }
 
@@ -319,56 +327,62 @@ void room::taskWaterLaundry()
     if(roomOrientation == GREEN_YELLOW)
     {
         pickLaundry(1);
+        correctionBeforeMovement();
         robot.setMode(REGULATED);
-        robot.arc(25, -45, -8.5, NONE);    
+        robot.arc(20, -47, -8.5, NONE);    
 
         leaveWater(1);
         robot.arc(30, -45, -3, BRAKE);
         leaveWater(2);
 
+        correctionBeforeMovement();
         robot.setMode(CONTROLLED);
-        robot.setLinearAccelParams(150, 15, 35);
-        robot.straight(35, 5, NONE);    
+        robot.setLinearAccelParams(150, 10, 35);
+        robot.straight(35, 7, NONE);    
         leaveWater(3);
         pickLaundry(2);
-        robot.setLinearAccelParams(150, 35, 15);
-        robot.straight(30, 10, BRAKE);
+        robot.setLinearAccelParams(150, 35, 10);
+        robot.straight(30, 9, BRAKE);
 
-        robot.setLinearAccelParams(150, -15, -15);
-        robot.straight(35, -10, BRAKE);
+        robot.setLinearAccelParams(150, -10, -10);
+        robot.straight(35, -11, BRAKE);
 
+        correctionBeforeMovement();
         robot.setMode(REGULATED);
-        robot.arc(35, 92, 3.5, NONE);
-        robot.arcUnlim(35, 3.5, FORWARD, true);
+        robot.arc(30, 92, 3.5, NONE);
+        robot.arcUnlim(30, 3.5, FORWARD, true);
         while(rightSensor.getReflected() < 60)
-            robot.arcUnlim(35, 3.5, FORWARD, false);
+            robot.arcUnlim(30, 3.5, FORWARD, false);
     }
     else //RED_BLUE
     {
         pickLaundry(1);
+        correctionBeforeMovement();
         robot.setMode(REGULATED);
-        robot.arc(25, -45, 8.5, NONE);    
+        robot.arc(20, -47, 8.5, NONE);    
 
         leaveWater(1);
         robot.arc(30, -45, 3, BRAKE);
         leaveWater(2);
 
+        correctionBeforeMovement();
         robot.setMode(CONTROLLED);
-        robot.setLinearAccelParams(150, 15, 35);
-        robot.straight(35, 5, NONE);    
+        robot.setLinearAccelParams(150, 10, 35);
+        robot.straight(35, 7, NONE);    
         leaveWater(3);
         pickLaundry(2);
-        robot.setLinearAccelParams(150, 35, 15);
-        robot.straight(30, 10, BRAKE);
+        robot.setLinearAccelParams(150, 35, 10);
+        robot.straight(30, 9, BRAKE);
 
-        robot.setLinearAccelParams(150, -15, -15);
-        robot.straight(35, -10, BRAKE);
+        robot.setLinearAccelParams(150, -10, -10);
+        robot.straight(35, -11, BRAKE);
 
+        correctionBeforeMovement();
         robot.setMode(REGULATED);
-        robot.arc(35, 92, -3.5, NONE);
-        robot.arcUnlim(35, -3.5, FORWARD, true);
+        robot.arc(30, 92, -3.5, NONE);
+        robot.arcUnlim(30, -3.5, FORWARD, true);
         while(leftSensor.getReflected() < 60)
-            robot.arcUnlim(35, -3.5, FORWARD, false);
+            robot.arcUnlim(30, -3.5, FORWARD, false);
     }
 }
 
@@ -542,7 +556,8 @@ void room::exitRoom()
     currentState = COMPLETE;
 
     //Exiting code
-    grabber.stop(COAST);
+    if(!(!doLaundry && task == WATER))
+        grabber.moveDegrees(-300, 110, BRAKE, false);
 }
 
 void room::executeAllActions()
