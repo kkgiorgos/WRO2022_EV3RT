@@ -439,34 +439,50 @@ void emptyRampWater()
 
 void emptyRampWaterStage1(bool wait)
 {
-    ramp.moveDegrees(500, 60, BRAKE, wait);
+    // ramp.moveDegrees(700, 70, BRAKE, wait);
+    ramp.moveDegrees(800, 200, BRAKE, wait);
 }
 void emptyRampWaterStage2()
 {
-    ramp.moveUnlimited(300, true);
-    tslp_tsk(150);
-    while(abs(ramp.getCurrentSpeed()) > 50)
+    // ramp.moveUnlimited(300, true);
+    // tslp_tsk(150);
+    // while(abs(ramp.getCurrentSpeed()) > 50)
+    // {
+    //     ramp.moveUnlimited(300);
+    //     tslp_tsk(1);
+    // }
+    // ramp.stop(BRAKE);
+
+    ramp.moveUnlimited(500, true);
+    tslp_tsk(100);
+    while(abs(ramp.getCurrentSpeed()) > 100)
     {
-        ramp.moveUnlimited(300);
+        ramp.moveUnlimited(500);
         tslp_tsk(1);
     }
-    ramp.stop(BRAKE);
+    ramp.stop(BRAKE);   
 }
 
 colors scanLaundryBlock(colorSensor &scanner)
 {
     scanner.setNormalisation(false);
-    colorspaceHSV hsv = scanner.getHSV();
+    colorspaceRGB rgb = scanner.getRGB();
+
+    if(rgb.red >= 3 * rgb.green) return RED;
+    if(rgb.red > 2 * rgb.blue && rgb.green > 2 * rgb.blue) return YELLOW;
+    if(rgb.red > 1 && rgb.green > 1 && rgb.blue > 1 && rgb.white < 100) return BLACK;
+
+    // colorspaceHSV hsv = scanner.getHSV();
     
-    if(hsv.saturation > 10)
-    {
-        if(hsv.value < 20)
-            return BLACK;
-        if(hsv.hue < 20)
-            return RED;
-        else
-            return YELLOW;
-    }
+    // if(hsv.saturation > 10)
+    // {
+    //     if(hsv.value < 20)
+    //         return BLACK;
+    //     if(hsv.hue < 20)
+    //         return RED;
+    //     else
+    //         return YELLOW;
+    // }
 
     return WHITE;
 }

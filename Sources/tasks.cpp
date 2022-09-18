@@ -255,7 +255,7 @@ void room::pickBall(int stage)
     {
         DEBUGPRINT("Picking the ball at the %s room.\n", name);
         currentState = PLAYING_BALL;
-        grabber.moveDegrees(600, 210, NONE, true);
+        grabber.moveDegrees(600, 250, NONE, true);
         grabber.moveDegrees(400, 100, BRAKE, false);
     }
 }
@@ -396,20 +396,24 @@ void room::taskBall()
         while(grabberUsed)
             tslp_tsk(10); 
         robot.setMode(CONTROLLED);
-        robot.setLinearAccelParams(150, 20, 20);
+        correctionBeforeMovement();
+        robot.setLinearAccelParams(150, 15, 15);
         robot.straight(25, 5, BRAKE);
         pickBall(2);
         robot.setMode(REGULATED);
+        correctionBeforeMovement();
         robot.arc(30, -115, 2, BRAKE);
         robot.setLinearAccelParams(150, 15, 20);
-        robot.straight(45, 15.5, NONE);
+        correctionBeforeMovement();
+        robot.straight(45, 15, NONE);
         leaveBall();
         robot.setLinearAccelParams(150, 20, 15);
         robot.straight(20, 1, BRAKE);
         robot.setLinearAccelParams(150, -15, -15);
-        robot.straight(45, -9.5, BRAKE);
+        robot.straight(45, -8, BRAKE);
         robot.setAngularAccelParams(600, -200, -200);
-        robot.turn(300, -115, BRAKE);
+        robot.turn(300, -125, BRAKE);
+        correctionBeforeMovement();
         robot.setLinearAccelParams(150, 15, 35);
         robot.straight(40, 17, NONE);
     }
@@ -421,12 +425,15 @@ void room::taskBall()
         while(grabberUsed)
             tslp_tsk(10); 
         robot.setMode(CONTROLLED);
-        robot.setLinearAccelParams(150, 20, 20);
+        correctionBeforeMovement();
+        robot.setLinearAccelParams(150, 15, 15);
         robot.straight(25, 5, BRAKE);
         pickBall(2);
         robot.setMode(REGULATED);
+        correctionBeforeMovement();
         robot.arc(30, -115, -2, BRAKE);
         robot.setLinearAccelParams(150, 15, 20);
+        correctionBeforeMovement();
         robot.straight(45, 15, NONE);
         leaveBall();
         robot.setLinearAccelParams(150, 20, 15);
@@ -434,9 +441,10 @@ void room::taskBall()
         robot.setLinearAccelParams(150, -15, -15);
         robot.straight(45, -8, BRAKE);
         robot.setAngularAccelParams(600, 200, 200);
-        robot.turn(300, 128, BRAKE);
+        robot.turn(300, 130, BRAKE);
+        correctionBeforeMovement();
         robot.setLinearAccelParams(150, 15, 35);
-        robot.straight(40, 17, NONE);   
+        robot.straight(40, 17, NONE);
     }
 }
 
@@ -557,7 +565,9 @@ void room::exitRoom()
 
     //Exiting code
     if(!(!doLaundry && task == WATER))
-        grabber.moveDegrees(-300, 110, BRAKE, false);
+    {
+        // grabber.moveDegrees(-1000, 120, BRAKE, false);
+    }
 }
 
 void room::executeAllActions()

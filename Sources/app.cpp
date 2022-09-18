@@ -155,12 +155,22 @@ void init_task(intptr_t unused)
 void close_ramp_task(intptr_t unused)
 {
     //CLOSES RAMP
+    // ramp.setMode(REGULATED);
+    // ramp.moveUnlimited(-1000, true);
+    // tslp_tsk(50);
+    // while(abs(ramp.getCurrentSpeed()) > 400)
+    // {
+    //     ramp.moveUnlimited(-1000);
+    //     tslp_tsk(1);
+    // }
+    // ramp.stop(BRAKE);
+
     ramp.setMode(REGULATED);
-    ramp.moveUnlimited(-800, true);
-    tslp_tsk(50);
-    while(abs(ramp.getCurrentSpeed()) > 50)
+    ramp.moveUnlimited(-1000, true);
+    tslp_tsk(100);
+    while(abs(ramp.getCurrentSpeed()) > 500)
     {
-        ramp.moveUnlimited(-800);
+        ramp.moveUnlimited(-1000);
         tslp_tsk(1);
     }
     ramp.stop(BRAKE);
@@ -201,7 +211,7 @@ void pick_block_task(intptr_t unused)
         grabber.moveUnlimited(700);
         tslp_tsk(1);
     }
-    grabber.stop(BRAKE);
+    grabber.stop(COAST);
 }
 
 void empty_water_ramp_task(intptr_t unused)
@@ -225,13 +235,32 @@ void main_task(intptr_t unused)
     startData();
 
     //Mission Code
-    // startProcedure();
+    startProcedure();
 
-    // fullRouteStandard(W);
-    // pickWater();
-    rampQueue.push(BOTTLE);
-    rampQueue.push(BOTTLE);
-    grabber.stop(BRAKE);
+    fullRouteStandard(W);
+    pickWater();
+
+    // fullRouteStandard(GR);
+
+
+    // rampQueue.push(BOTTLE);
+    // rampQueue.push(BOTTLE);
+    // grabber.stop(BRAKE);
+
+    // leftScanner.setNormalisation(false);
+    // rightScanner.setNormalisation(false);
+    // display.resetScreen();
+    // while(true)
+    // {
+    //     colorspaceRGB l = leftScanner.getRGB();
+    //     colorspaceRGB r = rightScanner.getRGB();
+    //     format(bt, "L: R: %  G: %  B: %  W: %  \nR: R: %  G: %  B: %  W: %  \n") %l.red %l.green %l.blue %l.white %r.red %r.green %r.blue %r.white;
+    //     colorspaceHSV l2 = leftSensor.getHSV();
+    //     colorspaceHSV r2 = rightSensor.getHSV();
+    //     // format(bt, "L: H: %  S: %  V: %  \nR: H: %  S: %  V: %  \n\n") %l2.hue %l2.saturation %l2.value %r2.hue %r2.saturation %r2.value;
+    //     display.format("L: %  \nR: %  \n\n\n") %static_cast<int>(scanLaundryBlock(leftScanner)) %static_cast<int>(scanLaundryBlock(rightScanner));
+    //     tslp_tsk(10);
+    // }
 
     // robot.setMode(CONTROLLED);
     // correctionBeforeMovement();
@@ -246,22 +275,54 @@ void main_task(intptr_t unused)
     // btnEnter.waitForClick();
 
 
-    currentPos = FR;
-    currentDirection = SOUTH;
-    rooms[GREEN].setTask(WHITE);
+    // while(true)
+    // {
+    //     btnEnter.waitForClick();
+    //     ramp.setMode(REGULATED);
+    //     ramp.moveUnlimited(-1000, true);
+    //     tslp_tsk(100);
+    //     while(abs(ramp.getCurrentSpeed()) > 500)
+    //     {
+    //         ramp.moveUnlimited(-1000);
+    //         tslp_tsk(1);
+    //     }
+    //     ramp.stop(BRAKE);
+        
+    //     btnEnter.waitForClick();
+    //     ramp.moveDegrees(800, 200, BRAKE, true);
+    //     btnEnter.waitForClick();
+
+    //     ramp.moveUnlimited(500, true);
+    //     tslp_tsk(100);
+    //     while(abs(ramp.getCurrentSpeed()) > 100)
+    //     {
+    //         ramp.moveUnlimited(500);
+    //         tslp_tsk(1);
+    //     }
+    //     ramp.stop(BRAKE);        
+    // }
+
+
+    // currentPos = GR;
+    // currentDirection = NORTH;
+    // rooms[GREEN].setTask(GREEN);
+    // fullRouteStandard(GR);
+    // rooms[GREEN].executeAllActions();
+
+    // fullRouteStandard(RR);
+    // rooms[RED].setTask(GREEN);
+    // rooms[RED].executeAllActions();
+
+    // fullRouteStandard(CR);
+
     fullRouteStandard(GR);
     rooms[GREEN].executeAllActions();
-
     fullRouteStandard(RR);
-    rooms[RED].setTask(WHITE);
     rooms[RED].executeAllActions();
-
-    fullRouteStandard(CR);
-
-    // fullRouteStandard(BR);
-    // rooms[BLUE].executeAllActions();
-    // fullRouteStandard(YR);
-    // rooms[YELLOW].executeAllActions();
+    fullRouteStandard(BR);
+    rooms[BLUE].executeAllActions();
+    fullRouteStandard(YR);
+    rooms[YELLOW].executeAllActions();
 
     robot.stop(BRAKE);
 
