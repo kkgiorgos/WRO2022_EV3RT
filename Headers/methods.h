@@ -57,3 +57,4 @@ void emptyRampWaterStage2();
 
 ev3ys::colors scanLaundryBlock(ev3ys::colorSensor &scanner);
 ev3ys::colors scanCodeBlock(ev3ys::colorSensor &scanner);
+ev3ys::colors scanLaundryBasket(ev3ys::colorSensor &scanner);

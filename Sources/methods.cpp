@@ -21,7 +21,7 @@ void resetLifo()
     lifo.setAlignMode(true);
     robot.setUnregulatedDPS(true);
     lifo.setPIDparams(KP, KI, KD, PIDspeed);
-
+    lifo.setSensorMode(REFLECTED);
     //printf("Reset Color of Line Followed\n");
 }
 
@@ -30,6 +30,7 @@ void setLifoNormalReg()
     lifo.setDoubleFollowMode("SL", "SR");
     lifo.initializeMotionMode(CONTROLLED);
     lifo.setAlignMode(true);
+    lifo.setSensorMode(REFLECTED);
     lifo.setPIDparams(1.5, 3, 150, PIDspeed);
 }
 
@@ -39,6 +40,7 @@ void setLifoSlow()
     lifo.setPIDparams(slowKP, slowKI, slowKD, PIDspeed);
     lifo.initializeMotionMode(CONTROLLED);
     lifo.setAlignMode(true);
+    lifo.setSensorMode(REFLECTED);
 }
 
 void setLifoLeft(bool slow)
@@ -222,7 +224,7 @@ void correctionBeforeMovement()
 
 void correctionOnTheMove()
 {
-    robot.tank(robot.cmToTacho(20), robot.cmToTacho(18), robot.cmToTacho(0.4), NONE);
+    robot.tank(robot.cmToTacho(23), robot.cmToTacho(20), robot.cmToTacho(1), NONE);
 }
 
 void reverse(bool stop, bool alignEnd)
@@ -454,13 +456,13 @@ void emptyRampWaterStage2()
     // ramp.stop(BRAKE);
 
     ramp.moveUnlimited(500, true);
-    tslp_tsk(100);
-    while(abs(ramp.getCurrentSpeed()) > 100)
+    tslp_tsk(50);
+    while(abs(ramp.getCurrentSpeed()) > 200)
     {
         ramp.moveUnlimited(500);
         tslp_tsk(1);
     }
-    ramp.stop(BRAKE);   
+    ramp.stop(BRAKE_COAST);   
 }
 
 colors scanLaundryBlock(colorSensor &scanner)
@@ -512,4 +514,14 @@ colors scanCodeBlock(colorSensor &scanner)
     //         return BLACK;
     //     }
     // }
+}
+
+colors scanLaundryBasket(colorSensor &scanner)
+{
+    scanner.setNormalisation(false);
+    colorspaceRGB rgb = scanner.getRGB();
+
+    if(rgb.green > 3) return YELLOW;
+    if(rgb.red > 3) return RED;
+    return BLACK;
 }
