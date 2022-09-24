@@ -410,24 +410,13 @@ void openGrabberAndPickBlock()
 
 void emptyRampLaundry()
 {
-    ramp.setMode(REGULATED);
-    ramp.moveUnlimited(300, true);
-    tslp_tsk(50);
-    while(abs(ramp.getCurrentSpeed()) > 50)
-    {
-        ramp.moveUnlimited(300);
-        tslp_tsk(1);
-    }
-    ramp.stop(BRAKE);
-    tslp_tsk(100);
-    ramp.moveUnlimited(-800, true);
-    tslp_tsk(50);
-    while(abs(ramp.getCurrentSpeed()) > 50)
-    {
-        ramp.moveUnlimited(-800);   
-        tslp_tsk(1);
-    }
-    ramp.stop(BRAKE);
+    ramp.setMode(CONTROLLED);
+    ramp.setUnregulatedDPS();
+    ramp.setAccelParams(2000, 800, 0);
+    ramp.moveDegrees(600, 260, COAST);
+    timer::secDelay(0.2);
+    act_tsk(CLOSE_RAMP_TASK);
+    tslp_tsk(1);
 }
 
 void emptyRampWater()
@@ -442,7 +431,8 @@ void emptyRampWater()
 void emptyRampWaterStage1(bool wait)
 {
     // ramp.moveDegrees(700, 70, BRAKE, wait);
-    ramp.moveDegrees(800, 200, BRAKE, wait);
+    // ramp.moveDegrees(1000, 200, BRAKE, wait);
+    ramp.moveDegrees(800, 220, BRAKE, wait);
 }
 void emptyRampWaterStage2()
 {
@@ -471,7 +461,7 @@ colors scanLaundryBlock(colorSensor &scanner)
     colorspaceRGB rgb = scanner.getRGB();
 
     if(rgb.red >= 3 * rgb.green) return RED;
-    if(rgb.red > 2 * rgb.blue && rgb.green > 2 * rgb.blue) return YELLOW;
+    if(rgb.red > 2 * rgb.blue && rgb.green > 2 * rgb.blue && rgb.red > rgb.green) return YELLOW;
     if(rgb.red > 1 && rgb.green > 1 && rgb.blue > 1 && rgb.white < 100) return BLACK;
 
     // colorspaceHSV hsv = scanner.getHSV();

@@ -121,7 +121,7 @@ void room::scanLaundry()
     correctionOnTheMove();
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(100, 20, 45);
-    robot.straight(45, 7, NONE);
+    robot.straight(45, 6, NONE);
     robot.setLinearAccelParams(100, 45, 45);
     robot.straightUnlim(35, true);    
     laundry = WHITE;
@@ -151,6 +151,11 @@ void room::scanLaundry()
     }
     robot.setLinearAccelParams(100, 35, 0);
     robot.straight(35, (color == RED ? 5.5 : 6.1), COAST); //ADD 0.6cm if room is NOT red
+
+    leftSensor.getReflected();
+    rightSensor.getReflected();
+    leftScanner.getReflected();
+    rightScanner.getReflected();
 
     //Set if there is laundry to be done
     doLaundry = laundry != WHITE; //WHITE signifies no laundry
@@ -400,9 +405,8 @@ void room::taskBall()
         robot.setLinearAccelParams(100, 0, 0);
         robot.straight(45, -10, COAST);
         robot.arc(45, -113, 0, COAST);
+        robot.setLinearAccelParams(100, 0, 20);
         robot.straight(45, 16, COAST);
-
-        robot.stop(COAST);
     }
     else    //RED_BLUE
     {
@@ -422,9 +426,8 @@ void room::taskBall()
         robot.setLinearAccelParams(100, 0, 0);
         robot.straight(45, -10, COAST);
         robot.arc(45, 113, 0, COAST);
+        robot.setLinearAccelParams(100, 0, 20);
         robot.straight(45, 16, COAST);
-
-        robot.stop(COAST);
     }
 }
 
@@ -445,7 +448,7 @@ void room::taskBallLaundry()
         robot.straight(45, 8, NONE);
         
         robot.setLinearAccelParams(100, 20, 0);
-        robot.arc(45, 90, -3, BRAKE);
+        robot.arc(45, 92, -3, BRAKE);
         while(grabberUsed)
             tslp_tsk(10);
 
@@ -464,12 +467,9 @@ void room::taskBallLaundry()
 
         robot.setLinearAccelParams(100, 0, 0);
         robot.straight(45, -7.5, COAST);
-
         robot.arc(45, -105, 0, COAST);
-
+        robot.setLinearAccelParams(100, 0, 20);
         robot.straight(45, 20, COAST);
-
-        robot.stop(COAST);
     }
     else    //RED_BLUE
     {
@@ -486,7 +486,7 @@ void room::taskBallLaundry()
         robot.straight(45, 8, NONE);
         
         robot.setLinearAccelParams(100, 20, 0);
-        robot.arc(45, 93, 3, BRAKE);
+        robot.arc(45, 95, 3, BRAKE);
         while(grabberUsed)
             tslp_tsk(10);
 
@@ -505,12 +505,9 @@ void room::taskBallLaundry()
 
         robot.setLinearAccelParams(100, 0, 0);
         robot.straight(45, -7.5, COAST);
-
         robot.arc(45, 105, 0, COAST);
-
+        robot.setLinearAccelParams(100, 0, 20);
         robot.straight(45, 20, COAST);
-
-        robot.stop(COAST);
     }
 }
 
@@ -662,7 +659,7 @@ void turnToBasket(baskets current, baskets target)
     //TODO
     int turnDifference = target - current;
     if(turnDifference != 0)
-        robot.turn(300, -36.5 * turnDifference);
+        robot.arc(35, -32 * turnDifference, 0, COAST);
 }
 
 
@@ -740,25 +737,20 @@ void scanLaundryBaskets()
 {
     DEBUGPRINT("\nScanning laundry baskets.\n");
 
-    robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(200, 50, 0);
-    robot.setAngularAccelParams(1000, 0, 100);
+    act_tsk(BASKET_SCAN_TASK);
+    tslp_tsk(1);
 
-    robot.straight(50, 2.5);
-    timer::secDelay(0.2);
-    robot.turn(200, -27);
-    //Scan first basket (left most)
-    colorspaceHSV hsvLeft = rightScanner.getHSV();
-    robot.turn(200, 57);
-    //Scan third basket (right one)
-    colorspaceHSV hsvRight = leftScanner.getHSV();
-    robot.turn(500, 150);
-    align(0.2, true);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(35, 30, -8.5, COAST);
+    robot.arc(35, -30, -8.5, COAST);
+    robot.arc(35, 30, 8.5, COAST);
+    robot.arc(35, -30, 8.5, COAST);
+    stopScanning = true;
+    tslp_tsk(1);
+    robot.arc(40, -180, 0, COAST);
 
     //Calculating Colors
-    laundryBaskets[BASKET_LEFT] = clasifyBasket(hsvLeft);
-    laundryBaskets[BASKET_RIGHT] = clasifyBasket(hsvRight);
-
     colors temp[2];
     temp[0] = laundryBaskets[BASKET_LEFT];
     temp[1] = laundryBaskets[BASKET_RIGHT];
@@ -817,10 +809,8 @@ void leaveLaundry()
     baskets currentBasket = BASKET_MIDDLE;
     baskets targetBasket;
 
-    robot.stop(BRAKE);
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(100, 0, 0);
-    robot.setAngularAccelParams(1000, 0, 100);
 
     while(!rampQueue.empty())   //Repeat for every item
     {
@@ -859,13 +849,15 @@ void leaveLaundry()
         //Leave the laundry
         if(currentBasket == BASKET_MIDDLE)
         {
-            robot.straight(30, 4);
+            robot.straight(35, -2, COAST);
             emptyRampLaundry();
-            robot.straight(-30, 4);
+            robot.straight(35, 2, COAST);
         }
         else
         {
+            robot.straight(35, -4, COAST);
             emptyRampLaundry();
+            robot.straight(35, 4, COAST);
         }
     }
 
@@ -880,9 +872,11 @@ void finishProcedure()
     DEBUGPRINT("\nEnding movement :(\n");
 
     //Getting inside finishing square
+    act_tsk(END_TASK);
+    tslp_tsk(1);
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 50, 0);
-    robot.straight(50, 27);
-    robot.setAngularAccelParams(1000, 0, 50);
-    robot.turn(500, 45);
+    robot.setLinearAccelParams(100, 20, 0);
+    robot.straight(45, 21, COAST);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, 45, 0, BRAKE);
 }

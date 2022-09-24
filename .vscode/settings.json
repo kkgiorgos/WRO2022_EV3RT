@@ -47,6 +47,7 @@
         "iosfwd": "cpp",
         "new": "cpp",
         "sstream": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "climits": "cpp"
     }
 }

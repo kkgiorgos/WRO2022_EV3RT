@@ -16,7 +16,7 @@ extern ev3cxx::Bluetooth bt;
 
 extern FILE* bluetooth;
 
-extern bool grabberUsed, startPicking;
+extern bool grabberUsed, startPicking, stopScanning;
 
 #define DEBUG_BLUETOOTH
 //#define DEBUG_FILE

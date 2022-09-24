@@ -113,6 +113,7 @@ void init()
 
 bool grabberUsed = false;
 bool startPicking = false;
+bool stopScanning = false;
 
 void open_grabber_task(intptr_t unused)
 {
@@ -172,7 +173,7 @@ void close_ramp_task(intptr_t unused)
 
     ramp.setMode(REGULATED);
     ramp.moveUnlimited(-1000, true);
-    tslp_tsk(50);
+    tslp_tsk(150);
     while(abs(ramp.getCurrentSpeed()) > 400)
     {
         ramp.moveUnlimited(-1000);
@@ -223,6 +224,78 @@ void empty_water_ramp_task(intptr_t unused)
 {
     //LEAVES WATER ON TABLE FINAL STAGE
     emptyRampWaterStage2();
+}
+
+void basket_scan_task(intptr_t unused)
+{
+    colors leftBasket = BLACK;  //rightScanner used for left Basket
+    colors rightBasket = BLACK; //leftScanner used for right Basket
+    map<colors, int> appearancesLeft, appearancesRight;
+    colors currentLeft, currentRight;
+    bool notBlackLeft = false, notBlackRight = false;
+    while(!stopScanning)
+    {
+        if((currentLeft = scanLaundryBasket(leftScanner)) != BLACK)
+        {
+            appearancesLeft[currentLeft]++;
+            notBlackLeft = true;
+        }
+        if((currentRight = scanLaundryBasket(rightScanner)) != BLACK)
+        {
+            appearancesRight[currentRight]++;
+            notBlackRight = true;
+        }
+        tslp_tsk(10);
+    }
+    if(notBlackLeft)
+    {
+        int maxCount = 0;
+        for(auto x: appearancesLeft)
+        {
+            if(x.second > maxCount)
+            {
+                maxCount = x.second;
+                rightBasket = x.first;    
+            }
+        }
+    }
+    if(notBlackRight)
+    {
+        int maxCount = 0;
+        for(auto x: appearancesRight)
+        {
+            if(x.second > maxCount)
+            {
+                maxCount = x.second;
+                leftBasket = x.first;    
+            }
+        }
+    }
+
+    laundryBaskets[BASKET_LEFT] = leftBasket;
+    laundryBaskets[BASKET_RIGHT] = rightBasket;
+}
+
+void end_task(intptr_t unused)
+{
+    grabber.setMode(REGULATED);
+    grabber.moveUnlimited(700, true);
+    tslp_tsk(50);
+    while(grabber.getCurrentSpeed() > 350)
+    {
+        grabber.moveUnlimited(700);
+        tslp_tsk(1);
+    }
+    grabber.stop(BRAKE);
+    ramp.setMode(REGULATED);
+    ramp.moveUnlimited(-800, true);
+    tslp_tsk(50);
+    while(abs(ramp.getCurrentSpeed()) > 50)
+    {
+        ramp.moveUnlimited(-800);
+        tslp_tsk(1);
+    }
+    ramp.stop(BRAKE);   
 }
 
 void main_task(intptr_t unused) 
@@ -423,38 +496,103 @@ void main_task(intptr_t unused)
     // fullRouteStandard(W);
     // pickWater();
 
-    grabber.stop();
+    // grabber.stop();
 
-    rampQueue.push(items::BOTTLE);
-    rampQueue.push(items::BOTTLE);
-    currentPos = FR;
-    currentDirection = SOUTH;
+    // rampQueue.push(items::BOTTLE);
+    // rampQueue.push(items::BOTTLE);
+    // currentPos = BR;
+    // currentDirection = SOUTH;
+
+    // fullRouteStandard(YR);
+
+    // rooms[YELLOW].setTask(WHITE);
+    // rooms[YELLOW].executeAllActions();
+
+
+    // grabber.stop();
+    // ramp.stop();
+
+    // while(true)
+    // {
+    //     ramp.setMode(REGULATED);
+    //     ramp.moveUnlimited(-1000, true);
+    //     tslp_tsk(50);
+    //     while(abs(ramp.getCurrentSpeed()) > 400)
+    //     {
+    //         ramp.moveUnlimited(-1000);
+    //         tslp_tsk(1);
+    //     }
+    //     ramp.stop(BRAKE);
+    //     btnEnter.waitForClick();
+    //     // ramp.setMode(CONTROLLED);
+    //     // ramp.setUnregulatedDPS();
+    //     // ramp.setAccelParams(2000, 800, 0);
+    //     // ramp.moveDegrees(600, 250, COAST);
+    //     // // btnEnter.waitForClick();
+    //     // t.secDelay(0.1);
+    //     ramp.moveDegrees(800, 220, BRAKE);
+    //     t.secDelay(0.4);
+    //     ramp.moveUnlimited(500, true);
+    //     tslp_tsk(50);
+    //     while(abs(ramp.getCurrentSpeed()) > 200)
+    //     {
+    //         ramp.moveUnlimited(500);
+    //         tslp_tsk(1);
+    //     }
+    //     ramp.stop(BRAKE_COAST); 
+    //     btnEnter.waitForClick();
+    // }
+
+
+    startProcedure();
+
+    fullRouteStandard(W);
+    pickWater();
+
 
     fullRouteStandard(GR);
-
-    rooms[GREEN].setTask(GREEN);
     rooms[GREEN].executeAllActions();
+    fullRouteStandard(RR);
+    rooms[RED].executeAllActions();
+    fullRouteStandard(BR);
+    rooms[BLUE].executeAllActions();
+    fullRouteStandard(YR);
+    rooms[YELLOW].executeAllActions();
+    fullRouteStandard(L);
 
-    // fullRouteStandard(RR);
-    // rooms[RED].setTask(WHITE);
-    // rooms[RED].executeAllActions();
+    scanLaundryBaskets();
+    leaveLaundry();
+
+    fullRouteStandard(S);
+    finishProcedure();
+
+    // grabber.stop(COAST);
+
+    // resetLifo();
+    // lifo.setPIDparams(KP * 1.2, slowKI * 0.7, KD*1.5, 1);
+    // lifo.distance(robot.cmToTacho(30), 10, NONE);
+    // setLifoSlow();
+    // lifo.setAccelParams(150, 20, 20);
+    // lifo.distance(20, 3, NONE);
+    // lifo.lines(20, 1, BRAKE);
 
 
-    // startProcedure();
+    // robot.setLinearAccelParams(100, 0, 0);
+    // scanLaundryBaskets();
+    // turnToBasket(BASKET_MIDDLE, BASKET_LEFT);
+    // robot.straight(35, -4, COAST);
+    // emptyRampLaundry();
+    // robot.straight(35, 4, COAST);
+    // turnToBasket(BASKET_LEFT, BASKET_MIDDLE);
+    // robot.straight(35, -2, COAST);
+    // emptyRampLaundry();
+    // robot.straight(35, 2, COAST);
+    // turnToBasket(BASKET_MIDDLE, BASKET_RIGHT);
+    // robot.straight(35, -4, COAST);
+    // emptyRampLaundry();
+    // robot.straight(35, 4, COAST);
+    // turnToBasket(BASKET_RIGHT, BASKET_MIDDLE);
 
-    // fullRouteStandard(W);
-    // pickWater();
-
-
-    // fullRouteStandard(GR);
-    // rooms[GREEN].executeAllActions();
-    // fullRouteStandard(RR);
-    // rooms[RED].executeAllActions();
-    // fullRouteStandard(BR);
-    // rooms[BLUE].executeAllActions();
-    // fullRouteStandard(YR);
-    // rooms[YELLOW].executeAllActions();
-    // fullRouteStandard(L);
 
 
     // rampQueue.push(BOTTLE);
@@ -470,25 +608,6 @@ void main_task(intptr_t unused)
     // lifo.lines(20, 1, NONE);
 
     // //     // btnEnter.waitForClick();
-
-
-    // robot.setMode(CONTROLLED);
-    // robot.setLinearAccelParams(100, 20, 0);
-    // robot.straight(20, 4, COAST);
-
-    // robot.setMode(CONTROLLED);
-    // robot.setLinearAccelParams(100, 10, 10);
-    // robot.arc(25, 40, -8.5, COAST);
-    // robot.setLinearAccelParams(100, -10, -10);
-    // robot.arc(25, -40, -8.5, COAST);
-    // robot.setLinearAccelParams(100, 10, 10);
-    // robot.arc(25, 40, 8.5, COAST);
-    // robot.setLinearAccelParams(100, -10, -10);  
-    // robot.arc(25, -40, 8.5, COAST);
-    // robot.arc(40, -183, 0, COAST);
-    // // align(0.5, false);
-    // robot.stop();
-
 
     
 
