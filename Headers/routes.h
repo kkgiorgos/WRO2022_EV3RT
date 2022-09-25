@@ -48,11 +48,15 @@ void specialTurn(orientation start, orientation finish);
 
 //Actual route implementations
 orientation S_W(orientation dir);
+orientation S_CL(orientation dir);
+orientation S_CR(orientation dir);
 
 orientation W_CL(orientation dir);
 orientation W_CR(orientation dir);
+orientation W_S(orientation dir);
 
 orientation L_S(orientation dir);
+orientation L_W(orientation dir);
 
 orientation CL_CR(orientation dir);
 orientation CL_FL(orientation dir);

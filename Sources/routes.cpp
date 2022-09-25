@@ -40,6 +40,11 @@ void graphInit()
     //"Efficiency" edges
     addEdge(BR, YR);
     addEdge(GR, RR);
+
+    //"Surprise" edges
+    addEdge(L, W);
+    addEdge(S, CL);
+    addEdge(S, CR);
 }
 
 int dijkstra(int source, int target, vector<int> *path)
@@ -103,15 +108,19 @@ void constructRoute(routeFunc *route, vector<int> *pathNodes, int distance)
         if(firstNode == S)
         {
             if(secondNode == W) route[i] = S_W;
+            else if(secondNode == CL) route[i] = S_CL;
+            else if(secondNode == CR) route[i] = S_CR;
         }
         else if(firstNode == W)
         {
             if(secondNode == CL) route[i] = W_CL;
             else if(secondNode == CR) route[i] = W_CR;
+            else if(secondNode == S) route[i] = W_S;
         }
         else if(firstNode == L)
         {
             if(secondNode == S) route[i] = L_S;
+            else if(secondNode == W) route[i] = L_W;
         }
         else if(firstNode == CL)
         {
@@ -241,6 +250,17 @@ orientation S_W(orientation dir)
     return NORTH;
 }
 
+orientation S_CL(orientation dir)
+{
+    DEBUGPRINT("\nS_CL\n");
+    return  WEST;
+}
+orientation S_CR(orientation dir)
+{
+    DEBUGPRINT("\nS_CR\n");
+    return EAST;
+}
+
 orientation W_CL(orientation dir)
 {
     DEBUGPRINT("\nW_CL\n");
@@ -333,6 +353,15 @@ orientation W_CR(orientation dir)
     return EAST;
 }
 
+orientation W_S(orientation dir)
+{
+    resetLifo();
+    lifo.setPIDparams(KP * 1.2, slowKI * 0.7, KD*1.5, 1);
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    L_S(SOUTH);
+    return SOUTH;
+}
+
 orientation L_S(orientation dir)
 {
     DEBUGPRINT("\nL_S\n");
@@ -345,6 +374,19 @@ orientation L_S(orientation dir)
     lifo.distance(20, 3, NONE);
 
     return NO;
+}
+
+orientation L_W(orientation dir)
+{
+    resetLifo();
+    timer t;
+    lifo.setPIDparams(KP * 1.2, slowKI * 0.7, KD*1.5, 1);
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    double speed = robot.getPosition() / t.secElapsed();
+    robot.setLinearAccelParams(100, speed, speed);
+    robot.straight(40, 32, NONE);   
+
+    S_W(NORTH);
 }
 
 orientation CL_CR(orientation dir)
@@ -367,7 +409,7 @@ orientation CL_FL(orientation dir)
     robot.setLinearAccelParams(150, 35, 0);
     robot.straight(35, 7, NONE);
 
-    robot.setLinearAccelParams(100, -35, -35);
+    robot.setLinearAccelParams(100, 0, 0);
     robot.arc(45, -80, 4, NONE);
     robot.arcUnlim(35, 4, BACKWARD, true);
     while(rightSensor.getReflected() > 60)
@@ -490,7 +532,7 @@ orientation CR_FR(orientation dir)
     robot.setLinearAccelParams(150, 35, 0);
     robot.straight(35, 7, NONE);
 
-    robot.setLinearAccelParams(100, -35, -35);
+    robot.setLinearAccelParams(100, 0, 0);
     robot.arc(45, -80, -4, NONE);
     robot.arcUnlim(35, -4, BACKWARD, true);
     while(leftSensor.getReflected() > 60)

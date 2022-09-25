@@ -115,6 +115,8 @@ bool grabberUsed = false;
 bool startPicking = false;
 bool stopScanning = false;
 int scanStage = 0;
+int waterCount = 0;
+bool leaveWaterBall = true;
 
 void open_grabber_task(intptr_t unused)
 {
@@ -275,58 +277,6 @@ void basket_scan_task(intptr_t unused)
 
     laundryBaskets[BASKET_LEFT] = leftBasket;
     laundryBaskets[BASKET_RIGHT] = rightBasket;
-
-    // colors leftBasket = BLACK;  //rightScanner used for left Basket
-    // colors middleBasket = BLACK; //leftScanner used for right Basket
-    // map<colors, int> appearancesLeft, appearancesMiddle;
-    // colors currentLeft, currentMiddle;
-    // bool notBlackLeft = false, notBlackMiddle = false;
-    // while(scanStage == 1)
-    // {
-    //     if((currentMiddle = scanLaundryBasket(leftScanner)) != BLACK)
-    //     {
-    //         appearancesMiddle[currentMiddle]++;
-    //         notBlackMiddle = true;
-    //     }
-    //     tslp_tsk(10);
-    // }
-    // while(scanStage == 2)
-    // {
-    //     if((currentLeft = scanLaundryBasket(leftScanner)) != BLACK)
-    //     {
-    //         appearancesLeft[currentLeft]++;
-    //         notBlackLeft = true;
-    //     }
-    //     tslp_tsk(10);
-    // }
-
-    // if(notBlackMiddle)
-    // {
-    //     int maxCount = 0;
-    //     for(auto x: appearancesMiddle)
-    //     {
-    //         if(x.second > maxCount)
-    //         {
-    //             maxCount = x.second;
-    //             middleBasket = x.first;    
-    //         }
-    //     }
-    // }
-    // if(notBlackLeft)
-    // {
-    //     int maxCount = 0;
-    //     for(auto x: appearancesLeft)
-    //     {
-    //         if(x.second > maxCount)
-    //         {
-    //             maxCount = x.second;
-    //             leftBasket = x.first;    
-    //         }
-    //     }
-    // }
-
-    // laundryBaskets[BASKET_MIDDLE] = middleBasket;
-    // laundryBaskets[BASKET_LEFT] = leftBasket;
 }
 
 void end_task(intptr_t unused)
@@ -543,12 +493,6 @@ void main_task(intptr_t unused)
 
     // btnEnter.waitForClick();
 
-    // //Mission Code
-    // startProcedure();
-
-    // fullRouteStandard(W);
-    // pickWater();
-
     // grabber.stop();
 
     // rampQueue.push(items::BOTTLE);
@@ -587,11 +531,13 @@ void main_task(intptr_t unused)
     // }
 
 
+    //Mission Code
     startProcedure();
 
     fullRouteStandard(W);
     pickWater();
 
+    emptyRampWaterStage1(false);
 
     fullRouteStandard(GR);
     rooms[GREEN].executeAllActions();
@@ -602,12 +548,12 @@ void main_task(intptr_t unused)
     fullRouteStandard(YR);
     rooms[YELLOW].executeAllActions();
     fullRouteStandard(L);
-
     scanLaundryBaskets();
     leaveLaundry();
 
     fullRouteStandard(S);
     finishProcedure();
+
 
     // grabber.stop(COAST);
 
@@ -1234,3 +1180,45 @@ rightSensor.setRgbCalParams(minRight, maxRight);*/
 // rightSensor.setRefCalParams(minRightRef, maxRightRef);
 // leftSensor.setRgbCalParams(minLeft, maxLeft);
 // rightSensor.setRgbCalParams(minRight, maxRight);
+
+
+
+//SURPRISE PREP
+
+//PICK BLOCK END
+// robot.setLinearAccelParams(100, 20, 25);
+// robot.straight(25, 5, NONE);
+// robot.setLinearAccelParams(100, 25, 0);
+// robot.straight(25, 2, BRAKE);
+// act_tsk(OPEN_GRABBER_TASK);
+// tslp_tsk(1);
+
+// robot.setLinearAccelParams(100, -10, 0);
+// robot.arc(40, -40, 8.5, BRAKE);
+
+// robot.setLinearAccelParams(100, 10, 30);
+// robot.straight(40, 10, COAST);
+// act_tsk(PICK_BLOCK_TASK);
+// tslp_tsk(1);
+// robot.setLinearAccelParams(100, 30, 0);
+// robot.straight(30, 3, BRAKE);
+// while(grabber.getTachoCount() < 200) 
+//     tslp_tsk(10);
+// rampQueue.push(BOTTLE);
+
+// robot.setLinearAccelParams(100, 0, 0);
+// robot.straight(45, -5, COAST);
+
+// robot.setLinearAccelParams(100, 10, 0);
+// robot.arc(40, 40, 8.5, BRAKE);
+
+// robot.setLinearAccelParams(100, 0, 0);
+// robot.arc(40, 180, COAST);
+
+// resetLifo();
+// lifo.setPIDparams(KP * 1.2, slowKI * 0.7, KD*1.5, 1);
+// lifo.distance(robot.cmToTacho(30), 10, NONE);
+
+// L_S(NORTH);
+
+// finishProcedure();

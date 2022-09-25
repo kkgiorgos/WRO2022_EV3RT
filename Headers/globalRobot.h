@@ -18,6 +18,8 @@ extern FILE* bluetooth;
 
 extern bool grabberUsed, startPicking, stopScanning;
 extern int scanStage;
+extern int waterCount;
+extern bool leaveWaterBall;
 
 #define DEBUG_BLUETOOTH
 //#define DEBUG_FILE

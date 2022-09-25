@@ -281,7 +281,7 @@ void room::taskWater()
 {
     if(roomOrientation == GREEN_YELLOW)
     {
-        leaveWater(1);
+        // leaveWater(1);
         robot.setLinearAccelParams(100, 0, -25);
         robot.arc(35, -50, -8.5, NONE);
 
@@ -300,10 +300,12 @@ void room::taskWater()
             robot.arcUnlim(20, 3, FORWARD);
 
         leaveWater(3);
+        if(waterCount < 3)
+            leaveWater(1);
     }
     else //RED_BLUE
     {
-        leaveWater(1);
+        // leaveWater(1);
         robot.setLinearAccelParams(100, 0, -25);
         robot.arc(35, -50, 8.5, NONE);
 
@@ -322,6 +324,8 @@ void room::taskWater()
             robot.arcUnlim(20, -3, FORWARD);
 
         leaveWater(3);
+        if(waterCount < 3)
+            leaveWater(1);
     }
 }
 
@@ -330,7 +334,7 @@ void room::taskWaterLaundry()
     if(roomOrientation == GREEN_YELLOW)
     {
         pickLaundry(1);
-        leaveWater(1);
+        // leaveWater(1);
         robot.setLinearAccelParams(100, 0, -25);
         robot.arc(35, -50, -8.5, NONE);
 
@@ -354,11 +358,14 @@ void room::taskWaterLaundry()
         robot.arcUnlim(20, 3, FORWARD, true);
         while(rightSensor.getReflected() < 50)
             robot.arcUnlim(20, 3, FORWARD);
+
+        if(waterCount < 3)
+            leaveWater(1);
     }
     else //RED_BLUE
     {
         pickLaundry(1);
-        leaveWater(1);
+        // leaveWater(1);
         robot.setLinearAccelParams(100, 0, -25);
         robot.arc(35, -50, 8.5, NONE);
 
@@ -382,6 +389,9 @@ void room::taskWaterLaundry()
         robot.arcUnlim(20, -3, FORWARD, true);
         while(leftSensor.getReflected() < 50)
             robot.arcUnlim(20, -3, FORWARD);
+
+        if(waterCount < 3)
+            leaveWater(1);
     }
 }
 
@@ -437,11 +447,13 @@ void room::taskBallLaundry()
     {
         pickLaundry(1);
         robot.setLinearAccelParams(100, 0, -25);
-        robot.arc(35, -48, -8.5, NONE);
+        robot.arc(35, (leaveWaterBall) ? -50 : -48, -8.5, NONE);
         robot.setLinearAccelParams(100, -30, 0);
-        robot.arc(35, -48, -4, COAST);
+        robot.arc(35, -48, -4, (leaveWaterBall) ? BRAKE : COAST);
+        if(leaveWaterBall)
+            leaveWater(2);
 
-         robot.setLinearAccelParams(100, 0, 25);
+        robot.setLinearAccelParams(100, 0, 25);
         robot.straight(25, 7, NONE);    
         pickLaundry(2);
         robot.setLinearAccelParams(100, 25, 20);
@@ -455,6 +467,8 @@ void room::taskBallLaundry()
 
         robot.setLinearAccelParams(100, 0, 0);
         robot.straight(45, 7.5, BRAKE);
+        if(leaveWaterBall)
+            leaveWater(3);
         pickBall(2);
         robot.setLinearAccelParams(100, 0, 0);
         robot.arc(45, 83, -3, COAST);
@@ -470,17 +484,24 @@ void room::taskBallLaundry()
         robot.arc(45, -105, 0, COAST);
         robot.setLinearAccelParams(100, 0, 20);
         robot.straight(45, 20, COAST);
+
+        if(waterCount < 3 && leaveWaterBall)
+            leaveWater(1);
     }
     else    //RED_BLUE
     {
         pickLaundry(1);
         robot.setLinearAccelParams(100, 0, -25);
-        robot.arc(35, -48, 8.5, NONE);
+        robot.arc(35, (leaveWaterBall) ? -50 : -48, 8.5, NONE);
         robot.setLinearAccelParams(100, -30, 0);
-        robot.arc(35, -48, 4, COAST);
+        robot.arc(35, -48, 4, (leaveWaterBall) ? BRAKE : COAST);
+        if(leaveWaterBall)
+            leaveWater(2);
 
-         robot.setLinearAccelParams(100, 0, 25);
-        robot.straight(25, 7, NONE);    
+        robot.setLinearAccelParams(100, 0, 25);
+        robot.straight(25, 7, NONE);  
+        if(leaveWaterBall)
+            leaveWater(3);
         pickLaundry(2);
         robot.setLinearAccelParams(100, 25, 20);
         robot.straight(45, 8.5, NONE);
@@ -508,6 +529,9 @@ void room::taskBallLaundry()
         robot.arc(45, 105, 0, COAST);
         robot.setLinearAccelParams(100, 0, 20);
         robot.straight(45, 20, COAST);
+
+        if(waterCount < 3 && leaveWaterBall)
+            leaveWater(1);
     }
 }
 
@@ -523,6 +547,7 @@ void room::executeTask()
 {
     if(task == WATER)
     {
+        waterCount++;
         if(doLaundry)
             taskWaterLaundry();
         else //NO LAUNDRY
@@ -531,7 +556,17 @@ void room::executeTask()
     else //BALL
     {
         if(doLaundry)
+        {
+            if(leaveWaterBall)
+            {
+                waterCount++;
+            }
             taskBallLaundry();
+            if(leaveWaterBall)
+            {
+                leaveWaterBall = false;
+            }    
+        }
         else //NO LAUNDRY
             taskBall();
     }
@@ -693,6 +728,30 @@ void pickWater()
         tslp_tsk(10);
     DEBUGPRINT("First bottle of water has been loaded.\n");
     rampQueue.push(BOTTLE);
+
+    robot.setLinearAccelParams(100, -10, 0);
+    robot.arc(40, -40, 8.5, BRAKE);
+    while(grabberUsed)
+        tslp_tsk(10);
+
+    robot.setLinearAccelParams(100, 10, 30);
+    robot.straight(40, 10, COAST);
+    act_tsk(PICK_BLOCK_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(30, 3, BRAKE);
+    while(grabber.getTachoCount() < 200) 
+        tslp_tsk(10);
+    DEBUGPRINT("Second bottle of water has been loaded.\n");
+    rampQueue.push(BOTTLE);
+
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(40, -10, BRAKE);
+    
+    robot.arc(40, 40, 8.5, BRAKE);
+
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
 
     //Pick Second Bottle
     robot.setLinearAccelParams(100, -10, 0);
