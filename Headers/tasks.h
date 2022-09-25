@@ -102,7 +102,7 @@ tasks findTask(ev3ys::colors color);
 ev3ys::colors findColorOfItem(items item);
 baskets findBasket(ev3ys::colors color);
 ev3ys::colors clasifyBasket(ev3ys::colorspaceHSV hsv);
-ev3ys::colors findTheThirdColor(ev3ys::colors *cols, int numOfCols = 3);
+ev3ys::colors findTheLastColor(ev3ys::colors *cols, int numOfCols = 3);
 
 void turnToBasket(baskets current, baskets target);
 

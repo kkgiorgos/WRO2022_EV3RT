@@ -114,6 +114,7 @@ void init()
 bool grabberUsed = false;
 bool startPicking = false;
 bool stopScanning = false;
+int scanStage = 0;
 
 void open_grabber_task(intptr_t unused)
 {
@@ -274,6 +275,58 @@ void basket_scan_task(intptr_t unused)
 
     laundryBaskets[BASKET_LEFT] = leftBasket;
     laundryBaskets[BASKET_RIGHT] = rightBasket;
+
+    // colors leftBasket = BLACK;  //rightScanner used for left Basket
+    // colors middleBasket = BLACK; //leftScanner used for right Basket
+    // map<colors, int> appearancesLeft, appearancesMiddle;
+    // colors currentLeft, currentMiddle;
+    // bool notBlackLeft = false, notBlackMiddle = false;
+    // while(scanStage == 1)
+    // {
+    //     if((currentMiddle = scanLaundryBasket(leftScanner)) != BLACK)
+    //     {
+    //         appearancesMiddle[currentMiddle]++;
+    //         notBlackMiddle = true;
+    //     }
+    //     tslp_tsk(10);
+    // }
+    // while(scanStage == 2)
+    // {
+    //     if((currentLeft = scanLaundryBasket(leftScanner)) != BLACK)
+    //     {
+    //         appearancesLeft[currentLeft]++;
+    //         notBlackLeft = true;
+    //     }
+    //     tslp_tsk(10);
+    // }
+
+    // if(notBlackMiddle)
+    // {
+    //     int maxCount = 0;
+    //     for(auto x: appearancesMiddle)
+    //     {
+    //         if(x.second > maxCount)
+    //         {
+    //             maxCount = x.second;
+    //             middleBasket = x.first;    
+    //         }
+    //     }
+    // }
+    // if(notBlackLeft)
+    // {
+    //     int maxCount = 0;
+    //     for(auto x: appearancesLeft)
+    //     {
+    //         if(x.second > maxCount)
+    //         {
+    //             maxCount = x.second;
+    //             leftBasket = x.first;    
+    //         }
+    //     }
+    // }
+
+    // laundryBaskets[BASKET_MIDDLE] = middleBasket;
+    // laundryBaskets[BASKET_LEFT] = leftBasket;
 }
 
 void end_task(intptr_t unused)
@@ -524,23 +577,13 @@ void main_task(intptr_t unused)
     //     }
     //     ramp.stop(BRAKE);
     //     btnEnter.waitForClick();
-    //     // ramp.setMode(CONTROLLED);
-    //     // ramp.setUnregulatedDPS();
-    //     // ramp.setAccelParams(2000, 800, 0);
-    //     // ramp.moveDegrees(600, 250, COAST);
-    //     // // btnEnter.waitForClick();
-    //     // t.secDelay(0.1);
-    //     ramp.moveDegrees(800, 220, BRAKE);
-    //     t.secDelay(0.4);
-    //     ramp.moveUnlimited(500, true);
-    //     tslp_tsk(50);
-    //     while(abs(ramp.getCurrentSpeed()) > 200)
-    //     {
-    //         ramp.moveUnlimited(500);
-    //         tslp_tsk(1);
-    //     }
-    //     ramp.stop(BRAKE_COAST); 
-    //     btnEnter.waitForClick();
+    //     ramp.setMode(CONTROLLED);
+    //     ramp.setUnregulatedDPS();
+    //     ramp.setAccelParams(2000, 800, 0);
+    //     ramp.moveDegrees(600, 260, COAST);
+    //     // btnEnter.waitForClick();
+    //     t.secDelay(0.2);
+    //     // btnEnter.waitForClick();
     // }
 
 
@@ -574,7 +617,107 @@ void main_task(intptr_t unused)
     // setLifoSlow();
     // lifo.setAccelParams(150, 20, 20);
     // lifo.distance(20, 3, NONE);
-    // lifo.lines(20, 1, BRAKE);
+    // lifo.lines(20, 1, NONE);
+
+    // scanStage = 1;
+    // act_tsk(BASKET_SCAN_TASK);
+    // tslp_tsk(1);
+
+    // robot.setLinearAccelParams(100, 20, 0);
+    // robot.straight(20, 1, COAST);
+    // robot.setLinearAccelParams(100, 0, 0);
+    // robot.arc(35, 90, 0, COAST);
+    // scanStage = 2;
+    // robot.straight(35, 4, COAST);
+    // scanStage = 3;
+    // robot.straight(35, -4, COAST);
+    // robot.arc(35, 98, 0, COAST);
+    // robot.setLinearAccelParams(100, 0, 0);
+    // robot.straight(35, 2, COAST);
+
+    // // btnEnter.waitForClick();
+
+    // colors temp[2];
+    // temp[0] = laundryBaskets[BASKET_LEFT];
+    // temp[1] = laundryBaskets[BASKET_MIDDLE];
+    // laundryBaskets[BASKET_RIGHT] = findTheLastColor(temp, 3);  
+
+
+    // DEBUGPRINT("First laundry basket was scanned and it has the color: ");
+    // switch(laundryBaskets[BASKET_LEFT])
+    // {
+    //     case RED:
+    //         DEBUGPRINT("red.\n");
+    //         break;
+    //     case BLACK:
+    //         DEBUGPRINT("black.\n");
+    //         break;
+    //     case YELLOW:
+    //         DEBUGPRINT("yellow.\n");
+    //         break;
+    // }
+
+    // DEBUGPRINT("Second laundry basket was scanned and it has the color: ");
+    // switch(laundryBaskets[BASKET_MIDDLE])
+    // {
+    //     case RED:
+    //         DEBUGPRINT("red.\n");
+    //         break;
+    //     case BLACK:
+    //         DEBUGPRINT("black.\n");
+    //         break;
+    //     case YELLOW:
+    //         DEBUGPRINT("yellow.\n");
+    //         break;
+    // }
+    
+    // DEBUGPRINT("Last laundry basket was scanned and it has the color: ");
+    // switch(laundryBaskets[BASKET_RIGHT])
+    // {
+    //     case RED:
+    //         DEBUGPRINT("red.\n");
+    //         break;
+    //     case BLACK:
+    //         DEBUGPRINT("black.\n");
+    //         break;
+    //     case YELLOW:
+    //         DEBUGPRINT("yellow.\n");
+    //         break;
+    // }
+
+
+    // rampQueue.push(items::LAUNDRY_BLACK);
+    // rampQueue.push(items::LAUNDRY_RED);
+    // rampQueue.push(items::LAUNDRY_YELLOW);
+    // scanLaundryBaskets();    
+
+    // robot.setLinearAccelParams(100, 0, 0);
+    // robot.straight(30, -4, COAST);
+    // emptyRampLaundry();
+    // robot.straight(30, 4, COAST);
+
+    // robot.arc(35, -36, 0, COAST); //32
+
+    // robot.straight(30, -5, COAST);
+    // emptyRampLaundry();
+    // robot.straight(30, 5, COAST);
+
+    // robot.arc(35, 72, 0, COAST); //32
+
+    // robot.straight(30, -5, COAST);
+    // emptyRampLaundry();
+    // robot.straight(30, 5, COAST);
+
+    // robot.arc(35, -36, 0, COAST); //32
+
+    // robot.straight(30, -4, COAST);
+    // emptyRampLaundry();
+    // robot.straight(30, 4, COAST);
+
+    // leaveLaundry();
+    // L_S(SOUTH);
+    // finishProcedure();
+     
 
 
     // robot.setLinearAccelParams(100, 0, 0);
