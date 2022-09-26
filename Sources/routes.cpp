@@ -374,12 +374,14 @@ orientation W_G(orientation dir)
 {
     DEBUGPRINT("\nW_G\n");
 
+    //Complex turn to go from one area to another
     robot.setLinearAccelParams(100, 35, 45);
     robot.arc(45, 30, 15, NONE);
     robot.setLinearAccelParams(100, 45, 25);
     robot.arc(45, 20, 40, NONE);
     robot.setLinearAccelParams(100, 35, 35);
     robot.arcUnlim(45, 15, FORWARD, true);
+    //Scan left (red room) task block while turning
     colors current = BLACK;
     map<colors, int> appearances;
     while(robot.getAngle() < 40)
@@ -390,19 +392,12 @@ orientation W_G(orientation dir)
         }
         robot.arcUnlim(45, 15, FORWARD, false);
     }
-    int maxCount = 0;
-    for(auto x: appearances)
-    {
-        if(x.second > maxCount)
-        {
-            maxCount = x.second;
-            current = x.first;    
-        }
-    }
+    current = analyzeFrequency(appearances, BLACK);
     rooms[RED].setTask(current);
     display.resetScreen();
     display.format("%  \n")%static_cast<int>(current);
 
+    //Get in position to scan green room task.
     robot.setLinearAccelParams(100, 20, 45);
     robot.straightUnlim(45, true);
     do{
@@ -422,6 +417,8 @@ orientation W_G(orientation dir)
     while(leftSensor.getReflected() < 50)
         robot.arcUnlim(25, 3.5, BACKWARD, false);
 
+
+    //Lifo until right before task block (green room)
     resetLifo();
     setLifoLeftExtreme();
     lifo.distance(robot.cmToTacho(20), 2, NONE);
@@ -430,6 +427,7 @@ orientation W_G(orientation dir)
     while(rightSensor.getReflected() < 60)
         executeLifoLeftUnlim(robot.cmToTacho(30));
 
+    //Scan (right) green room task while moving forwards on route to get in the room.
     current = BLACK;
     appearances.clear();
     robot.resetPosition();
@@ -441,19 +439,12 @@ orientation W_G(orientation dir)
         }
         executeLifoLeftUnlim(robot.cmToTacho(30));
     }
-    maxCount = 0;
-    for(auto x: appearances)
-    {
-        if(x.second > maxCount)
-        {
-            maxCount = x.second;
-            current = x.first;    
-        }
-    }
+    current = analyzeFrequency(appearances, BLACK);
     rooms[GREEN].setTask(current);
     display.format("%  \n")%static_cast<int>(current);
 
 
+    //Get to the intersection
     resetLifo();
     setLifoLeftExtreme();
     lifo.distance(robot.cmToTacho(30), 8, NONE);
@@ -464,13 +455,14 @@ orientation W_G(orientation dir)
     robot.setLinearAccelParams(150, 35, 0);
     robot.straight(35, 7, NONE);
 
+    //Turn towards the room
     robot.setLinearAccelParams(100, -35, -35);
     robot.arc(45, -80, -4, NONE);
     robot.arcUnlim(35, -4, BACKWARD, true);
     while(leftSensor.getReflected() > 60)
         robot.arcUnlim(35, -4, BACKWARD); 
 
-    
+    //Lifo till right before the entrance
     resetLifo();
     setLifoLeftExtreme();
     lifo.distance(robot.cmToTacho(30), 10, NONE);
@@ -484,7 +476,8 @@ orientation W_G(orientation dir)
 orientation G_R(orientation dir)
 {
     DEBUGPRINT("\nG_R\n");
-
+    
+    //Lifo till the middle (intersection)
     resetLifo();
     setLifoRightExtreme();
     lifo.distance(robot.cmToTacho(30), 10, NONE);
@@ -495,6 +488,8 @@ orientation G_R(orientation dir)
     while(robot.getPosition() < 5)
         executeLifoRightUnlim(robot.cmToTacho(30));
 
+
+    //Lifo till right before the entrance of the red room
     resetLifo();
     setLifoRightExtreme();
     lifo.distance(robot.cmToTacho(30), 10, NONE);
@@ -509,6 +504,7 @@ orientation R_B(orientation dir)
 {
     DEBUGPRINT("\nR_B\n");
 
+    //Lifo exit red room till white part of intersection 
     resetLifo();
     setLifoLeftExtreme();
     lifo.distance(robot.cmToTacho(30), 10, NONE);
@@ -516,6 +512,8 @@ orientation R_B(orientation dir)
     while(rightSensor.getReflected() < 60)
         executeLifoLeftUnlim(robot.cmToTacho(30));
 
+
+    //Complex turn to pass all the difficult lifo parts and get ready to cross
     robot.setMode(REGULATED);
     robot.arc(35, 30, 8.5, NONE); 
     robot.arc(35, 60, 19.5, NONE);
@@ -523,22 +521,27 @@ orientation R_B(orientation dir)
     while(rightSensor.getReflected() < 60)
         robot.arcUnlim(35, 19.5, FORWARD);
 
-    robot.setMode(CONTROLLED);    
 
+    //Lifo slower speed to correct from turn
+    robot.setMode(CONTROLLED);    
     resetLifo();
     setLifoRightExtreme();
     lifo.distance(robot.cmToTacho(30), 10, NONE);
+    //Increase speed until the intersection
     setLifoRight();
     lifo.unlimited(robot.cmToTacho(45), true);
     while(leftSensor.getReflected() < 60)
         executeLifoRightUnlim(robot.cmToTacho(45));
+    //Move until right before the start/finish square
     robot.resetPosition();
     timer t;
     while(robot.getPosition() < 27)
         executeLifoRightUnlim(robot.cmToTacho(45));
-    double speed = robot.getPosition() / t.secElapsed();
+    double speed = robot.getPosition() / t.secElapsed();    //Real speed calculation because of unreg/reg discrepancy
+    //Pass the square (no lifo here)
     robot.setLinearAccelParams(100, speed, speed);
     robot.straight(speed, 32, NONE);    
+    //Continue lifo high speed till the intersection and half way to the blue room scan area
     setLifoRight();
     while(leftSensor.getReflected() < 60)
         executeLifoRightUnlim(robot.cmToTacho(45));
@@ -546,6 +549,7 @@ orientation R_B(orientation dir)
     while(robot.getPosition() < 20)
         executeLifoRightUnlim(robot.cmToTacho(45));
 
+    //Slow down to correct possible mistakes and get to right before scan area
     resetLifo();
     setLifoRightExtreme();
     lifo.distance(robot.cmToTacho(30), 5, NONE);
@@ -553,7 +557,7 @@ orientation R_B(orientation dir)
     while(leftSensor.getReflected() < 60)
         executeLifoRightUnlim(robot.cmToTacho(30));
 
-
+    //Continue forwards scanning left (blue room) same way as green just mirrored
     colors current = BLACK;
     map<colors, int> appearances;
     robot.resetPosition();
@@ -565,15 +569,7 @@ orientation R_B(orientation dir)
         }
         executeLifoRightUnlim(robot.cmToTacho(30));
     }
-    int maxCount = 0;
-    for(auto x: appearances)
-    {
-        if(x.second > maxCount)
-        {
-            maxCount = x.second;
-            current = x.first;    
-        }
-    }
+    current = analyzeFrequency(appearances, BLACK);
     rooms[BLUE].setTask(current);
     display.format("%  \n")%static_cast<int>(current);
 
@@ -588,6 +584,7 @@ orientation R_B(orientation dir)
     rooms[YELLOW].setTask(waterTasks == 2 ? GREEN : WHITE);
 
 
+    //Move to the intersection 
     resetLifo();
     setLifoRightExtreme();
     lifo.distance(robot.cmToTacho(30), 8, NONE);
@@ -598,13 +595,14 @@ orientation R_B(orientation dir)
     robot.setLinearAccelParams(150, 35, 0);
     robot.straight(35, 7, NONE);
 
+    //Turn towards blue room
     robot.setLinearAccelParams(100, -35, -35);
     robot.arc(45, -80, 4, NONE);
     robot.arcUnlim(35, 4, BACKWARD, true);
     while(rightSensor.getReflected() > 60)
         robot.arcUnlim(35, 4, BACKWARD);  
 
-
+    //Lifo until right before blue room's entrance
     resetLifo();
     setLifoRightExtreme();
     lifo.distance(robot.cmToTacho(30), 10, NONE);
@@ -619,6 +617,7 @@ orientation B_Y(orientation dir)
 {
     DEBUGPRINT("\nB_Y\n");
 
+    //Lifo until intersection
     resetLifo();
     setLifoLeftExtreme();
     lifo.distance(robot.cmToTacho(30), 10, NONE);
@@ -629,6 +628,7 @@ orientation B_Y(orientation dir)
     while(robot.getPosition() < 5)
         executeLifoLeftUnlim(robot.cmToTacho(30));
 
+    //Lifo until right before yellow room entrance
     resetLifo();
     setLifoLeftExtreme();
     lifo.distance(robot.cmToTacho(30), 10, NONE);
@@ -643,6 +643,7 @@ orientation Y_L(orientation dir)
 {
     DEBUGPRINT("\nY_L\n");
 
+    //Exit yellow room
     resetLifo();
     setLifoRightExtreme();
     lifo.distance(robot.cmToTacho(30), 10, NONE);
@@ -651,32 +652,35 @@ orientation Y_L(orientation dir)
         executeLifoRightUnlim(robot.cmToTacho(30));
 
     
+    //Special turn to pass through trouble and put line between the two sensors
     robot.setLinearAccelParams(100, 30, 30);
     robot.arc(45, 90, -8.5, COAST);
 
+    //Correct turn mistakes with slow lifo
     resetLifo();
     lifo.setPIDparams(KP * 1.2, slowKI * 0.7, KD*1.5, 1);
     lifo.distance(robot.cmToTacho(30), 5, NONE);
 
-
+    //Lifo until the intersection
     timer t;
-
     resetLifo();
     lifo.distance(robot.cmToTacho(45), 10, NONE);
     lifo.lines(robot.cmToTacho(45), 1, NONE);
+
+    //Lifo until right before the start/finish square
     robot.resetPosition();
     t.reset();
     lifo.distance(robot.cmToTacho(45), 22, NONE);
-    
-    double speed = robot.getPosition() / t.secElapsed();
+
+    double speed = robot.getPosition() / t.secElapsed(); //Speed calculation for unreg/reg behaviour
+    //Complex arc turn to get into the right position before the laundry baskets
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(150, speed, speed);
     robot.straight(speed, 6, NONE);
     robot.setLinearAccelParams(100, speed, speed);
     robot.arc(45, 90, 17.5, COAST);
-    // robot.setMode(REGULATED);
-    // robot.arc(40, 90, 18, NONE);
 
+    //Lifo until the intersection
     resetLifo();
     lifo.setPIDparams(KP * 1.2, slowKI * 0.7, KD*1.5, 1);
     lifo.distance(robot.cmToTacho(30), 10, NONE);
@@ -691,6 +695,7 @@ orientation L_S(orientation dir)
 {
     DEBUGPRINT("\nL_S\n");
 
+    //Get to right before the start/finish square
     resetLifo();
     lifo.setPIDparams(KP * 1.2, slowKI * 0.7, KD*1.5, 1);
     lifo.distance(robot.cmToTacho(30), 10, NONE);

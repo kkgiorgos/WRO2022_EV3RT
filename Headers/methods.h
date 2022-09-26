@@ -24,9 +24,6 @@ void setLifoRightExtreme(bool slow = false);
 void executeLifoLeftUnlim(int velocity = 50);
 void executeLifoRightUnlim(int velocity = 50);
 
-bool detectColorLine(ev3ys::colorSensor &sensor, ev3ys::colors target);
-bool detectWhiteRoomBed(ev3ys::colorSensor &sensor);
-
 void correctionBeforeMovement();
 void correctionOnTheMove();
 
@@ -45,7 +42,3 @@ void lifo1WhiteLineRightSlow(double startVelocity, double distance, double slowV
 void emptyRampLaundry();
 void emptyRampWaterStage1(bool wait = true);
 void emptyRampWaterStage2();
-
-ev3ys::colors scanLaundryBlock(ev3ys::colorSensor &scanner);
-ev3ys::colors scanCodeBlock(ev3ys::colorSensor &scanner);
-ev3ys::colors scanLaundryBasket(ev3ys::colorSensor &scanner);

@@ -99,28 +99,6 @@ void executeLifoRightUnlim(int velocity)
     lifo.unlimited(velocity);
 }
 
-bool detectColorLine(colorSensor &sensor, colors target)
-{
-    // switch(target)
-    // {
-    //     case RED:
-    //         return sensor.getReflected() > 50;
-    //     case GREEN:
-    //         return sensor.getReflected() < 20;
-    //     case BLUE:
-    //         return sensor.getReflected() < 20;
-    //     case YELLOW:
-    //         return sensor.getReflected() > 80;
-    // }
-    return abs(sensor.getReflected() - 33) > 5;
-}
-
-bool detectWhiteRoomBed(colorSensor &sensor)
-{
-    colorspaceRGB rgb = sensor.getRGB();
-    return rgb.red > 200 && rgb.green > 200 && rgb.blue > 200;
-}
-
 void align(double time, bool stop)
 {
     timer t;
@@ -355,37 +333,4 @@ void emptyRampWaterStage2()
         tslp_tsk(1);
     }
     ramp.stop(BRAKE_COAST);   
-}
-
-colors scanLaundryBlock(colorSensor &scanner)
-{
-    scanner.setNormalisation(false);
-    colorspaceRGB rgb = scanner.getRGB();
-
-    if(rgb.red >= 3 * rgb.green) return RED;
-    if(rgb.red > 2 * rgb.blue && rgb.green > 2 * rgb.blue && rgb.red > rgb.green) return YELLOW;
-    if(rgb.red > 1 && rgb.green > 1 && rgb.blue > 1 && rgb.white < 100) return BLACK;
-
-    return WHITE;
-}
-
-colors scanCodeBlock(colorSensor &scanner)
-{
-    scanner.setNormalisation(false);
-    colorspaceRGB rgb = scanner.getRGB();
-    colorspaceHSV hsv = scanner.getHSV();
-
-    if(rgb.white <= 3) return BLACK;
-    if(rgb.green >= rgb.red + rgb.blue) return GREEN;
-    else return WHITE;
-}
-
-colors scanLaundryBasket(colorSensor &scanner)
-{
-    scanner.setNormalisation(false);
-    colorspaceRGB rgb = scanner.getRGB();
-
-    if(rgb.green > 3) return YELLOW;
-    if(rgb.red > 3) return RED;
-    return BLACK;
 }
