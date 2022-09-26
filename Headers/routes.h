@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <climits>
 #include "ev3ys.h"
+#include "methods.h"
 
 //Graph - Routing Code
 enum matPos
@@ -35,6 +36,7 @@ enum orientation
 
 extern matPos currentPos;
 extern orientation currentDirection;
+extern lifoRobotPosition currentAlignment;
 
 typedef std::pair<int, int> weightedVertex;
 typedef orientation (*routeFunc)( orientation );
@@ -53,8 +55,7 @@ void fullRoute(int source, int target, orientation dir);
 void fullRouteStandard(int target);
 
 //Turn functions
-void standardTurn(orientation start, orientation finish);
-void specialTurn(orientation start, orientation finish);
+void standardTurn(orientation start, orientation finish, lifoRobotPosition endAlignment);
 
 //Actual route implementations
 //Main network

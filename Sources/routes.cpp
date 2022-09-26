@@ -313,46 +313,26 @@ void fullRouteStandard(int target)
     fullRoute(currentPos, target, currentDirection);
 }
 
-void standardTurn(orientation start, orientation finish)
+void standardTurn(orientation start, orientation finish, lifoRobotPosition endAlignment)
 {
     int turnDifference = finish - start;
     currentDirection = finish;
     if(turnDifference == -1 || turnDifference == 3)
     {
         DEBUGPRINT("Turning left 90\n");
-//        leftTurn();
+        leftTurn(endAlignment);
     }
     else if(turnDifference == 1 || turnDifference == -3)
     {
         DEBUGPRINT("Turning right 90\n");
-//        rightTurn();
+        rightTurn(endAlignment);
     }
     else if(turnDifference == -2 || turnDifference == 2)
     {
         DEBUGPRINT("Reversing\n");
-//        reverse();
+        reverse(currentAlignment, endAlignment);
     }
-}
-
-void specialTurn(orientation start, orientation finish)
-{
-    int turnDifference = finish - start;
-    currentDirection = finish;
-    if(turnDifference == -1 || turnDifference == 3)
-    {
-        DEBUGPRINT("Turning left 90 no align\n");
-//        leftTurn(false, false);
-    }
-    else if(turnDifference == 1 || turnDifference == -3)
-    {
-        DEBUGPRINT("Turning right 90 no align\n");
-//        rightTurn(false, false);
-    }
-    else if(turnDifference == -2 || turnDifference == 2)
-    {
-        DEBUGPRINT("Reversing no align\n");
-//        reverse(false, false);
-    }
+    currentAlignment = endAlignment;
 }
 
 //Main network

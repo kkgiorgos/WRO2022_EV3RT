@@ -55,6 +55,7 @@ double colorCoef = 1;
 matPos startPos;
 matPos currentPos;
 orientation currentDirection;
+lifoRobotPosition currentAlignment;
 
 std::vector<int> graph[V];
 
@@ -108,7 +109,7 @@ void init()
 
     display.format("WAIT FOR SENSORS\n");
     btnEnter.waitForClick();
-    act_tsk(INIT_TASK);
+    // act_tsk(INIT_TASK);
     tslp_tsk(1);
 }
 
@@ -354,27 +355,362 @@ void main_task(intptr_t unused)
     //     }
     // }
 
+    //Line follower start 30 unreg speed for 10cm speed up to 45 unreg speed for majority of  movement 10cm of 30 unreg speed before end plus 20 speed reg for 5cm and to the line
+    //Turn left and right 90 degrees on the arc with center of -5.5 or 5.5 respectively to center sensors from lifo, if you want to follow on a different edge you add or subtract 2cm respectively
+    //Change in lifo side on the move: start with one side and then return to normal requires no intervention, start normal and go to one side requires turn at the speed of movement with center 20 (-20) for 10degrees
+    //Lifo on different edges need pid scaling of 1.6 - 2 times.
 
-    startProcedure();
+    double distance = 60;
+    double speed;
+    t.reset();
+    resetLifo();
+    lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(45), distance - 25, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, 5, NONE);
+    lifo.lines(20, 1, COAST);
 
-    fullRouteStandard(W);
-    pickWater();
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, 180, 1, COAST);
 
-    fullRouteStandard(G);
-    rooms[GREEN].executeAllActions();
-    fullRouteStandard(R);
-    rooms[RED].executeAllActions();
-    fullRouteStandard(B);
-    rooms[BLUE].executeAllActions();
-    fullRouteStandard(Y);
-    rooms[YELLOW].executeAllActions();
-    fullRouteStandard(L);
+    t.reset();
+    resetLifo();
+    lifo.setDoubleFollowMode("SR", "50");
+    lifo.setPIDparams(KP * 1.2 * 1.6, KI * 0.7 * 1.6, KD*1.5 * 1.6, 1);
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(45), distance - 25, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setDoubleFollowMode("SR", "50");
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, 5, NONE);
+    lifo.lines(20, 1, COAST);
 
-    scanLaundryBaskets();
-    leaveLaundry();
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, 180, 2);
 
-    fullRouteStandard(S);
-    finishProcedure();
+    t.reset();
+    resetLifo();
+    lifo.setDoubleFollowMode("SR", "50");
+    lifo.setPIDparams(KP * 1.2 * 1.6, KI * 0.7 * 1.6, KD*1.5 * 1.6, 1);
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(45), distance - 25, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setDoubleFollowMode("SR", "50");
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, 5, NONE);
+    lifo.lines(20, 1, COAST);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, 180, 0);
+    
+    t.reset();
+    resetLifo();
+    lifo.setDoubleFollowMode("50", "SL");
+    lifo.setPIDparams(KP * 1.2 * 1.6, KI * 0.7 * 1.6, KD*1.5 * 1.6, 1);
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(45), distance - 25, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setDoubleFollowMode("50", "SL");
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, 5, NONE);
+    lifo.lines(20, 1, COAST);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, 180, -1);
+
+    t.reset();
+    resetLifo();
+    lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(45), distance - 25, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, 5, NONE);
+    lifo.lines(20, 1, COAST);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, 180, -1, COAST);
+
+    t.reset();
+    resetLifo();
+    lifo.setDoubleFollowMode("50", "SL");
+    lifo.setPIDparams(KP * 1.2 * 1.6, KI * 0.7 * 1.6, KD*1.5 * 1.6, 1);
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(45), distance - 25, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setDoubleFollowMode("50", "SL");
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, 5, NONE);
+    lifo.lines(20, 1, COAST);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, 180, -2, COAST);
+
+    t.reset();
+    resetLifo();
+    lifo.setDoubleFollowMode("50", "SL");
+    lifo.setPIDparams(KP * 1.2 * 1.6, KI * 0.7 * 1.6, KD*1.5 * 1.6, 1);
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(45), distance - 25, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setDoubleFollowMode("50", "SL");
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, 5, NONE);
+    lifo.lines(20, 1, COAST);
+
+    robot.stop(BRAKE);
+    btnEnter.waitForClick();
+
+
+    t.reset();
+    resetLifo();
+    lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
+    lifo.distance(robot.cmToTacho(30), 30, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, speed, speed);
+    robot.arc(speed, 10, 20, NONE);
+    resetLifo();
+    lifo.setPIDparams(KP * 1.2 * 1.6, KI * 0.7 * 1.6, KD*1.5 * 1.6, 1);
+    lifo.setDoubleFollowMode("50", "SL");
+    lifo.distance(robot.cmToTacho(30), 30, NONE);
+
+    robot.stop(BRAKE);
+    btnEnter.waitForClick();
+
+
+    distance = 60;
+    t.reset();
+    resetLifo();
+    lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(45), distance - 25, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, 5, NONE);
+    lifo.lines(20, 1, COAST);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 10, 20);
+    robot.arc(45, 90, -5.5, COAST);
+
+    resetLifo();
+    lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(30), 7, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, 5, NONE);
+    lifo.lines(20, 1, COAST);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 10, 20);
+    robot.arc(45, 90, -3.5, COAST);
+
+    distance = 70;
+    resetLifo();
+    lifo.setPIDparams(KP * 1.2 * 1.6, KI * 0.7 * 1.6, KD*1.5 * 1.6, 1);
+    lifo.setDoubleFollowMode("SR", "50");
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(45), distance - 25, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setDoubleFollowMode("SR", "50");
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, 5, NONE);
+    lifo.lines(20, 1, COAST);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 10, 20);
+    robot.arc(45, 90, 5.5, COAST);
+
+
+    distance = 25;
+    t.reset();
+    resetLifo();
+    lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(45), distance - 25, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, 5, COAST);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, 180, 0, COAST);
+
+    distance = 25;
+    t.reset();
+    resetLifo();
+    lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
+    lifo.distance(robot.cmToTacho(30), 15, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, 5, NONE);
+    lifo.lines(20, 1, COAST);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 10, 20);
+    robot.arc(45, 90, -7.5, COAST);
+
+    distance = 70;
+    resetLifo();
+    lifo.setPIDparams(KP * 1.2 * 1.6, KI * 0.7 * 1.6, KD*1.5 * 1.6, 1);
+    lifo.setDoubleFollowMode("50", "SL");
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(45), distance - 25, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setDoubleFollowMode("50", "SL");
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, 5, NONE);
+    lifo.lines(20, 1, COAST);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 10, 20);
+    robot.arc(45, 90, 5.5, COAST);
+
+    resetLifo();
+    lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(30), 7, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, 5, NONE);
+    lifo.lines(20, 1, COAST);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 10, 20);
+    robot.arc(45, 90, 5.5, COAST);
+
+    distance = 60;
+    t.reset();
+    resetLifo();
+    lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(45), distance - 25, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+    setLifoSlow();
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, 5, NONE);
+    lifo.lines(20, 1, COAST);
+
+
+
+    // startProcedure();
+
+    // fullRouteStandard(W);
+    // pickWater();
+
+    // fullRouteStandard(G);
+    // rooms[GREEN].executeAllActions();
+    // fullRouteStandard(R);
+    // rooms[RED].executeAllActions();
+    // fullRouteStandard(B);
+    // rooms[BLUE].executeAllActions();
+    // fullRouteStandard(Y);
+    // rooms[YELLOW].executeAllActions();
+    // fullRouteStandard(L);
+
+    // scanLaundryBaskets();
+    // leaveLaundry();
+
+    // fullRouteStandard(S);
+    // finishProcedure();
 
     robot.stop(BRAKE);
 

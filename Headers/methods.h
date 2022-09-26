@@ -31,14 +31,25 @@ void align(double time, bool stop = false);
 void alignPerpendicular(double time, bool stop = false);
 void alignOnMove(double speed);
 
-void reverse(bool stop = false, bool alignEnd = true);
-void leftTurn(bool stop = false, bool alignEnd = true);
-void rightTurn(bool stop = false, bool alignEnd = true);
-
-void lifo1LineDist(double distance);
 void lifo1WhiteLineLeftSlow(double startVelocity, double distance, double slowVelocity = 20, ev3ys::breakMode stopMode = ev3ys::breakMode::BRAKE_COAST);
 void lifo1WhiteLineRightSlow(double startVelocity, double distance, double slowVelocity = 20, ev3ys::breakMode stopMode = ev3ys::breakMode::BRAKE_COAST);
 
 void emptyRampLaundry();
 void emptyRampWaterStage1(bool wait = true);
 void emptyRampWaterStage2();
+
+//Used in general graph traversal for surprise rule not base program
+enum lifoRobotPosition
+{
+    LEFT_OF_LINE,
+    CENTERED,
+    RIGHT_OF_LINE
+};
+
+void reverse(lifoRobotPosition startAlignment, lifoRobotPosition endAlignment, ev3ys::breakMode stopMode = ev3ys::breakMode::COAST);
+void leftTurn(lifoRobotPosition endAlignment, ev3ys::breakMode stopMode = ev3ys::breakMode::COAST);
+void rightTurn(lifoRobotPosition endAlignment, ev3ys::breakMode stopMode = ev3ys::breakMode::COAST);
+
+void switchLifoRobotPosition(double speed, lifoRobotPosition startAlignment, lifoRobotPosition endAlignment);
+
+void lifo1LineDist(lifoRobotPosition alignment, double totalDistance, double startPhaseDist = 10, double endPhaseDist = 10, double slowDist = 5, bool detectLine = true, ev3ys::breakMode stopMode = ev3ys::breakMode::COAST);

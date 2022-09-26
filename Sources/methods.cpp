@@ -204,78 +204,6 @@ void correctionOnTheMove()
     robot.tank(robot.cmToTacho(23), robot.cmToTacho(20), robot.cmToTacho(1), NONE);
 }
 
-void reverse(bool stop, bool alignEnd)
-{
-    robot.setMode(REGULATED);
-    if(alignEnd)
-    {
-        robot.arc(700, 180, 0.2, NONE);
-        align(0.2, stop);
-    }
-    else
-        robot.arc(700, 180, 0.2, BRAKE);
-}
-
-void leftTurn(bool stop, bool alignEnd)
-{
-    if(!alignEnd)
-    {
-        double angle;
-        
-        angle = -90;
-
-        robot.setMode(CONTROLLED);
-        robot.setAngularAccelParams(1000, 0, 50);
-        robot.turn(500, angle, BRAKE);
-    }
-    else
-    {
-        double center;
-        double angle;
-
-        center = -4;
-        angle = 75;
-
-        robot.setMode(REGULATED);
-        robot.arc(1000, angle, center, NONE);
-        align(0.2, stop);
-    }
-}
-
-void rightTurn(bool stop, bool alignEnd)
-{
-    if(!alignEnd)
-    {
-        double angle;
-
-        angle = 95;
-
-        robot.setMode(CONTROLLED);
-        robot.setAngularAccelParams(1000, 0, 50);
-        robot.turn(500, angle, BRAKE);
-    }
-    else
-    {
-        double center;
-        double angle;
-
-        center = 4;
-        angle = 75;
-
-        robot.setMode(REGULATED);
-        robot.arc(1000, angle, center, NONE);
-        align(0.2, stop);
-    }
-}
-
-void lifo1LineDist(double distance)
-{
-    lifo.setAccelParams(250, 5, 50);
-    lifo.distance(50, distance, NONE);
-    lifo.setAccelParams(600, 50, 50);
-    lifo.lines(50, 1, COAST);
-}
-
 void lifo1WhiteLineLeftSlow(double startVelocity, double distance, double slowVelocity, breakMode stopMode)
 {
     lifo.initializeMotionMode(CONTROLLED);
@@ -333,4 +261,87 @@ void emptyRampWaterStage2()
         tslp_tsk(1);
     }
     ramp.stop(BRAKE_COAST);   
+}
+
+void reverse(lifoRobotPosition startAlignment, lifoRobotPosition endAlignment, ev3ys::breakMode stopMode)
+{
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+
+    double arcCenter = 0;
+    if(startAlignment == LEFT_OF_LINE) arcCenter += 1;
+    if(startAlignment == RIGHT_OF_LINE) arcCenter -= 1;
+    if(endAlignment == LEFT_OF_LINE) arcCenter += 1;
+    if(endAlignment == RIGHT_OF_LINE) arcCenter -= 1;
+
+    robot.arc(45, 180, arcCenter, stopMode);
+}
+
+void leftTurn(lifoRobotPosition endAlignment, ev3ys::breakMode stopMode)
+{
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 10, 20);
+    
+    double arcCenter;
+    if(endAlignment == CENTERED) arcCenter = -5.5;
+    else if(endAlignment == LEFT_OF_LINE) arcCenter = -3.5;
+    else arcCenter = -7.5;
+
+    robot.arc(45, 90, arcCenter, stopMode);
+}
+
+void rightTurn(lifoRobotPosition endAlignment, ev3ys::breakMode stopMode)
+{
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 10, 20);
+
+    double arcCenter;
+    if(endAlignment == CENTERED) arcCenter = 5.5;
+    else if(endAlignment == LEFT_OF_LINE) arcCenter = 7.5;
+    else arcCenter = 3.5;
+
+    robot.arc(45, 90, arcCenter, stopMode);
+}
+
+void lifo1LineDist(lifoRobotPosition alignment, double totalDistance, double startPhaseDist, double endPhaseDist, double slowDist, bool detectLine, ev3ys::breakMode stopMode)
+{
+    timer t;
+    double speed;
+    resetLifo();
+    if(alignment == CENTERED)
+        lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
+    else //ONE SENSOR EDGE FOLLOWING
+        lifo.setPIDparams(KP * 1.2 * 1.6, KI * 0.7 * 1.6, KD*1.5 * 1.6, 1);
+    if(alignment == LEFT_OF_LINE)
+        lifo.setDoubleFollowMode("SR", "50");
+    if(alignment == RIGHT_OF_LINE)
+        lifo.setDoubleFollowMode("50", "SL");
+
+    lifo.distance(robot.cmToTacho(30), startPhaseDist, NONE);
+    lifo.distance(robot.cmToTacho(45), totalDistance - startPhaseDist - endPhaseDist - slowDist, NONE);
+    t.reset();
+    robot.resetPosition();
+    lifo.distance(robot.cmToTacho(30), endPhaseDist, NONE);
+    speed = robot.getPosition() / t.secElapsed();
+
+    setLifoSlow();
+    if(alignment == LEFT_OF_LINE)
+        lifo.setDoubleFollowMode("SR", "50");
+    if(alignment == RIGHT_OF_LINE)
+        lifo.setDoubleFollowMode("50", "SL");
+    lifo.setAccelParams(150, speed, 20);
+    lifo.distance(20, slowDist, (detectLine) ? NONE : stopMode);
+    if(detectLine) 
+        lifo.lines(20, 1, stopMode);
+}
+
+void switchLifoRobotPosition(double speed, lifoRobotPosition startAlignment, lifoRobotPosition endAlignment)
+{
+    if(startAlignment == CENTERED && endAlignment != CENTERED)
+    {
+        robot.setMode(CONTROLLED);
+        robot.setLinearAccelParams(100, speed, speed);
+        robot.arc(speed, 10, (endAlignment == LEFT_OF_LINE) ? -20 : 20, NONE);
+    }
+    currentAlignment = endAlignment;
 }
