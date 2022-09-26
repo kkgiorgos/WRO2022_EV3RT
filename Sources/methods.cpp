@@ -117,7 +117,6 @@ bool detectColorLine(colorSensor &sensor, colors target)
 
 bool detectWhiteRoomBed(colorSensor &sensor)
 {
-    // return sensor.getColor() == WHITE;
     colorspaceRGB rgb = sensor.getRGB();
     return rgb.red > 200 && rgb.green > 200 && rgb.blue > 200;
 }
@@ -331,83 +330,6 @@ void lifo1WhiteLineRightSlow(double startVelocity, double distance, double slowV
     robot.stop(stopMode);
 }
 
-
-void openGrabber()
-{
-    grabber.setStallTolerance(150, 10, 0.1);
-    grabber.setSpeedLimiter(false);
-    grabber.setMode(REGULATED);
-    grabber.moveDegrees(-1400, 300, NONE);
-    grabber.moveUntilStalled(-500, BRAKE);
-}
-
-void openGrabberAsync()
-{
-    act_tsk(OPEN_GRABBER_TASK);
-    while(!grabberUsed) tslp_tsk(10);
-}
-
-void pickBlock()
-{
-    int tacho;
-    int startSpeed = 1400;
-    int endSpeed = 700;
-    int distance = 250;
-    int decelDistance = 100;
-    int speed;
-    grabber.moveUnlimited(startSpeed, true);
-    while(tacho = grabber.getTachoCount() < (distance - decelDistance))
-        grabber.moveUnlimited(startSpeed);
-    grabber.resetTachoCount();
-    speed = startSpeed;
-    while(tacho = grabber.getTachoCount() < decelDistance)
-    {
-        speed = (decelDistance - tacho) / decelDistance * (startSpeed - endSpeed) + endSpeed;
-        grabber.moveUnlimited(speed);
-        if(grabber.isStalled(speed))
-            break;
-    }
-    grabber.moveUntilStalled(endSpeed, BRAKE);
-}
-
-void pickBlockStage1()
-{
-    grabber.moveDegrees(450, 90, NONE);
-    grabber.moveDegrees(60, 30, NONE);
-    grabberUsed = true;
-    grabber.moveUntilStalled(60, BRAKE_COAST, 0.3);
-    act_tsk(PICK_BLOCK_TASK);
-}
-void pickBlockStage2()
-{
-    grabberUsed = false;
-    ev3_speaker_play_tone(300, 10);
-} 
-
-void openGrabberAndPickBlock()
-{
-    startPicking = false;
-    grabber.setStallTolerance(150, 10, 0.1);
-    grabber.setSpeedLimiter(false);
-    grabber.setMode(REGULATED);
-    grabber.moveDegrees(-1400, 300, NONE);
-    grabber.moveUntilStalled(-500, BRAKE);
-    while(!startPicking) tslp_tsk(10);
-
-    int tacho;
-    int startSpeed = 1400;
-    int endSpeed = 700;
-    int distance = 300;
-    int decelDistance = 100;
-    grabber.moveUnlimited(startSpeed, true);
-    while(tacho = grabber.getTachoCount() < (distance - decelDistance))
-        grabber.moveUnlimited(startSpeed);
-    grabber.resetTachoCount();
-    while(tacho = grabber.getTachoCount() < decelDistance)
-        grabber.moveUnlimited((decelDistance - tacho) / decelDistance * (startSpeed - endSpeed) + endSpeed);
-    grabber.moveUntilStalled(endSpeed, BRAKE);
-}
-
 void emptyRampLaundry()
 {
     ramp.setMode(CONTROLLED);
@@ -419,32 +341,12 @@ void emptyRampLaundry()
     tslp_tsk(1);
 }
 
-void emptyRampWater()
-{
-    //ramp.moveDegrees(120, 80, BRAKE);
-    ramp.moveDegrees(300, 120, BRAKE);
-    act_tsk(CLOSE_RAMP_TASK);
-    //t.secDelay(0.2);
-    //ramp.moveUntilStalled(-300, BRAKE);
-}
-
 void emptyRampWaterStage1(bool wait)
 {
-    // ramp.moveDegrees(700, 70, BRAKE, wait);
-    // ramp.moveDegrees(1000, 200, BRAKE, wait);
     ramp.moveDegrees(800, 220, BRAKE, wait);
 }
 void emptyRampWaterStage2()
 {
-    // ramp.moveUnlimited(300, true);
-    // tslp_tsk(150);
-    // while(abs(ramp.getCurrentSpeed()) > 50)
-    // {
-    //     ramp.moveUnlimited(300);
-    //     tslp_tsk(1);
-    // }
-    // ramp.stop(BRAKE);
-
     ramp.moveUnlimited(500, true);
     tslp_tsk(50);
     while(abs(ramp.getCurrentSpeed()) > 200)
@@ -464,18 +366,6 @@ colors scanLaundryBlock(colorSensor &scanner)
     if(rgb.red > 2 * rgb.blue && rgb.green > 2 * rgb.blue && rgb.red > rgb.green) return YELLOW;
     if(rgb.red > 1 && rgb.green > 1 && rgb.blue > 1 && rgb.white < 100) return BLACK;
 
-    // colorspaceHSV hsv = scanner.getHSV();
-    
-    // if(hsv.saturation > 10)
-    // {
-    //     if(hsv.value < 20)
-    //         return BLACK;
-    //     if(hsv.hue < 20)
-    //         return RED;
-    //     else
-    //         return YELLOW;
-    // }
-
     return WHITE;
 }
 
@@ -488,22 +378,6 @@ colors scanCodeBlock(colorSensor &scanner)
     if(rgb.white <= 3) return BLACK;
     if(rgb.green >= rgb.red + rgb.blue) return GREEN;
     else return WHITE;
-
-    // if(hsv.value > 60 && hsv.saturation < 20)
-    // {
-    //     return WHITE;
-    // }
-    // else
-    // {
-    //     if(hsv.hue > 110 && hsv.hue < 170 && hsv.saturation > 70)
-    //     {
-    //         return GREEN;
-    //     }
-    //     else
-    //     {
-    //         return BLACK;
-    //     }
-    // }
 }
 
 colors scanLaundryBasket(colorSensor &scanner)

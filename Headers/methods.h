@@ -42,16 +42,7 @@ void lifo1LineDist(double distance);
 void lifo1WhiteLineLeftSlow(double startVelocity, double distance, double slowVelocity = 20, ev3ys::breakMode stopMode = ev3ys::breakMode::BRAKE_COAST);
 void lifo1WhiteLineRightSlow(double startVelocity, double distance, double slowVelocity = 20, ev3ys::breakMode stopMode = ev3ys::breakMode::BRAKE_COAST);
 
-void openGrabber();
-void openGrabberAsync();
-void pickBlock();
-void pickBlockStage1();
-void pickBlockStage2();
-
-void openGrabberAndPickBlock();
-
 void emptyRampLaundry();
-void emptyRampWater();
 void emptyRampWaterStage1(bool wait = true);
 void emptyRampWaterStage2();
 

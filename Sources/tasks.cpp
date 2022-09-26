@@ -99,7 +99,7 @@ void room::setTask(colors code)
     currentState = SCANNING;
 
     //Set task
-    task = (code == WHITE) ? WATER : BALL;
+    task = findTask(code);
 
     DEBUGPRINT("task is ");
     if(task == WATER)
@@ -441,7 +441,7 @@ void room::taskBallLaundry()
         robot.setLinearAccelParams(100, -30, 0);
         robot.arc(35, -48, -4, COAST);
 
-         robot.setLinearAccelParams(100, 0, 25);
+        robot.setLinearAccelParams(100, 0, 25);
         robot.straight(25, 7, NONE);    
         pickLaundry(2);
         robot.setLinearAccelParams(100, 25, 20);
@@ -479,7 +479,7 @@ void room::taskBallLaundry()
         robot.setLinearAccelParams(100, -30, 0);
         robot.arc(35, -48, 4, COAST);
 
-         robot.setLinearAccelParams(100, 0, 25);
+        robot.setLinearAccelParams(100, 0, 25);
         robot.straight(25, 7, NONE);    
         pickLaundry(2);
         robot.setLinearAccelParams(100, 25, 20);
@@ -621,19 +621,6 @@ baskets findBasket(colors color)
     return static_cast<baskets>(result);
 }
 
-colors clasifyBasket(colorspaceHSV hsv)
-{
-    if(hsv.saturation > 40)
-    {
-        if(hsv.hue > 4)
-            return YELLOW;
-        else 
-            return RED;
-    }
-    else
-        return BLACK;
-}
-
 colors findTheLastColor(colors *cols, int numOfCols)
 {
     colors available[] = {RED, YELLOW, BLACK};
@@ -656,10 +643,9 @@ colors findTheLastColor(colors *cols, int numOfCols)
 
 void turnToBasket(baskets current, baskets target)
 {
-    //TODO
     int turnDifference = target - current;
     if(turnDifference != 0)
-        robot.arc(35, -36 * turnDifference, 0, COAST); //32
+        robot.arc(35, -36 * turnDifference, 0, COAST);
 }
 
 
