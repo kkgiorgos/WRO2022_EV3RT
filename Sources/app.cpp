@@ -360,13 +360,13 @@ void main_task(intptr_t unused)
     fullRouteStandard(W);
     pickWater();
 
-    fullRouteStandard(GR);
+    fullRouteStandard(G);
     rooms[GREEN].executeAllActions();
-    fullRouteStandard(RR);
+    fullRouteStandard(R);
     rooms[RED].executeAllActions();
-    fullRouteStandard(BR);
+    fullRouteStandard(B);
     rooms[BLUE].executeAllActions();
-    fullRouteStandard(YR);
+    fullRouteStandard(Y);
     rooms[YELLOW].executeAllActions();
     fullRouteStandard(L);
 
