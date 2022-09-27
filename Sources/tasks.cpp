@@ -296,7 +296,7 @@ void room::taskWater()
         robot.arc(45, 90, 3, NONE);
         robot.setLinearAccelParams(100, 20, 20);
         robot.arcUnlim(20, 3, FORWARD, true);
-        while(rightSensor.getReflected() < 50)
+        while(rightSensor.getReflected() < 50 && abs(robot.getAngle()) < 5)
             robot.arcUnlim(20, 3, FORWARD);
 
         leaveWater(3);
@@ -318,7 +318,7 @@ void room::taskWater()
         robot.arc(45, 90, -3, NONE);
         robot.setLinearAccelParams(100, 20, 20);
         robot.arcUnlim(20, -3, FORWARD, true);
-        while(leftSensor.getReflected() < 50)
+        while(leftSensor.getReflected() < 50 && abs(robot.getAngle()) < 5)
             robot.arcUnlim(20, -3, FORWARD);
 
         leaveWater(3);
@@ -352,7 +352,7 @@ void room::taskWaterLaundry()
         robot.arc(45, 95, 3, NONE);
         robot.setLinearAccelParams(100, 20, 20);
         robot.arcUnlim(20, 3, FORWARD, true);
-        while(rightSensor.getReflected() < 50)
+        while(rightSensor.getReflected() < 50 && abs(robot.getAngle()) < 5)
             robot.arcUnlim(20, 3, FORWARD);
     }
     else //RED_BLUE
@@ -380,7 +380,7 @@ void room::taskWaterLaundry()
         robot.arc(45, 95, -3, NONE);
         robot.setLinearAccelParams(100, 20, 20);
         robot.arcUnlim(20, -3, FORWARD, true);
-        while(leftSensor.getReflected() < 50)
+        while(leftSensor.getReflected() < 50 && abs(robot.getAngle()) < 5)
             robot.arcUnlim(20, -3, FORWARD);
     }
 }
@@ -708,6 +708,7 @@ bool detectColorLine(colorSensor &sensor, colors target)
 bool detectWhiteRoomBed(colorSensor &sensor)
 {
     colorspaceRGB rgb = sensor.getRGB();
+    tslp_tsk(1);
     return rgb.red > 200 && rgb.green > 200 && rgb.blue > 200;
 }
 

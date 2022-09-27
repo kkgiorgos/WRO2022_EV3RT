@@ -109,7 +109,7 @@ void init()
 
     display.format("WAIT FOR SENSORS\n");
     btnEnter.waitForClick();
-    // act_tsk(INIT_TASK);
+    act_tsk(INIT_TASK);
     tslp_tsk(1);
 }
 
@@ -355,58 +355,13 @@ void main_task(intptr_t unused)
     //     }
     // }
 
-    //Line follower start 30 unreg speed for 10cm speed up to 45 unreg speed for majority of  movement 10cm of 30 unreg speed before end plus 20 speed reg for 5cm and to the line
-    //Turn left and right 90 degrees on the arc with center of -5.5 or 5.5 respectively to center sensors from lifo, if you want to follow on a different edge you add or subtract 2cm respectively
-    //Change in lifo side on the move: start with one side and then return to normal requires no intervention, start normal and go to one side requires turn at the speed of movement with center 20 (-20) for 10degrees
-    //Lifo on different edges need pid scaling of 1.6 - 2 times.
 
-    lifo1LineDist(CENTERED, 60);
-    leftTurn(CENTERED);
-    lifo1LineDist(CENTERED, 12, 3, 5, 5);
-    leftTurn(LEFT_OF_LINE);
-    lifo1LineDist(LEFT_OF_LINE, 70);
-    rightTurn(CENTERED);
-    lifo1LineDist(CENTERED, 20, 7, 7, 6, false);
-    reverse(CENTERED, CENTERED);
-    lifo1LineDist(CENTERED, 15, 5, 5, 5);
-    leftTurn(RIGHT_OF_LINE);
-    lifo1LineDist(RIGHT_OF_LINE, 70);
-    rightTurn(CENTERED);
-    lifo1LineDist(CENTERED, 12, 3, 5, 5);
-    rightTurn(LEFT_OF_LINE);
-    lifo1LineDist(LEFT_OF_LINE, 60);
-    reverse(LEFT_OF_LINE, CENTERED);
-    lifo1LineDist(CENTERED, 60);
-    reverse(CENTERED, RIGHT_OF_LINE);
-    lifo1LineDist(RIGHT_OF_LINE, 60);
-    reverse(RIGHT_OF_LINE, LEFT_OF_LINE);
-    lifo1LineDist(LEFT_OF_LINE, 60);
-    reverse(LEFT_OF_LINE, LEFT_OF_LINE);
-    lifo1LineDist(LEFT_OF_LINE, 60);
-    reverse(LEFT_OF_LINE, RIGHT_OF_LINE);
-    lifo1LineDist(RIGHT_OF_LINE, 60, 10, 10, 5, false);
-    reverse(RIGHT_OF_LINE, CENTERED);
-    lifo1LineDist(CENTERED, 60);
-    reverse(CENTERED, CENTERED);
-    t.reset();
-    lifo1LineDist(CENTERED, 30, 15, 15, 0, false, NONE);
-    switchLifoRobotPosition(30/t.secElapsed(), CENTERED, LEFT_OF_LINE);
-    lifo1LineDist(LEFT_OF_LINE, 30);
-    reverse(LEFT_OF_LINE, CENTERED);
-    t.reset();
-    lifo1LineDist(CENTERED, 30, 15, 15, 0, false, NONE);
-    switchLifoRobotPosition(30/t.secElapsed(), CENTERED, RIGHT_OF_LINE);
-    lifo1LineDist(RIGHT_OF_LINE, 30);
-    reverse(RIGHT_OF_LINE, RIGHT_OF_LINE);
-    lifo1LineDist(RIGHT_OF_LINE, 30, 15, 15, 0, false, NONE);
-    lifo1LineDist(CENTERED, 30);
-    reverse(CENTERED, LEFT_OF_LINE);
-    lifo1LineDist(LEFT_OF_LINE, 30, 15, 15, 0, false, NONE);
-    lifo1LineDist(CENTERED, 30);
 
-    // startProcedure();
+    startProcedure();
 
-    // fullRouteStandard(W);
+    fullRouteStandard(W);
+    pickWaterTriple();
+
     // pickWater();
 
     // fullRouteStandard(G);
