@@ -323,29 +323,27 @@ void main_task(intptr_t unused)
     //     tslp_tsk(10);
     // }
 
+    startProcedure();
 
-    // startProcedure();
+    fullRouteStandard(W);
 
-    // fullRouteStandard(W);
+    pickWater();
 
-    // pickWater();
+    fullRouteStandard(G);
+    rooms[GREEN].executeAllActions();
+    fullRouteStandard(R);
+    rooms[RED].executeAllActions();
+    fullRouteStandard(B);
+    rooms[BLUE].executeAllActions();
+    fullRouteStandard(Y);
+    rooms[YELLOW].executeAllActions();
+    fullRouteStandard(L);
 
-    // fullRouteStandard(G);
-    // rooms[GREEN].executeAllActions();
-    // fullRouteStandard(R);
-    // rooms[RED].executeAllActions();
-    // fullRouteStandard(B);
-    // rooms[BLUE].executeAllActions();
-    // fullRouteStandard(Y);
-    // rooms[YELLOW].executeAllActions();
-    // fullRouteStandard(L);
+    scanLaundryBaskets();
+    leaveLaundry();
 
-    // scanLaundryBaskets();
-    // leaveLaundry();
-
-    // fullRouteStandard(S);
-    // finishProcedure();
-
+    fullRouteStandard(S);
+    finishProcedure();
 
     robot.stop(BRAKE);
 

@@ -863,7 +863,37 @@ void pickWaterTriple()
 void pickWaterLast()
 {
     DEBUGPRINT("\nPicking last water bottle (remaining) at the end (variation).\n");
-    //TODO
+    
+    robot.setLinearAccelParams(100, 20, 25);
+    robot.straight(25, 5, NONE);
+    robot.setLinearAccelParams(100, 25, 0);
+    robot.straight(25, 2, BRAKE);
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+
+    robot.setLinearAccelParams(100, -10, 0);
+    robot.arc(40, -40, 8.5, BRAKE);
+
+    robot.setLinearAccelParams(100, 10, 30);
+    robot.straight(40, 10, COAST);
+    act_tsk(PICK_BLOCK_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(30, 3, BRAKE);
+    while(grabber.getTachoCount() < 200) 
+        tslp_tsk(10);
+    rampQueue.push(BOTTLE);
+
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(45, -5, COAST);
+
+    robot.setLinearAccelParams(100, 10, 0);
+    robot.arc(40, 40, 8.5, BRAKE);
+
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(40, 180, COAST);
+
+    currentDirection = SOUTH;
 }
 
 void pickWaterTriple();
@@ -1009,11 +1039,9 @@ void finishProcedure()
     DEBUGPRINT("\nEnding movement :(\n");
 
     //Getting inside finishing square
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
     act_tsk(END_TASK);
     tslp_tsk(1);
-    robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 20, 0);
-    robot.straight(45, 21, COAST);
-    robot.setLinearAccelParams(100, 0, 0);
-    robot.arc(45, 45, 0, BRAKE);
+    robot.arc(45, 45, 2, BRAKE);
 }

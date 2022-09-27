@@ -704,12 +704,10 @@ orientation L_S(orientation dir)
     DEBUGPRINT("\nL_S\n");
 
     //Get to right before the start/finish square
-    resetLifo();
-    lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
-    setLifoSlow();
-    lifo.setAccelParams(150, 20, 20);
-    lifo.distance(20, 3, NONE);
+    lifo1LineDist(CENTERED, 7, 2, 2, 3, SPECIAL_REF, NONE);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 20, 0);
+    robot.straight(45, 21, COAST);
 
     return NORTH;
 }
