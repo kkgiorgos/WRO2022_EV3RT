@@ -303,7 +303,7 @@ void rightTurn(lifoRobotPosition endAlignment, ev3ys::breakMode stopMode)
     robot.arc(45, 90, arcCenter, stopMode);
 }
 
-void lifo1LineDist(lifoRobotPosition alignment, double totalDistance, double startPhaseDist, double endPhaseDist, double slowDist, bool detectLine, ev3ys::breakMode stopMode)
+void lifo1LineDist(lifoRobotPosition alignment, double totalDistance, double startPhaseDist, double endPhaseDist, double slowDist, lineDetectionMode detectLine, ev3ys::breakMode stopMode)
 {
     timer t;
     double speed;
@@ -330,9 +330,67 @@ void lifo1LineDist(lifoRobotPosition alignment, double totalDistance, double sta
     if(alignment == RIGHT_OF_LINE)
         lifo.setDoubleFollowMode("50", "SL");
     lifo.setAccelParams(150, speed, 20);
-    lifo.distance(20, slowDist, (detectLine) ? NONE : stopMode);
-    if(detectLine) 
+    lifo.distance(20, slowDist, (detectLine != NO_DETECT) ? NONE : stopMode);
+    lifo.setAccelParams(150, 20, 20);
+    if(detectLine == NORMAL) 
+    {
         lifo.lines(20, 1, stopMode);
+    }
+    else if(detectLine == COLORED)
+    {
+        lifo.setSensorMode(WHITE_RGB);
+        lifo.unlimited(20, true);
+        bool isDone = false;
+        colorspaceRGB lCur, lPrev, rCur, rPrev;
+        timer conditionTimer;
+        lCur = lPrev = leftSensor.getRGB();
+        rCur = rPrev = rightSensor.getRGB();
+        while(!isDone)
+        {
+            lifo.unlimited(20);
+            if(conditionTimer.secElapsed() > 0.01)
+            {
+                lCur = leftSensor.getRGB();
+                rCur = rightSensor.getRGB();
+
+                isDone = abs((lCur.red + rCur.red) - (lPrev.red + rPrev.red)) > 30
+                    || abs((lCur.green + rCur.green) - (lPrev.green + rPrev.green)) > 30
+                    || abs((lCur.blue + rCur.blue) - (lPrev.blue + rPrev.blue)) > 30;
+
+                lPrev = lCur;
+                rPrev = rCur;
+                conditionTimer.reset();
+            }
+        }
+        leftSensor.getReflected();
+        rightSensor.getReflected();
+        lifo.stop(stopMode);
+    } 
+    else if(detectLine == SPECIAL_REF)
+    {
+        lifo.unlimited(20, true);
+        bool isDone = false;
+        int lCur, lPrev, rCur, rPrev;
+        timer conditionTimer;
+        lCur = lPrev = leftSensor.getReflected();
+        rCur = rPrev = rightSensor.getReflected();
+        while(!isDone)
+        {
+            lifo.unlimited(20);
+            if(conditionTimer.secElapsed() > 0.01)
+            {
+                lCur = leftSensor.getReflected();
+                rCur = rightSensor.getReflected();
+
+                isDone = abs((lCur + rCur) - (lPrev + rPrev)) > 10;
+
+                lPrev = lCur;
+                rPrev = rCur;
+                conditionTimer.reset();
+            }
+        }
+        lifo.stop(stopMode);
+    }
 }
 
 void switchLifoRobotPosition(double speed, lifoRobotPosition startAlignment, lifoRobotPosition endAlignment)
@@ -342,6 +400,18 @@ void switchLifoRobotPosition(double speed, lifoRobotPosition startAlignment, lif
         robot.setMode(CONTROLLED);
         robot.setLinearAccelParams(100, speed, speed);
         robot.arc(speed, 10, (endAlignment == LEFT_OF_LINE) ? -20 : 20, NONE);
+    }
+    if(startAlignment == RIGHT_OF_LINE && endAlignment == CENTERED)
+    {
+        robot.setMode(CONTROLLED);
+        robot.setLinearAccelParams(100, speed, speed);
+        robot.arc(speed, 10, -20, NONE);
+    }
+    if(startAlignment == LEFT_OF_LINE && endAlignment == CENTERED)
+    {
+        robot.setMode(CONTROLLED);
+        robot.setLinearAccelParams(100, speed, speed);
+        robot.arc(speed, 10, 20, NONE);
     }
     currentAlignment = endAlignment;
 }

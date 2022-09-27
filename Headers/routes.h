@@ -56,6 +56,7 @@ void fullRouteStandard(int target);
 
 //Turn functions
 void standardTurn(orientation start, orientation finish, lifoRobotPosition endAlignment);
+void centralTurn(orientation start, orientation finish);
 
 //Actual route implementations
 //Main network

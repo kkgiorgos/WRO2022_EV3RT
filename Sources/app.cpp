@@ -324,43 +324,9 @@ void main_task(intptr_t unused)
     // }
 
 
-    // resetLifo();
-    // lifo.setPIDparams(KP * 1.2, slowKI * 0.7, KD*1.5, 1);
-    // lifo.distance(robot.cmToTacho(30), 10, NONE);
-    // setLifoSlow();
-    // lifo.setAccelParams(150, 20, 20);
-    // lifo.distance(20, 5, NONE);
-    // lifo.setSensorMode(WHITE_RGB);
-    // lifo.unlimited(20, true);
-    // bool isDone = false;
-    // colorspaceRGB lCur, lPrev, rCur, rPrev;
-    // timer conditionTimer;
-    // lCur = lPrev = leftSensor.getRGB();
-    // rCur = rPrev = rightSensor.getRGB();
-    // while(!isDone)
-    // {
-    //     lifo.unlimited(20);
-    //     if(conditionTimer.secElapsed() > 0.01)
-    //     {
-    //         lCur = leftSensor.getRGB();
-    //         rCur = rightSensor.getRGB();
+    // startProcedure();
 
-    //         isDone = abs((lCur.red + rCur.red) - (lPrev.red + rPrev.red)) > 30
-    //             || abs((lCur.green + rCur.green) - (lPrev.green + rPrev.green)) > 30
-    //             || abs((lCur.blue + rCur.blue) - (lPrev.blue + rPrev.blue)) > 30;
-
-    //         lPrev = lCur;
-    //         rPrev = rCur;
-    //         conditionTimer.reset();
-    //     }
-    // }
-
-
-
-    startProcedure();
-
-    fullRouteStandard(W);
-    pickWaterTriple();
+    // fullRouteStandard(W);
 
     // pickWater();
 
@@ -379,6 +345,7 @@ void main_task(intptr_t unused)
 
     // fullRouteStandard(S);
     // finishProcedure();
+
 
     robot.stop(BRAKE);
 

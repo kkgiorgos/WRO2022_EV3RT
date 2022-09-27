@@ -781,7 +781,7 @@ void pickWater()
         robot.straightUnlim(30);
 
     resetLifo();
-    lifo.setPIDparams(KP*1.2, slowKI * 0.7, KD*1.5, 1);
+    lifo.setPIDparams(KP*1.2, KI * 0.7, KD*1.5, 1);
     lifo.distance(robot.cmToTacho(30), 8, NONE);
     setLifoSlow();
     lifo.setAccelParams(150, 30, 30);
@@ -791,7 +791,74 @@ void pickWater()
 void pickWaterTriple()
 {
     DEBUGPRINT("\nPicking all three water bottles (variations).\n");
-    //TODO
+        
+    //Pick First Bottle
+    robot.setLinearAccelParams(100, 20, 25);
+    robot.straight(25, 5, NONE);
+    act_tsk(WATER_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, 25, 0);
+    robot.straight(25, 2, BRAKE);
+    while(grabber.getTachoCount() < 200) 
+        tslp_tsk(10);
+    DEBUGPRINT("First bottle of water has been loaded.\n");
+    rampQueue.push(BOTTLE);
+
+    //Pick Second Bottle (left)
+    robot.setLinearAccelParams(100, -10, 0);
+    robot.arc(40, -40, 8.5, BRAKE);
+    while(grabberUsed)
+        tslp_tsk(10);
+
+    robot.setLinearAccelParams(100, 10, 30);
+    robot.straight(40, 10, COAST);
+    act_tsk(WATER_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(30, 3, BRAKE);
+    while(grabber.getTachoCount() < 200) 
+        tslp_tsk(10);
+    DEBUGPRINT("Second bottle of water has been loaded.\n");
+    rampQueue.push(BOTTLE);
+
+    //Pick Third Bottle (right)
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(40, -2, COAST);
+    robot.setLinearAccelParams(100, -10, 0);
+    robot.arc(40, -80, -8.5, BRAKE);
+    while(grabberUsed)
+        tslp_tsk(10);
+
+    robot.setLinearAccelParams(100, 10, 30);
+    robot.straight(40, 13, COAST);
+    act_tsk(PICK_BLOCK_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(30, 3, BRAKE);
+    while(grabber.getTachoCount() < 200) 
+        tslp_tsk(10);
+    DEBUGPRINT("Third bottle of water has been loaded.\n");
+    rampQueue.push(BOTTLE);
+
+    robot.setLinearAccelParams(100, 20, 20);
+    robot.arc(40, 90, 3, COAST);
+
+    robot.setLinearAccelParams(100, 0, 30);
+    robot.straightUnlim(30, true);
+    while(robot.getPosition() < 1) 
+        robot.straightUnlim(30);
+    while(rightSensor.getReflected() > 80)
+        robot.straightUnlim(30);
+    while(leftSensor.getReflected() > 80)
+        robot.straightUnlim(30);
+
+    resetLifo();
+    lifo.setPIDparams(KP*1.2, KI * 0.7, KD*1.5, 1);
+    lifo.distance(robot.cmToTacho(30), 8, NONE);
+    setLifoSlow();
+    lifo.setAccelParams(150, 30, 30);
+    lifo.distance(30, 6, NONE);
+    lifo.lines(30, 1, NONE);
 }
 void pickWaterLast()
 {
