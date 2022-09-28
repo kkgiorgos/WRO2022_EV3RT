@@ -35,7 +35,7 @@ colorSensor rightSensor(SensorPort::S3, false, "WRO2022");
 colorSensor leftScanner(SensorPort::S1, false, "WRO2022");
 colorSensor rightScanner(SensorPort::S4, false, "WRO2022");
 lineFollower lifo(700, &robot, &leftSensor, &rightSensor);
-
+timer universalTimer;
 
 queue<items, list<items>> rampQueue;
 colors laundryBaskets[3];
@@ -117,6 +117,7 @@ bool grabberUsed = false;
 bool startPicking = false;
 bool stopScanning = false;
 int scanStage = 0;
+int prevLeft = -1, prevRight = -1;
 
 void open_grabber_task(intptr_t unused)
 {
@@ -273,14 +274,7 @@ void end_task(intptr_t unused)
 {
     //CLOSES EVERYTHING
     grabber.setMode(REGULATED);
-    grabber.moveUnlimited(700, true);
-    tslp_tsk(50);
-    while(grabber.getCurrentSpeed() > 350)
-    {
-        grabber.moveUnlimited(700);
-        tslp_tsk(1);
-    }
-    grabber.stop(BRAKE);
+    grabber.moveSeconds(500, 1, BRAKE);
     ramp.setMode(REGULATED);
     ramp.moveUnlimited(-800, true);
     tslp_tsk(50);
@@ -307,7 +301,9 @@ void main_task(intptr_t unused)
     startData();
 
     // grabber.stop();
-
+    // double min[4] = {1,2,1,2};
+    // double max[4] = {68,73,55,196};
+    // leftScanner.setRgbCalParams(min, max);
     // leftScanner.setNormalisation(false);
     // rightScanner.setNormalisation(false);
     // display.resetScreen();
@@ -319,9 +315,13 @@ void main_task(intptr_t unused)
     //     colorspaceHSV l2 = leftScanner.getHSV();
     //     colorspaceHSV r2 = rightScanner.getHSV();
     //     // format(bt, "L: H: %  S: %  V: %  \nR: H: %  S: %  V: %  \n\n") %l2.hue %l2.saturation %l2.value %r2.hue %r2.saturation %r2.value;
-    //     display.format("L: %  \nR: %  \n\n\n") %static_cast<int>(scanLaundryBasket(leftScanner)) %static_cast<int>(scanLaundryBasket(rightScanner));
+    //     display.format("L: %  \nR: %  \n\n\n") %static_cast<int>(scanLaundryBlock(leftScanner)) %static_cast<int>(scanLaundryBlock(rightScanner));
     //     tslp_tsk(10);
     // }
+
+
+    // btnEnter.waitForClick();
+
 
     startProcedure();
 

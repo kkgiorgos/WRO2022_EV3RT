@@ -150,7 +150,7 @@ void room::scanLaundry()
         }
     }
     robot.setLinearAccelParams(100, 35, 0);
-    robot.straight(35, (color == RED ? 5.5 : 6.1), COAST); //ADD 0.6cm if room is NOT red
+    robot.straight(35, (color == RED ? 4.8 : 5.4), COAST); //ADD 0.6cm if room is NOT red (5.5, 6.1)
 
     leftSensor.getReflected();
     rightSensor.getReflected();
@@ -296,7 +296,7 @@ void room::taskWater()
         robot.arc(45, 90, 3, NONE);
         robot.setLinearAccelParams(100, 20, 20);
         robot.arcUnlim(20, 3, FORWARD, true);
-        while(rightSensor.getReflected() < 50 && abs(robot.getAngle()) < 5)
+        while(rightSensor.getReflected() < 50)
             robot.arcUnlim(20, 3, FORWARD);
 
         leaveWater(3);
@@ -318,7 +318,7 @@ void room::taskWater()
         robot.arc(45, 90, -3, NONE);
         robot.setLinearAccelParams(100, 20, 20);
         robot.arcUnlim(20, -3, FORWARD, true);
-        while(leftSensor.getReflected() < 50 && abs(robot.getAngle()) < 5)
+        while(leftSensor.getReflected() < 50)
             robot.arcUnlim(20, -3, FORWARD);
 
         leaveWater(3);
@@ -352,7 +352,7 @@ void room::taskWaterLaundry()
         robot.arc(45, 95, 3, NONE);
         robot.setLinearAccelParams(100, 20, 20);
         robot.arcUnlim(20, 3, FORWARD, true);
-        while(rightSensor.getReflected() < 50 && abs(robot.getAngle()) < 5)
+        while(rightSensor.getReflected() < 50)
             robot.arcUnlim(20, 3, FORWARD);
     }
     else //RED_BLUE
@@ -380,7 +380,7 @@ void room::taskWaterLaundry()
         robot.arc(45, 95, -3, NONE);
         robot.setLinearAccelParams(100, 20, 20);
         robot.arcUnlim(20, -3, FORWARD, true);
-        while(leftSensor.getReflected() < 50 && abs(robot.getAngle()) < 5)
+        while(leftSensor.getReflected() < 50)
             robot.arcUnlim(20, -3, FORWARD);
     }
 }
@@ -591,7 +591,7 @@ tasks findTask(colors color)
 {
     if(color == WHITE)
         return WATER;
-    else if(color == GREEN)
+    else // if(color == GREEN)
         return BALL;
 }
 
@@ -607,6 +607,21 @@ colors findColorOfItem(items item)
             return YELLOW;
         default:
             return WHITE;   //Should not happen
+    }
+}
+
+items findItem(ev3ys::colors color)
+{
+    switch(color)
+    {
+        case BLACK:
+            return LAUNDRY_BLACK;
+        case RED:
+            return LAUNDRY_RED;
+        case YELLOW:
+            return LAUNDRY_YELLOW;
+        default:
+            return BOTTLE;   //Should not happen
     }
 }
 
@@ -663,7 +678,7 @@ colors scanLaundryBlock(colorSensor &scanner)
 
     if(rgb.red >= 3 * rgb.green) return RED;
     if(rgb.red > 2 * rgb.blue && rgb.green > 2 * rgb.blue && rgb.red > rgb.green) return YELLOW;
-    if(rgb.red > 1 && rgb.green > 1 && rgb.blue > 1 && rgb.white < 100) return BLACK;
+    if(rgb.green > 1 && rgb.white < 100) return BLACK;
 
     return WHITE;
 }
@@ -787,6 +802,7 @@ void pickWater()
     lifo.setAccelParams(150, 30, 30);
     lifo.distance(30, 6, NONE);
     lifo.lines(30, 1, NONE);
+    lifo.distance(30, 1, NONE);
 }
 void pickWaterTriple()
 {
@@ -859,6 +875,7 @@ void pickWaterTriple()
     lifo.setAccelParams(150, 30, 30);
     lifo.distance(30, 6, NONE);
     lifo.lines(30, 1, NONE);
+    lifo.distance(30, 1, NONE);
 }
 void pickWaterLast()
 {
@@ -896,8 +913,6 @@ void pickWaterLast()
     currentDirection = SOUTH;
 }
 
-void pickWaterTriple();
-
 void scanLaundryBaskets()
 {
     DEBUGPRINT("\nScanning laundry baskets.\n");
@@ -919,6 +934,19 @@ void scanLaundryBaskets()
     colors temp[2];
     temp[0] = laundryBaskets[BASKET_LEFT];
     temp[1] = laundryBaskets[BASKET_RIGHT];
+
+    //Simple fix for if there is a mistake in the readings so that the robot can finish the mission (wrongly :( )
+    if(temp[0] == BLACK && temp[1] == BLACK)
+    {
+        DEBUGPRINT("Mistake in laundry basket scanning !!!");
+        temp[1] = RED;
+    }
+    else if(temp[0] == temp[1])
+    {
+        DEBUGPRINT("Mistake in laundry basket scanning !!!");
+        temp[1] = (temp[0] == RED) ? YELLOW : RED;
+    }
+
     laundryBaskets[BASKET_MIDDLE] = findTheLastColor(temp, 3);
 
 
@@ -976,6 +1004,10 @@ void leaveLaundry()
 
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(100, 0, 0);
+
+    //Detect possible mistakes (color detection issues i.e. duplicates in the queue or less than 3 items + laundry basket scanning problems duplicates) and change them to at least get some points and not lose the run completely
+    //TODO: easy fix is to change the scanning of the baskets that way nothing terrible will happen. ->DONE
+
 
     while(!rampQueue.empty())   //Repeat for every item
     {

@@ -100,6 +100,7 @@ extern std::map<ev3ys::colors, room> rooms;
 void printRampQueue();
 tasks findTask(ev3ys::colors color);
 ev3ys::colors findColorOfItem(items item);
+items findItem(ev3ys::colors color);
 baskets findBasket(ev3ys::colors color);
 ev3ys::colors findTheLastColor(ev3ys::colors *cols, int numOfCols = 3);
 

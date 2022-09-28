@@ -13,6 +13,8 @@ extern double slowKD;
 
 extern double colorCoef;
 
+extern int prevLeft, prevRight;
+
 void resetLifo();
 void setLifoNormalReg();
 void setLifoSlow();

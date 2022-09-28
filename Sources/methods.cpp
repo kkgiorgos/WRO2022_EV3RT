@@ -50,6 +50,8 @@ void setLifoLeft(bool slow)
         lifo.setPIDparams(slowKP*1.7, slowKI*1.7, slowKD*2, PIDspeed);
     else
         lifo.setPIDparams(KP*1.7, KI*1.7, KD*2, PIDspeed);
+    prevRight = rightSensor.getReflected();
+    universalTimer.reset();
 }
 
 void setLifoLeftExtreme(bool slow)
@@ -59,6 +61,8 @@ void setLifoLeftExtreme(bool slow)
         lifo.setPIDparams(slowKP*3, slowKI*1.5, slowKD*5, PIDspeed);   
     else
         lifo.setPIDparams(KP*3, KI*1.5, KD*5, PIDspeed);   
+    prevRight = rightSensor.getReflected();
+    universalTimer.reset();
 }
 
 void setLifoRight(bool slow)
@@ -68,6 +72,8 @@ void setLifoRight(bool slow)
         lifo.setPIDparams(slowKP*1.7, slowKI*1.7, slowKD*2, PIDspeed);
     else
         lifo.setPIDparams(KP*1.7, KI*1.7, KD*2, PIDspeed);
+    prevLeft = leftSensor.getReflected();
+    universalTimer.reset();
 }
 
 void setLifoRightExtreme(bool slow)
@@ -77,12 +83,14 @@ void setLifoRightExtreme(bool slow)
         lifo.setPIDparams(slowKP*3, slowKI*1.5, slowKD*5, PIDspeed);   
     else
         lifo.setPIDparams(KP*3, KI*1.5, KD*5, PIDspeed);   
+    prevLeft = leftSensor.getReflected();
+    universalTimer.reset();
 }
 
 void executeLifoLeftUnlim(int velocity)
 {
     int refRight = rightSensor.getReflected();
-    if(refRight < 15 || refRight > 80)
+    if(refRight < 25 || refRight > 40)
         lifo.setDoubleFollowMode("N", "N");
     else
         lifo.setDoubleFollowMode("SL", "70");
@@ -92,7 +100,7 @@ void executeLifoLeftUnlim(int velocity)
 void executeLifoRightUnlim(int velocity)
 {
     int refLeft = leftSensor.getReflected();
-    if(refLeft < 15 || refLeft > 80)
+    if(refLeft < 25 || refLeft > 40)
         lifo.setDoubleFollowMode("N", "N");
     else
         lifo.setDoubleFollowMode("70", "SR");
