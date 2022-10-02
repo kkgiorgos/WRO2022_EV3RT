@@ -268,7 +268,7 @@ void emptyRampWaterStage2()
         ramp.moveUnlimited(500);
         tslp_tsk(1);
     }
-    ramp.stop(BRAKE_COAST);   
+    ramp.stop(BRAKE);   
 }
 
 void reverse(lifoRobotPosition startAlignment, lifoRobotPosition endAlignment, ev3ys::breakMode stopMode)
@@ -314,12 +314,15 @@ void rightTurn(lifoRobotPosition endAlignment, ev3ys::breakMode stopMode)
 void lifo1LineDist(lifoRobotPosition alignment, double totalDistance, double startPhaseDist, double endPhaseDist, double slowDist, lineDetectionMode detectLine, ev3ys::breakMode stopMode)
 {
     timer t;
-    double speed;
+    double speed, coef;
     resetLifo();
     if(alignment == CENTERED)
-        lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
+        coef = 1;
+        // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
     else //ONE SENSOR EDGE FOLLOWING
-        lifo.setPIDparams(KP * 1.2 * 1.6, KI * 0.7 * 1.6, KD*1.5 * 1.6, 1);
+        coef = 1.8;
+        // lifo.setPIDparams(KP * 1.2 * 1.6, KI * 0.7 * 1.6, KD*1.5 * 1.6, 1);
+    lifo.setPIDparams(3 * coef, 3 * coef, 120 * coef, PIDspeed);
     if(alignment == LEFT_OF_LINE)
         lifo.setDoubleFollowMode("SR", "50");
     if(alignment == RIGHT_OF_LINE)

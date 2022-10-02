@@ -121,7 +121,7 @@ void room::scanLaundry()
     correctionOnTheMove();
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(100, 20, 45);
-    robot.straight(45, 6, NONE);
+    robot.straight(45, 5, NONE);
     robot.setLinearAccelParams(100, 45, 45);
     robot.straightUnlim(35, true);    
     laundry = WHITE;
@@ -150,7 +150,7 @@ void room::scanLaundry()
         }
     }
     robot.setLinearAccelParams(100, 35, 0);
-    robot.straight(35, (color == RED ? 4.8 : 5.4), COAST); //ADD 0.6cm if room is NOT red (5.5, 6.1)
+    robot.straight(35, (color == RED ? 4.5 : 5.1), COAST);//4.6, 5.2 //ADD 0.6cm if room is NOT red (5.5, 6.1)
 
     leftSensor.getReflected();
     rightSensor.getReflected();
@@ -260,7 +260,7 @@ void room::pickBall(int stage)
     {
         DEBUGPRINT("Picking the ball at the %s room.\n", name);
         currentState = PLAYING_BALL;
-        grabber.moveDegrees(600, 240, NONE, true);
+        grabber.moveDegrees(600, 250, NONE, true);
         grabber.moveDegrees(400, 115, BRAKE, false);
     }
 }
@@ -391,10 +391,10 @@ void room::taskBall()
     {
         pickBall(1);
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(45, 47, 3, COAST);
-        robot.straight(45, 6, BRAKE);
+        robot.arc(45, 51, 3, COAST);
+        robot.straight(45, 5.7, BRAKE);
         pickBall(2);
-        robot.arc(45, -117, 2, COAST);
+        robot.arc(45, -120, 2, COAST);
         
         robot.setLinearAccelParams(100, 0, 15);
         robot.straight(45, 14, NONE);
@@ -403,10 +403,10 @@ void room::taskBall()
         robot.straight(15, 2, COAST);
         
         robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(45, -10, COAST);
-        robot.arc(45, -113, 0, COAST);
+        robot.straight(45, -10.5, COAST);
+        robot.arc(45, -110, 0, COAST);
         robot.setLinearAccelParams(100, 0, 20);
-        robot.straight(45, 16, COAST);
+        robot.straight(45, 16.5, COAST);
     }
     else    //RED_BLUE
     {
@@ -486,7 +486,7 @@ void room::taskBallLaundry()
         robot.straight(45, 8.5, NONE);
         
         robot.setLinearAccelParams(100, 20, 0);
-        robot.arc(45, 95, 3, BRAKE);
+        robot.arc(45, 93, 3, BRAKE);
         while(grabberUsed)
             tslp_tsk(10);
 
@@ -495,7 +495,7 @@ void room::taskBallLaundry()
         robot.straight(45, 7.5, BRAKE);
         pickBall(2);
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(45, 86, 3, COAST);
+        robot.arc(45, 83, 3, COAST);
 
         robot.setLinearAccelParams(100, 0, 15);
         robot.straight(45, 17, NONE);
@@ -521,7 +521,7 @@ void room::enterRoom()
 
 void room::executeTask()
 {
-    if(task == WATER)
+    if(task == WATER || task == BOTH)
     {
         if(doLaundry)
             taskWaterLaundry();
@@ -543,10 +543,10 @@ void room::exitRoom()
     currentState = COMPLETE;
 
     //Exiting code
-    if(!(!doLaundry && task == WATER))
-    {
-        grabber.stop(COAST);
-    }
+    // if(!(!doLaundry && task == WATER))
+    // {
+    //     grabber.stop(COAST);
+    // }
 }
 
 void room::executeAllActions()
@@ -591,6 +591,8 @@ tasks findTask(colors color)
 {
     if(color == WHITE)
         return WATER;
+    else if(color == BLUE)
+        return BOTH;
     else // if(color == GREEN)
         return BALL;
 }
@@ -691,6 +693,7 @@ colors scanCodeBlock(colorSensor &scanner)
 
     if(rgb.white <= 3) return BLACK;
     if(rgb.green >= rgb.red + rgb.blue) return GREEN;
+    if(rgb.blue >= rgb.red && rgb.blue >= rgb.green) return BLUE;
     else return WHITE;
 }
 
@@ -742,8 +745,8 @@ void startProcedure()
     DEBUGPRINT("\nStarting movement!!!\n");
 
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 10, 30);
-    robot.straight(30, 15, COAST);
+    robot.setLinearAccelParams(100, 10, 35);
+    robot.straight(35, 15, COAST);
 
     //Get out of the start position
     currentDirection = NORTH;
@@ -797,12 +800,16 @@ void pickWater()
 
     resetLifo();
     lifo.setPIDparams(KP*1.2, KI * 0.7, KD*1.5, 1);
+    lifo.setPIDparams(3, 3, 120, 1);
     lifo.distance(robot.cmToTacho(30), 8, NONE);
-    setLifoSlow();
-    lifo.setAccelParams(150, 30, 30);
-    lifo.distance(30, 6, NONE);
-    lifo.lines(30, 1, NONE);
-    lifo.distance(30, 1, NONE);
+    // setLifoSlow();
+    // lifo.setAccelParams(150, 30, 30);
+    // lifo.distance(30, 6, NONE);
+    // lifo.lines(30, 1, NONE);
+    // lifo.distance(30, 1, NONE);
+    lifo.distance(robot.cmToTacho(35), 6, NONE);
+    lifo.lines(robot.cmToTacho(35), 1, NONE);
+    lifo.distance(robot.cmToTacho(35), 1.5, NONE);
 }
 void pickWaterTriple()
 {

@@ -301,9 +301,9 @@ void main_task(intptr_t unused)
     startData();
 
     // grabber.stop();
-    // double min[4] = {1,2,1,2};
-    // double max[4] = {68,73,55,196};
-    // leftScanner.setRgbCalParams(min, max);
+    // // double min[4] = {1,2,1,2};
+    // // double max[4] = {68,73,55,196};
+    // // leftScanner.setRgbCalParams(min, max);
     // leftScanner.setNormalisation(false);
     // rightScanner.setNormalisation(false);
     // display.resetScreen();
@@ -311,7 +311,7 @@ void main_task(intptr_t unused)
     // {
     //     colorspaceRGB l = leftScanner.getRGB();
     //     colorspaceRGB r = rightScanner.getRGB();
-    //     format(bt, "L: R: %  G: %  B: %  W: %  \nR: R: %  G: %  B: %  W: %  \n") %l.red %l.green %l.blue %l.white %r.red %r.green %r.blue %r.white;
+    //     // format(bt, "L: R: %  G: %  B: %  W: %  \nR: R: %  G: %  B: %  W: %  \n") %l.red %l.green %l.blue %l.white %r.red %r.green %r.blue %r.white;
     //     colorspaceHSV l2 = leftScanner.getHSV();
     //     colorspaceHSV r2 = rightScanner.getHSV();
     //     // format(bt, "L: H: %  S: %  V: %  \nR: H: %  S: %  V: %  \n\n") %l2.hue %l2.saturation %l2.value %r2.hue %r2.saturation %r2.value;
@@ -321,6 +321,19 @@ void main_task(intptr_t unused)
 
 
     // btnEnter.waitForClick();
+
+    // grabber.stop();
+    // // resetLifo();
+    // // lifo.setPIDparams(KP*1.2, KI * 0.7, KD*1.5, 1);
+    // // lifo.distance(robot.cmToTacho(30), 8, NONE);
+    // // setLifoSlow();
+    // // lifo.setAccelParams(150, 30, 30);
+    // // lifo.distance(30, 6, NONE);
+    // // lifo.lines(30, 1, NONE);
+    // // lifo.distance(30, 1, NONE);
+    // G_R(EAST);
+    // rooms[BLUE].setTask(GREEN);
+    // rooms[BLUE].executeAllActions();
 
 
     startProcedure();

@@ -26,7 +26,8 @@ enum baskets
 enum tasks
 {
     WATER,
-    BALL
+    BALL,
+    BOTH
 };
 
 class room

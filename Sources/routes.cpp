@@ -369,8 +369,9 @@ orientation S_W(orientation dir)
     DEBUGPRINT("\nS_W\n");
 
     resetLifo();
-    lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
+    lifo.setPIDparams(3, 3, 120, 1);
+    lifo.distance(robot.cmToTacho(35), 10, NONE);
     setLifoSlow();
     lifo.setAccelParams(150, 20, 20);
     lifo.distance(20, 3, NONE);
@@ -429,8 +430,7 @@ orientation W_G(orientation dir)
     //Lifo until right before task block (green room)
     resetLifo();
     setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(20), 2, NONE);
-    lifo.distance(robot.cmToTacho(30), 3, NONE);
+    lifo.distance(robot.cmToTacho(30), 5, NONE);
     setLifoLeft();
     while(rightSensor.getReflected() < 60)
         executeLifoLeftUnlim(robot.cmToTacho(30));
@@ -440,13 +440,14 @@ orientation W_G(orientation dir)
     appearances.clear();
     robot.resetPosition();
     lifo.setDoubleFollowMode("N", "N");
+    lifo.unlimited(robot.cmToTacho(40), true);
     while(robot.getPosition() < 8)
     {
         if((current = scanCodeBlock(rightScanner)) != BLACK)
         {
             appearances[current]++;
         }
-        lifo.unlimited(robot.cmToTacho(30));
+        lifo.unlimited(robot.cmToTacho(40));
     }
     current = analyzeFrequency(appearances, BLACK);
     rooms[GREEN].setTask(current);
@@ -454,27 +455,33 @@ orientation W_G(orientation dir)
 
 
     //Get to the intersection
+    robot.resetPosition();
+    timer t;
+    t.reset();
     resetLifo();
     setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(30), 8, NONE);
-    
-    lifo1WhiteLineLeftSlow(35, 2, 35, NONE);
+    lifo.distance(robot.cmToTacho(35), 8, NONE);
+    double speed = robot.getPosition()/t.secElapsed();
+
+    setLifoLeft();
+    while(rightSensor.getReflected() < 60)
+        lifo.unlimited(robot.cmToTacho(35));
 
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(150, 35, 0);
+    robot.setLinearAccelParams(150, speed, 0);
     robot.straight(35, 7, NONE);
 
-    //Turn towards the room
-    robot.setLinearAccelParams(100, -35, -35);
+    //Turn towards green room
+    robot.setLinearAccelParams(100, 0, -20);
     robot.arc(45, -80, -4, NONE);
-    robot.arcUnlim(35, -4, BACKWARD, true);
+    robot.arcUnlim(20, -4, BACKWARD, true);
     while(leftSensor.getReflected() > 60)
-        robot.arcUnlim(35, -4, BACKWARD); 
+        robot.arcUnlim(20, -4, BACKWARD);  
 
-    //Lifo till right before the entrance
+    //Lifo until right before green room's entrance
     resetLifo();
     setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    lifo.distance(robot.cmToTacho(30), 9, NONE);
     setLifoSlow();
     setLifoLeft(true);
     lifo.setAccelParams(100, 20, 20);
@@ -492,19 +499,19 @@ orientation G_R(orientation dir)
     lifo.distance(robot.cmToTacho(30), 10, NONE);
     setLifoRight();
     while(leftSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(30));
+        lifo.unlimited(robot.cmToTacho(35));
     lifo.setDoubleFollowMode("N", "N");
-    lifo.distance(robot.cmToTacho(30), 8, NONE);
+    lifo.distance(robot.cmToTacho(35), 8, NONE);
 
 
     //Lifo till right before the entrance of the red room
     resetLifo();
     setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    lifo.distance(robot.cmToTacho(30), 9, NONE);
     setLifoSlow();
     setLifoRight(true);
     lifo.setAccelParams(100, 20, 20);
-    lifo.distance(20, 5, NONE);
+    lifo.distance(20, 4, NONE);
 
     return NORTH;
 }
@@ -566,23 +573,24 @@ orientation R_B(orientation dir)
     //Slow down to correct possible mistakes and get to right before scan area
     resetLifo();
     setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(30), 5, NONE);
+    lifo.distance(robot.cmToTacho(35), 5, NONE);
     setLifoRight();
     while(leftSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(30));
+        lifo.unlimited(robot.cmToTacho(40));
 
     //Continue forwards scanning left (blue room) same way as green just mirrored
     colors current = BLACK;
     map<colors, int> appearances;
     robot.resetPosition();
     lifo.setDoubleFollowMode("N", "N");
+    lifo.unlimited(robot.cmToTacho(40), true);
     while(robot.getPosition() < 8)
     {
         if((current = scanCodeBlock(leftScanner)) != BLACK)
         {
             appearances[current]++;
         }
-        lifo.unlimited(robot.cmToTacho(30));
+        lifo.unlimited(robot.cmToTacho(40));
     }
     current = analyzeFrequency(appearances, BLACK);
     rooms[BLUE].setTask(current);
@@ -600,27 +608,32 @@ orientation R_B(orientation dir)
 
 
     //Move to the intersection 
+    robot.resetPosition();
+    t.reset();
     resetLifo();
     setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(30), 8, NONE);
-    
-    lifo1WhiteLineRightSlow(35, 2, 35, NONE);
+    lifo.distance(robot.cmToTacho(35), 8, NONE);
+    speed = robot.getPosition()/t.secElapsed();
+
+    setLifoRight();
+    while(leftSensor.getReflected() < 60)
+        lifo.unlimited(robot.cmToTacho(35));
 
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(150, 35, 0);
+    robot.setLinearAccelParams(150, speed, 0);
     robot.straight(35, 7, NONE);
 
     //Turn towards blue room
-    robot.setLinearAccelParams(100, -35, -35);
+    robot.setLinearAccelParams(100, 0, -20);
     robot.arc(45, -80, 4, NONE);
-    robot.arcUnlim(35, 4, BACKWARD, true);
+    robot.arcUnlim(20, 4, BACKWARD, true);
     while(rightSensor.getReflected() > 60)
-        robot.arcUnlim(35, 4, BACKWARD);  
+        robot.arcUnlim(20, 4, BACKWARD);  
 
     //Lifo until right before blue room's entrance
     resetLifo();
     setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    lifo.distance(robot.cmToTacho(30), 9, NONE);
     setLifoSlow();
     setLifoRight(true);
     lifo.setAccelParams(100, 20, 20);
@@ -638,18 +651,18 @@ orientation B_Y(orientation dir)
     lifo.distance(robot.cmToTacho(30), 10, NONE);
     setLifoLeft();
     while(rightSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(30));
+        lifo.unlimited(robot.cmToTacho(35));
     lifo.setDoubleFollowMode("N", "N");
-    lifo.distance(robot.cmToTacho(30), 8, NONE);
+    lifo.distance(robot.cmToTacho(35), 8, NONE);
 
     //Lifo until right before yellow room entrance
     resetLifo();
     setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    lifo.distance(robot.cmToTacho(30), 9, NONE);
     setLifoSlow();
     setLifoLeft(true);
     lifo.setAccelParams(100, 20, 20);
-    lifo.distance(20, 5, NONE);
+    lifo.distance(20, 4, NONE);
 
     return NORTH;
 }
@@ -672,8 +685,9 @@ orientation Y_L(orientation dir)
 
     //Correct turn mistakes with slow lifo
     resetLifo();
-    lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
-    lifo.distance(robot.cmToTacho(30), 5, NONE);
+    // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
+    lifo.setPIDparams(3, 3, 120, 1);
+    lifo.distance(robot.cmToTacho(35), 5, NONE);
 
     //Lifo until the intersection
     timer t;
@@ -696,8 +710,9 @@ orientation Y_L(orientation dir)
 
     //Lifo until the intersection
     resetLifo();
-    lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
+    lifo.setPIDparams(3, 3, 120, 1);
+    lifo.distance(robot.cmToTacho(35), 10, NONE);
     setLifoSlow();
     lifo.setAccelParams(150, 20, 20);
     lifo.distance(20, 3, NONE);
