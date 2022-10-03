@@ -18,22 +18,22 @@ room::room(colors col)
     switch(color)
     {
         case RED:
-            position = RR;
+            position = R;
             roomOrientation = RED_BLUE;
             sprintf(name, "red");
             break;
         case BLUE:
-            position = BR;
+            position = B;
             roomOrientation = RED_BLUE;
             sprintf(name, "blue");
             break;
         case GREEN:
-            position = GR;
+            position = G;
             roomOrientation = GREEN_YELLOW;
             sprintf(name, "green");
             break;
         case YELLOW:
-            position = YR;
+            position = Y;
             roomOrientation = GREEN_YELLOW;
             sprintf(name, "yellow");
             break;
@@ -99,7 +99,7 @@ void room::setTask(colors code)
     currentState = SCANNING;
 
     //Set task
-    task = (code == WHITE) ? WATER : BALL;
+    task = findTask(code);
 
     DEBUGPRINT("task is ");
     if(task == WATER)
@@ -121,7 +121,7 @@ void room::scanLaundry()
     correctionOnTheMove();
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(100, 20, 45);
-    robot.straight(45, 6, NONE);
+    robot.straight(45, 5, NONE);
     robot.setLinearAccelParams(100, 45, 45);
     robot.straightUnlim(35, true);    
     laundry = WHITE;
@@ -150,7 +150,7 @@ void room::scanLaundry()
         }
     }
     robot.setLinearAccelParams(100, 35, 0);
-    robot.straight(35, (color == RED ? 5.5 : 6.1), COAST); //ADD 0.6cm if room is NOT red
+    robot.straight(35, (color == RED ? 4.5 : 5.1), COAST);//4.6, 5.2 //ADD 0.6cm if room is NOT red (5.5, 6.1)
 
     leftSensor.getReflected();
     rightSensor.getReflected();
@@ -260,7 +260,7 @@ void room::pickBall(int stage)
     {
         DEBUGPRINT("Picking the ball at the %s room.\n", name);
         currentState = PLAYING_BALL;
-        grabber.moveDegrees(600, 240, NONE, true);
+        grabber.moveDegrees(600, 250, NONE, true);
         grabber.moveDegrees(400, 115, BRAKE, false);
     }
 }
@@ -391,10 +391,10 @@ void room::taskBall()
     {
         pickBall(1);
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(45, 47, 3, COAST);
-        robot.straight(45, 6, BRAKE);
+        robot.arc(45, 51, 3, COAST);
+        robot.straight(45, 5.7, BRAKE);
         pickBall(2);
-        robot.arc(45, -117, 2, COAST);
+        robot.arc(45, -120, 2, COAST);
         
         robot.setLinearAccelParams(100, 0, 15);
         robot.straight(45, 14, NONE);
@@ -403,10 +403,10 @@ void room::taskBall()
         robot.straight(15, 2, COAST);
         
         robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(45, -10, COAST);
-        robot.arc(45, -113, 0, COAST);
+        robot.straight(45, -10.5, COAST);
+        robot.arc(45, -110, 0, COAST);
         robot.setLinearAccelParams(100, 0, 20);
-        robot.straight(45, 16, COAST);
+        robot.straight(45, 16.5, COAST);
     }
     else    //RED_BLUE
     {
@@ -441,7 +441,7 @@ void room::taskBallLaundry()
         robot.setLinearAccelParams(100, -30, 0);
         robot.arc(35, -48, -4, COAST);
 
-         robot.setLinearAccelParams(100, 0, 25);
+        robot.setLinearAccelParams(100, 0, 25);
         robot.straight(25, 7, NONE);    
         pickLaundry(2);
         robot.setLinearAccelParams(100, 25, 20);
@@ -479,14 +479,14 @@ void room::taskBallLaundry()
         robot.setLinearAccelParams(100, -30, 0);
         robot.arc(35, -48, 4, COAST);
 
-         robot.setLinearAccelParams(100, 0, 25);
+        robot.setLinearAccelParams(100, 0, 25);
         robot.straight(25, 7, NONE);    
         pickLaundry(2);
         robot.setLinearAccelParams(100, 25, 20);
         robot.straight(45, 8.5, NONE);
         
         robot.setLinearAccelParams(100, 20, 0);
-        robot.arc(45, 95, 3, BRAKE);
+        robot.arc(45, 93, 3, BRAKE);
         while(grabberUsed)
             tslp_tsk(10);
 
@@ -495,7 +495,7 @@ void room::taskBallLaundry()
         robot.straight(45, 7.5, BRAKE);
         pickBall(2);
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(45, 86, 3, COAST);
+        robot.arc(45, 83, 3, COAST);
 
         robot.setLinearAccelParams(100, 0, 15);
         robot.straight(45, 17, NONE);
@@ -521,7 +521,7 @@ void room::enterRoom()
 
 void room::executeTask()
 {
-    if(task == WATER)
+    if(task == WATER || task == BOTH)
     {
         if(doLaundry)
             taskWaterLaundry();
@@ -543,10 +543,10 @@ void room::exitRoom()
     currentState = COMPLETE;
 
     //Exiting code
-    if(!(!doLaundry && task == WATER))
-    {
-        grabber.stop(COAST);
-    }
+    // if(!(!doLaundry && task == WATER))
+    // {
+    //     grabber.stop(COAST);
+    // }
 }
 
 void room::executeAllActions()
@@ -591,7 +591,9 @@ tasks findTask(colors color)
 {
     if(color == WHITE)
         return WATER;
-    else if(color == GREEN)
+    else if(color == BLUE)
+        return BOTH;
+    else // if(color == GREEN)
         return BALL;
 }
 
@@ -610,6 +612,21 @@ colors findColorOfItem(items item)
     }
 }
 
+items findItem(ev3ys::colors color)
+{
+    switch(color)
+    {
+        case BLACK:
+            return LAUNDRY_BLACK;
+        case RED:
+            return LAUNDRY_RED;
+        case YELLOW:
+            return LAUNDRY_YELLOW;
+        default:
+            return BOTTLE;   //Should not happen
+    }
+}
+
 baskets findBasket(colors color)
 {
     int result = -1;
@@ -619,19 +636,6 @@ baskets findBasket(colors color)
             result = i;
     }
     return static_cast<baskets>(result);
-}
-
-colors clasifyBasket(colorspaceHSV hsv)
-{
-    if(hsv.saturation > 40)
-    {
-        if(hsv.hue > 4)
-            return YELLOW;
-        else 
-            return RED;
-    }
-    else
-        return BLACK;
 }
 
 colors findTheLastColor(colors *cols, int numOfCols)
@@ -654,12 +658,83 @@ colors findTheLastColor(colors *cols, int numOfCols)
     }
 }
 
+colors analyzeFrequency(map<colors, int> appearances, colors base)
+{
+    colors result = base;
+    int maxCount = 0;
+    for(auto x: appearances)
+    {
+        if(x.second > maxCount)
+        {
+            maxCount = x.second;
+            result = x.first;    
+        }
+    }
+    return result;
+}
+
+colors scanLaundryBlock(colorSensor &scanner)
+{
+    scanner.setNormalisation(false);
+    colorspaceRGB rgb = scanner.getRGB();
+
+    if(rgb.red >= 3 * rgb.green) return RED;
+    if(rgb.red > 2 * rgb.blue && rgb.green > 2 * rgb.blue && rgb.red > rgb.green) return YELLOW;
+    if(rgb.green > 1 && rgb.white < 100) return BLACK;
+
+    return WHITE;
+}
+
+colors scanCodeBlock(colorSensor &scanner)
+{
+    scanner.setNormalisation(false);
+    colorspaceRGB rgb = scanner.getRGB();
+    colorspaceHSV hsv = scanner.getHSV();
+
+    if(rgb.white <= 3) return BLACK;
+    if(rgb.green >= rgb.red + rgb.blue) return GREEN;
+    if(rgb.blue >= rgb.red && rgb.blue >= rgb.green) return BLUE;
+    else return WHITE;
+}
+
+colors scanLaundryBasket(colorSensor &scanner)
+{
+    scanner.setNormalisation(false);
+    colorspaceRGB rgb = scanner.getRGB();
+
+    if(rgb.green > 3) return YELLOW;
+    if(rgb.red > 3) return RED;
+    return BLACK;
+}
+
+bool detectColorLine(colorSensor &sensor, colors target)
+{
+    // switch(target)
+    // {
+    //     case RED:
+    //         return sensor.getReflected() > 50;
+    //     case GREEN:
+    //         return sensor.getReflected() < 20;
+    //     case BLUE:
+    //         return sensor.getReflected() < 20;
+    //     case YELLOW:
+    //         return sensor.getReflected() > 80;
+    // }
+    return abs(sensor.getReflected() - 33) > 5;
+}
+
+bool detectWhiteRoomBed(colorSensor &sensor)
+{
+    colorspaceRGB rgb = sensor.getRGB();
+    tslp_tsk(1);
+    return rgb.red > 200 && rgb.green > 200 && rgb.blue > 200;
+}
+
 void turnToBasket(baskets current, baskets target)
 {
-    //TODO
     int turnDifference = target - current;
     if(turnDifference != 0)
-        robot.arc(35, -36 * turnDifference, 0, COAST); //32
+        robot.arc(35, -36 * turnDifference, 0, COAST);
 }
 
 
@@ -670,8 +745,8 @@ void startProcedure()
     DEBUGPRINT("\nStarting movement!!!\n");
 
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 10, 30);
-    robot.straight(30, 15, COAST);
+    robot.setLinearAccelParams(100, 10, 35);
+    robot.straight(35, 15, COAST);
 
     //Get out of the start position
     currentDirection = NORTH;
@@ -724,14 +799,126 @@ void pickWater()
         robot.straightUnlim(30);
 
     resetLifo();
-    lifo.setPIDparams(KP*1.2, slowKI * 0.7, KD*1.5, 1);
+    lifo.setPIDparams(KP*1.2, KI * 0.7, KD*1.5, 1);
+    lifo.setPIDparams(3, 3, 120, 1);
+    lifo.distance(robot.cmToTacho(30), 8, NONE);
+    // setLifoSlow();
+    // lifo.setAccelParams(150, 30, 30);
+    // lifo.distance(30, 6, NONE);
+    // lifo.lines(30, 1, NONE);
+    // lifo.distance(30, 1, NONE);
+    lifo.distance(robot.cmToTacho(35), 6, NONE);
+    lifo.lines(robot.cmToTacho(35), 1, NONE);
+    lifo.distance(robot.cmToTacho(35), 1.5, NONE);
+}
+void pickWaterTriple()
+{
+    DEBUGPRINT("\nPicking all three water bottles (variations).\n");
+        
+    //Pick First Bottle
+    robot.setLinearAccelParams(100, 20, 25);
+    robot.straight(25, 5, NONE);
+    act_tsk(WATER_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, 25, 0);
+    robot.straight(25, 2, BRAKE);
+    while(grabber.getTachoCount() < 200) 
+        tslp_tsk(10);
+    DEBUGPRINT("First bottle of water has been loaded.\n");
+    rampQueue.push(BOTTLE);
+
+    //Pick Second Bottle (left)
+    robot.setLinearAccelParams(100, -10, 0);
+    robot.arc(40, -40, 8.5, BRAKE);
+    while(grabberUsed)
+        tslp_tsk(10);
+
+    robot.setLinearAccelParams(100, 10, 30);
+    robot.straight(40, 10, COAST);
+    act_tsk(WATER_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(30, 3, BRAKE);
+    while(grabber.getTachoCount() < 200) 
+        tslp_tsk(10);
+    DEBUGPRINT("Second bottle of water has been loaded.\n");
+    rampQueue.push(BOTTLE);
+
+    //Pick Third Bottle (right)
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(40, -2, COAST);
+    robot.setLinearAccelParams(100, -10, 0);
+    robot.arc(40, -80, -8.5, BRAKE);
+    while(grabberUsed)
+        tslp_tsk(10);
+
+    robot.setLinearAccelParams(100, 10, 30);
+    robot.straight(40, 13, COAST);
+    act_tsk(PICK_BLOCK_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(30, 3, BRAKE);
+    while(grabber.getTachoCount() < 200) 
+        tslp_tsk(10);
+    DEBUGPRINT("Third bottle of water has been loaded.\n");
+    rampQueue.push(BOTTLE);
+
+    robot.setLinearAccelParams(100, 20, 20);
+    robot.arc(40, 90, 3, COAST);
+
+    robot.setLinearAccelParams(100, 0, 30);
+    robot.straightUnlim(30, true);
+    while(robot.getPosition() < 1) 
+        robot.straightUnlim(30);
+    while(rightSensor.getReflected() > 80)
+        robot.straightUnlim(30);
+    while(leftSensor.getReflected() > 80)
+        robot.straightUnlim(30);
+
+    resetLifo();
+    lifo.setPIDparams(KP*1.2, KI * 0.7, KD*1.5, 1);
     lifo.distance(robot.cmToTacho(30), 8, NONE);
     setLifoSlow();
     lifo.setAccelParams(150, 30, 30);
     lifo.distance(30, 6, NONE);
     lifo.lines(30, 1, NONE);
+    lifo.distance(30, 1, NONE);
 }
+void pickWaterLast()
+{
+    DEBUGPRINT("\nPicking last water bottle (remaining) at the end (variation).\n");
+    
+    robot.setLinearAccelParams(100, 20, 25);
+    robot.straight(25, 5, NONE);
+    robot.setLinearAccelParams(100, 25, 0);
+    robot.straight(25, 2, BRAKE);
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
 
+    robot.setLinearAccelParams(100, -10, 0);
+    robot.arc(40, -40, 8.5, BRAKE);
+
+    robot.setLinearAccelParams(100, 10, 30);
+    robot.straight(40, 10, COAST);
+    act_tsk(PICK_BLOCK_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(30, 3, BRAKE);
+    while(grabber.getTachoCount() < 200) 
+        tslp_tsk(10);
+    rampQueue.push(BOTTLE);
+
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(45, -5, COAST);
+
+    robot.setLinearAccelParams(100, 10, 0);
+    robot.arc(40, 40, 8.5, BRAKE);
+
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(40, 180, COAST);
+
+    currentDirection = SOUTH;
+}
 
 void scanLaundryBaskets()
 {
@@ -754,6 +941,19 @@ void scanLaundryBaskets()
     colors temp[2];
     temp[0] = laundryBaskets[BASKET_LEFT];
     temp[1] = laundryBaskets[BASKET_RIGHT];
+
+    //Simple fix for if there is a mistake in the readings so that the robot can finish the mission (wrongly :( )
+    if(temp[0] == BLACK && temp[1] == BLACK)
+    {
+        DEBUGPRINT("Mistake in laundry basket scanning !!!");
+        temp[1] = RED;
+    }
+    else if(temp[0] == temp[1])
+    {
+        DEBUGPRINT("Mistake in laundry basket scanning !!!");
+        temp[1] = (temp[0] == RED) ? YELLOW : RED;
+    }
+
     laundryBaskets[BASKET_MIDDLE] = findTheLastColor(temp, 3);
 
 
@@ -811,6 +1011,10 @@ void leaveLaundry()
 
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(100, 0, 0);
+
+    //Detect possible mistakes (color detection issues i.e. duplicates in the queue or less than 3 items + laundry basket scanning problems duplicates) and change them to at least get some points and not lose the run completely
+    //TODO: easy fix is to change the scanning of the baskets that way nothing terrible will happen. ->DONE
+
 
     while(!rampQueue.empty())   //Repeat for every item
     {
@@ -874,11 +1078,9 @@ void finishProcedure()
     DEBUGPRINT("\nEnding movement :(\n");
 
     //Getting inside finishing square
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
     act_tsk(END_TASK);
     tslp_tsk(1);
-    robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 20, 0);
-    robot.straight(45, 21, COAST);
-    robot.setLinearAccelParams(100, 0, 0);
-    robot.arc(45, 45, 0, BRAKE);
+    robot.arc(45, 45, 2, BRAKE);
 }

@@ -26,7 +26,8 @@ enum baskets
 enum tasks
 {
     WATER,
-    BALL
+    BALL,
+    BOTH
 };
 
 class room
@@ -100,9 +101,18 @@ extern std::map<ev3ys::colors, room> rooms;
 void printRampQueue();
 tasks findTask(ev3ys::colors color);
 ev3ys::colors findColorOfItem(items item);
+items findItem(ev3ys::colors color);
 baskets findBasket(ev3ys::colors color);
-ev3ys::colors clasifyBasket(ev3ys::colorspaceHSV hsv);
 ev3ys::colors findTheLastColor(ev3ys::colors *cols, int numOfCols = 3);
+
+ev3ys::colors analyzeFrequency(std::map<ev3ys::colors, int> appearances, ev3ys::colors base);
+
+ev3ys::colors scanLaundryBlock(ev3ys::colorSensor &scanner);
+ev3ys::colors scanCodeBlock(ev3ys::colorSensor &scanner);
+ev3ys::colors scanLaundryBasket(ev3ys::colorSensor &scanner);
+
+bool detectColorLine(ev3ys::colorSensor &sensor, ev3ys::colors target);
+bool detectWhiteRoomBed(ev3ys::colorSensor &sensor);
 
 void turnToBasket(baskets current, baskets target);
 
@@ -115,6 +125,8 @@ extern orientation currentDirection;
 void startProcedure();
 
 void pickWater();
+void pickWaterTriple();
+void pickWaterLast();
 
 void scanLaundryBaskets();
 
