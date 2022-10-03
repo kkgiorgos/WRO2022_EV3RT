@@ -71,6 +71,7 @@ private:
     void taskWaterLaundry();
     void taskBall();
     void taskBallLaundry();
+    void taskBoth();
 
 public:
     room() : currentState(WAITING) {}

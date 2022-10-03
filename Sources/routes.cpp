@@ -598,14 +598,26 @@ orientation R_B(orientation dir)
 
     //Infer Yellow Room's task.
     int waterTasks = 0;
+    int ballTasks = 0;
     if(rooms[RED].getTask() == WATER)
         waterTasks++;
     if(rooms[GREEN].getTask() == WATER)
         waterTasks++;  
     if(rooms[BLUE].getTask() == WATER)
         waterTasks++;
-    rooms[YELLOW].setTask(waterTasks == 2 ? GREEN : WHITE);
+    if(rooms[RED].getTask() == BALL)
+        ballTasks++;
+    if(rooms[GREEN].getTask() == BALL)
+        ballTasks++;  
+    if(rooms[BLUE].getTask() == BALL)
+        ballTasks++;
 
+    if(ballTasks == 2 && waterTasks == 1)
+        rooms[YELLOW].setTask(BLUE);
+    else if(ballTasks == 1)
+        rooms[YELLOW].setTask(GREEN);
+    else 
+        rooms[YELLOW].setTask(WHITE);
 
     //Move to the intersection 
     robot.resetPosition();
