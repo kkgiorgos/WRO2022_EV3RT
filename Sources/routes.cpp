@@ -391,17 +391,17 @@ orientation W_G(orientation dir)
     robot.setLinearAccelParams(100, 35, 35);
     robot.arcUnlim(45, 15, FORWARD, true);
     //Scan left (red room) task block while turning
-    colors current = BLACK;
+    colors current = NO_COLOR;
     map<colors, int> appearances;
     while(robot.getAngle() < 40)
     {
-        if((current = scanCodeBlock(leftScanner)) != BLACK)
+        if((current = scanCodeBlock(leftScanner)) != NO_COLOR)
         {
             appearances[current]++;
         }
         robot.arcUnlim(45, 15, FORWARD, false);
     }
-    current = analyzeFrequency(appearances, BLACK);
+    current = analyzeFrequency(appearances, NO_COLOR);
     rooms[RED].setTask(current);
     display.resetScreen();
     display.format("%  \n")%static_cast<int>(current);
@@ -436,20 +436,20 @@ orientation W_G(orientation dir)
         executeLifoLeftUnlim(robot.cmToTacho(30));
 
     //Scan (right) green room task while moving forwards on route to get in the room.
-    current = BLACK;
+    current = NO_COLOR;
     appearances.clear();
     robot.resetPosition();
     lifo.setDoubleFollowMode("N", "N");
     lifo.unlimited(robot.cmToTacho(40), true);
     while(robot.getPosition() < 8)
     {
-        if((current = scanCodeBlock(rightScanner)) != BLACK)
+        if((current = scanCodeBlock(rightScanner)) != NO_COLOR)
         {
             appearances[current]++;
         }
         lifo.unlimited(robot.cmToTacho(40));
     }
-    current = analyzeFrequency(appearances, BLACK);
+    current = analyzeFrequency(appearances, NO_COLOR);
     rooms[GREEN].setTask(current);
     display.format("%  \n")%static_cast<int>(current);
 
@@ -579,20 +579,20 @@ orientation R_B(orientation dir)
         lifo.unlimited(robot.cmToTacho(40));
 
     //Continue forwards scanning left (blue room) same way as green just mirrored
-    colors current = BLACK;
+    colors current = NO_COLOR;
     map<colors, int> appearances;
     robot.resetPosition();
     lifo.setDoubleFollowMode("N", "N");
     lifo.unlimited(robot.cmToTacho(40), true);
     while(robot.getPosition() < 8)
     {
-        if((current = scanCodeBlock(leftScanner)) != BLACK)
+        if((current = scanCodeBlock(leftScanner)) != NO_COLOR)
         {
             appearances[current]++;
         }
         lifo.unlimited(robot.cmToTacho(40));
     }
-    current = analyzeFrequency(appearances, BLACK);
+    current = analyzeFrequency(appearances, NO_COLOR);
     rooms[BLUE].setTask(current);
     display.format("%  \n")%static_cast<int>(current);
 

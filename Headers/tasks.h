@@ -65,7 +65,7 @@ private:
     void leaveWater(int stage);
 
     void pickBall(int stage);
-    void leaveBall();
+    void leaveBall(int stage);
 
     void taskWater();
     void taskWaterLaundry();

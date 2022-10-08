@@ -124,20 +124,20 @@ void room::scanLaundry()
     robot.straight(45, 5, NONE);
     robot.setLinearAccelParams(100, 45, 45);
     robot.straightUnlim(35, true);    
-    laundry = WHITE;
+    laundry = NO_COLOR;
     map<colors, int> appearances;
     colors current;
-    bool notWhite = false;
+    bool isColored = false;
     while(!detectWhiteRoomBed(roomOrientation == RED_BLUE ? leftSensor : rightSensor))
     {
-        if((current = scanLaundryBlock(roomOrientation == RED_BLUE ? leftScanner : rightScanner)) != WHITE)
+        if((current = scanLaundryBlock(roomOrientation == RED_BLUE ? leftScanner : rightScanner)) != NO_COLOR)
         {
             appearances[current]++;
-            notWhite = true;
+            isColored = true;
         }
         robot.straightUnlim(35);
     }
-    if(notWhite)
+    if(isColored)
     {
         int maxCount = 0;
         for(auto x: appearances)
@@ -158,7 +158,7 @@ void room::scanLaundry()
     rightScanner.getReflected();
 
     //Set if there is laundry to be done
-    doLaundry = laundry != WHITE; //WHITE signifies no laundry
+    doLaundry = laundry != NO_COLOR; 
     if(doLaundry)
     {
         DEBUGPRINT("laundry color is ");
@@ -260,19 +260,30 @@ void room::pickBall(int stage)
     {
         DEBUGPRINT("Picking the ball at the %s room.\n", name);
         currentState = PLAYING_BALL;
-        grabber.moveDegrees(600, 250, NONE, true);
-        grabber.moveDegrees(400, 115, BRAKE, false);
+        grabber.moveDegrees(800, 250, NONE, true);
+        grabber.moveDegrees(400, 100, BRAKE, false);
     }
 }
 
-void room::leaveBall()
+/**
+ * @brief 
+ * 
+ * @param stage Stage 1 releasese the ball, Stage 2 fully closes grabber 
+ */
+void room::leaveBall(int stage)
 {
-    DEBUGPRINT("Leave the ball at the %s room.\n", name);
-    currentState = PLAYING_BALL;
-
     //Leave Ball Code
-    act_tsk(PICK_BLOCK_TASK);
-    tslp_tsk(1);
+    if(stage == 1)
+    {
+        DEBUGPRINT("Leave the ball at the %s room.\n", name);
+        currentState = PLAYING_BALL;
+        grabber.moveDegrees(400, 50, BRAKE, false);
+    }
+    else
+    {
+        act_tsk(PICK_BLOCK_TASK);
+        tslp_tsk(1);
+    }
 }
 
 
@@ -398,7 +409,7 @@ void room::taskBall()
         
         robot.setLinearAccelParams(100, 0, 15);
         robot.straight(45, 14, NONE);
-        leaveBall();
+        leaveBall(2);
         robot.setLinearAccelParams(100, 15, 0);
         robot.straight(15, 2, COAST);
         
@@ -419,7 +430,7 @@ void room::taskBall()
 
         robot.setLinearAccelParams(100, 0, 15);
         robot.straight(45, 14, NONE);
-        leaveBall();
+        leaveBall(2);
         robot.setLinearAccelParams(100, 15, 0);
         robot.straight(15, 2, COAST);
         
@@ -461,7 +472,7 @@ void room::taskBallLaundry()
 
         robot.setLinearAccelParams(100, 0, 15);
         robot.straight(45, 17, NONE);
-        leaveBall();
+        leaveBall(2);
         robot.setLinearAccelParams(100, 15, 0);
         robot.straight(15, 2, COAST);
 
@@ -499,7 +510,7 @@ void room::taskBallLaundry()
 
         robot.setLinearAccelParams(100, 0, 15);
         robot.straight(45, 17, NONE);
-        leaveBall();
+        leaveBall(2);
         robot.setLinearAccelParams(100, 15, 0);
         robot.straight(15, 2, COAST);
 
@@ -675,26 +686,24 @@ colors analyzeFrequency(map<colors, int> appearances, colors base)
 
 colors scanLaundryBlock(colorSensor &scanner)
 {
-    scanner.setNormalisation(false);
-    colorspaceRGB rgb = scanner.getRGB();
+    scanner.setNormalisation(true);
+    colors color = scanner.getColor();
 
-    if(rgb.red >= 3 * rgb.green) return RED;
-    if(rgb.red > 2 * rgb.blue && rgb.green > 2 * rgb.blue && rgb.red > rgb.green) return YELLOW;
-    if(rgb.green > 1 && rgb.white < 100) return BLACK;
+    if(color == WHITE)
+        return BLACK;
 
-    return WHITE;
+    return color;
 }
 
 colors scanCodeBlock(colorSensor &scanner)
 {
-    scanner.setNormalisation(false);
-    colorspaceRGB rgb = scanner.getRGB();
-    colorspaceHSV hsv = scanner.getHSV();
+    scanner.setNormalisation(true);
+    colors color = scanner.getColor();
 
-    if(rgb.white <= 3) return BLACK;
-    if(rgb.green >= rgb.red + rgb.blue) return GREEN;
-    if(rgb.blue >= rgb.red && rgb.blue >= rgb.green) return BLUE;
-    else return WHITE;
+    if(color == BLACK)
+        return WHITE;
+
+    return color;
 }
 
 colors scanLaundryBasket(colorSensor &scanner)

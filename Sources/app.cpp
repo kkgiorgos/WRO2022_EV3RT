@@ -29,7 +29,7 @@ motor grabber(MotorPort::A, true);
 motor ramp(MotorPort::D, false);
 motor leftMotor(MotorPort::B, true, MotorType::MEDIUM);
 motor rightMotor(MotorPort::C, false, MotorType::MEDIUM);
-chassis robot(&leftMotor, &rightMotor, 6.24, 17, 0.1, 0.007);
+chassis robot(&leftMotor, &rightMotor, 6.24, 17, 0.01, 0.01, 0.1);
 colorSensor leftSensor(SensorPort::S2, false, "WRO2022");
 colorSensor rightSensor(SensorPort::S3, false, "WRO2022");
 colorSensor leftScanner(SensorPort::S1, false, "WRO2022");
@@ -60,6 +60,12 @@ lifoRobotPosition currentAlignment;
 std::vector<int> graph[V];
 
 BrickButton btnEnter(BrickButtons::ENTER);
+
+bool grabberUsed = false;
+bool startPicking = false;
+bool stopScanning = false;
+int scanStage = 0;
+int prevLeft = -1, prevRight = -1;
 
 void startData()
 {
@@ -92,14 +98,18 @@ void init()
     //lifo.setPIDparams(1, 1, 100, 1000);      //REGULATED VALUES
 
     leftSensor.setNormalisation(true);
-    leftSensor.setFiltering(false);
+    leftSensor.setFilteringRef(false);
+    leftSensor.setFilteringRGB(false);
     leftSensor.setCutoffValue(27);
     rightSensor.setNormalisation(true);
-    rightSensor.setFiltering(false);
+    rightSensor.setFilteringRef(false);
+    rightSensor.setFilteringRGB(false);
     rightSensor.setCutoffValue(27);
 
-    leftScanner.setFiltering(false);
-    rightScanner.setFiltering(false);
+    leftScanner.setFilteringRef(false);
+    leftScanner.setFilteringRGB(false);
+    rightScanner.setFilteringRef(false);
+    rightScanner.setFilteringRGB(false);
     leftScanner.setNormalisation(true);
     rightScanner.setNormalisation(true);
     
@@ -109,30 +119,24 @@ void init()
 
     display.format("WAIT FOR SENSORS\n");
     btnEnter.waitForClick();
-    act_tsk(INIT_TASK);
+    // act_tsk(INIT_TASK);
     tslp_tsk(1);
 }
-
-bool grabberUsed = false;
-bool startPicking = false;
-bool stopScanning = false;
-int scanStage = 0;
-int prevLeft = -1, prevRight = -1;
 
 void open_grabber_task(intptr_t unused)
 {
     //OPENS GRABBER FULLY
     grabber.setMode(REGULATED);
-    grabber.moveUnlimited(-1000, true);
+    grabber.moveUnlimited(-1200, true);
     tslp_tsk(50);
-    while(grabber.getCurrentSpeed() > -450)
+    while(grabber.getCurrentSpeed() > -900)
     {
-        grabber.moveUnlimited(-1000);
+        grabber.moveUnlimited(-1200);
         tslp_tsk(1);
     }
-    while(grabber.getCurrentSpeed() < -400)
+    while(grabber.getCurrentSpeed() < -800)
     {
-        grabber.moveUnlimited(-1000);
+        grabber.moveUnlimited(-1200);
         tslp_tsk(1);
     }
     grabber.stop(BRAKE);
@@ -179,20 +183,25 @@ void water_grabber_task(intptr_t unused)
 {
     //PICKS ONE OBJECT AND IMMEDIATELY OPENS GRABBER TO BE READY FOR THE NEXT
     grabberUsed = true;
-    grabber.setMode(REGULATED);
-    grabber.moveUnlimited(800, true);
-    tslp_tsk(50);
-    while(grabber.getCurrentSpeed() > 350)
+    grabber.moveDegrees(1200, 350, NONE);
+    grabber.moveUnlimited(700, true);
+    while(grabber.getCurrentSpeed() > 600)
     {
-        grabber.moveUnlimited(800);
+        grabber.moveUnlimited(700);
         tslp_tsk(1);
     }
-    grabber.stop(BRAKE_COAST);
-    grabber.moveUnlimited(-1000, true);
+    grabber.stop(COAST);
+    grabber.setMode(REGULATED);
+    grabber.moveUnlimited(-1200, true);
     tslp_tsk(50);
-    while(grabber.getCurrentSpeed() < -400)
+    while(grabber.getCurrentSpeed() > -900)
     {
-        grabber.moveUnlimited(-1000);
+        grabber.moveUnlimited(-1200);
+        tslp_tsk(1);
+    }
+    while(grabber.getCurrentSpeed() < -800)
+    {
+        grabber.moveUnlimited(-1200);
         tslp_tsk(1);
     }
     grabber.stop(BRAKE);
@@ -202,15 +211,14 @@ void water_grabber_task(intptr_t unused)
 void pick_block_task(intptr_t unused)
 {
     //RAISES GRABBER FULLY
-    grabber.setMode(REGULATED);
+    grabber.moveDegrees(1200, 350, NONE);
     grabber.moveUnlimited(700, true);
-    tslp_tsk(50);
-    while(grabber.getCurrentSpeed() > 350)
+    while(grabber.getCurrentSpeed() > 600)
     {
         grabber.moveUnlimited(700);
         tslp_tsk(1);
     }
-    grabber.stop(BRAKE_COAST);
+    grabber.stop(COAST);
 }
 
 void empty_water_ramp_task(intptr_t unused)
@@ -300,24 +308,171 @@ void main_task(intptr_t unused)
     graphInit();
     startData();
 
-    // grabber.stop();
-    // // double min[4] = {1,2,1,2};
-    // // double max[4] = {68,73,55,196};
-    // // leftScanner.setRgbCalParams(min, max);
-    // leftScanner.setNormalisation(false);
-    // rightScanner.setNormalisation(false);
+
+    
+    // leftScanner.setNormalisation(true);
+    // rightScanner.setNormalisation(true);
     // display.resetScreen();
     // while(true)
     // {
-    //     colorspaceRGB l = leftScanner.getRGB();
-    //     colorspaceRGB r = rightScanner.getRGB();
-    //     // format(bt, "L: R: %  G: %  B: %  W: %  \nR: R: %  G: %  B: %  W: %  \n") %l.red %l.green %l.blue %l.white %r.red %r.green %r.blue %r.white;
-    //     colorspaceHSV l2 = leftScanner.getHSV();
-    //     colorspaceHSV r2 = rightScanner.getHSV();
-    //     // format(bt, "L: H: %  S: %  V: %  \nR: H: %  S: %  V: %  \n\n") %l2.hue %l2.saturation %l2.value %r2.hue %r2.saturation %r2.value;
-    //     display.format("L: %  \nR: %  \n\n\n") %static_cast<int>(scanLaundryBlock(leftScanner)) %static_cast<int>(scanLaundryBlock(rightScanner));
+    //     display.format("L: %  \nR: %  \n\n\n")%leftSensor.getReflected() %rightSensor.getReflected();
+    //     // colorspaceRGB ll = leftScanner.getRGB();
+    //     // colorspaceRGB rr = rightScanner.getRGB();
+    //     // format(bt, "LL: R: %  G: %  B: %  W:   \nRR: R: %  G: %  B: %  W:   \n") %ll.red %ll.green %ll.blue %rr.red %rr.green %rr.blue;
+    //     // rgb_raw_t l; ev3_color_sensor_get_rgb_raw(EV3_PORT_1, &l);
+    //     // rgb_raw_t r; ev3_color_sensor_get_rgb_raw(EV3_PORT_4, &r);
+    //     // format(bt, "LL: R: %  G: %  B: %  W:   \nRR: R: %  G: %  B: %  W:   \n") %l.r %l.g %l.b %r.r %r.g %r.b;
+    //     // colorspaceHSV l2 = leftScanner.getHSV();
+    //     // colorspaceHSV r2 = rightScanner.getHSV();
+    //     // format(bt, "L: H: %  S: %  V: %  \nW: %  C: %  \n") %l2.hue %l2.saturation %l2.value %ll.white %static_cast<int>(leftScanner.getColor());
+    //     // format(bt, "R: H: %  S: %  V: %  \nW: %  C: %  \n") %r2.hue %r2.saturation %r2.value %rr.white %static_cast<int>(rightScanner.getColor());
+    //     // display.format("L: %  \nR: %  \n\n\n") %static_cast<int>(leftScanner.getColor()) %static_cast<int>(rightScanner.getColor());
     //     tslp_tsk(10);
     // }
+
+    
+    // while(true)
+    // {
+    //     grabber.setMode(REGULATED);
+    //     grabber.moveUnlimited(-1200, true);
+    //     tslp_tsk(50);
+    //     while(grabber.getCurrentSpeed() > -900)
+    //     {
+    //         grabber.moveUnlimited(-1200);
+    //         tslp_tsk(1);
+    //     }
+    //     while(grabber.getCurrentSpeed() < -800)
+    //     {
+    //         grabber.moveUnlimited(-1200);
+    //         tslp_tsk(1);
+    //     }
+    //     grabber.stop(BRAKE);
+    //     // btnEnter.waitForClick();
+    //     // grabber.moveDegrees(800, 250, NONE, true);
+    //     // grabber.moveDegrees(400, 100, BRAKE, false);
+    //     // btnEnter.waitForClick();
+    //     // grabber.setMode(REGULATED);
+    //     // grabber.moveDegrees(400, 50, BRAKE, false);
+    //     btnEnter.waitForClick(); 
+    //     grabber.moveDegrees(1200, 350, NONE);
+    //     grabber.moveUnlimited(700, true);
+    //     while(grabber.getCurrentSpeed() > 600)
+    //     {
+    //         grabber.moveUnlimited(700);
+    //         tslp_tsk(1);
+    //     }
+    //     grabber.stop(COAST);
+    //     // btnEnter.waitForClick();
+    // }
+
+
+    leftSensor.setFilteringRef(true, 0.01, 10);
+    leftSensor.setFilteringRGB(true, 0.01, 30);
+
+    rightSensor.setFilteringRef(true, 0.01, 10);
+    rightSensor.setFilteringRGB(true, 0.01, 30);
+
+    resetLifo();
+    lifo.setPIDparams(4, 2, 150, 1);
+    lifo.distance(robot.cmToTacho(30), 3, NONE);
+    lifo.distance(robot.cmToTacho(40), 2, NONE);
+    lifo.lines(robot.cmToTacho(60), 1, COAST);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 60, 60);
+    robot.arc(60, 30, 15, NONE);
+    robot.arc(60, 20, 40, NONE);
+    robot.arc(60, 52, 15, NONE);
+    robot.setLinearAccelParams(100, 40, 60);
+    robot.straightUnlim(60, true);
+    robot.setLinearAccelParams(100, 60, 60);
+    robot.straight(60, 5, NONE);
+    leftSensor.resetFiltering();
+    robot.straightUnlim(60, true);
+    do{
+        leftSensor.getReflected();
+        robot.straightUnlim(60);
+    }while(!leftSensor.getLineDetected());
+    robot.straight(60, 7, NONE);
+    leftSensor.resetFiltering();
+    robot.straightUnlim(60, true);
+    do{
+        leftSensor.getReflected();
+        robot.straightUnlim(60);
+    }while(!leftSensor.getLineDetected());
+    robot.setLinearAccelParams(150, 60, 0);
+    robot.straight(60, 9, COAST);
+    robot.setLinearAccelParams(100, 0, -25);
+    robot.arc(60, -85, 3.5, NONE);
+    robot.setLinearAccelParams(100, -25, -25);
+    robot.arcUnlim(25, 3.5, BACKWARD, true);
+    while(leftSensor.getReflected() < 50)
+        robot.arcUnlim(25, 3.5, BACKWARD, false);
+    robot.stop(COAST);
+
+    resetLifo();
+
+    lifo.setDoubleFollowMode("SL", "70");
+
+    lifo.setPIDparams(4 * 3, 2 * 3, 150 * 3, 1);
+    lifo.distance(robot.cmToTacho(30), 3, NONE);
+    lifo.distance(robot.cmToTacho(40), 2, NONE);
+    lifo.lines(robot.cmToTacho(60), 1, NONE, 9, true);
+    robot.resetPosition();
+    t.reset();
+    lifo.distance(robot.cmToTacho(40), 10, NONE);
+    
+    lifo.setPIDparams(2 * 3, 3 * 3, 150 * 3, PIDspeed);
+    lifo.initializeMotionMode(CONTROLLED);
+
+    // lifo.setAccelParams(100, 50, 20);
+    // lifo.distance(30, 7, NONE);
+    double speed = robot.getPosition()/t.secElapsed();
+    lifo.setAccelParams(100, speed, 30);
+    lifo.lines(30, 1, NONE);
+
+    robot.setMode(CONTROLLED);  
+    robot.setLinearAccelParams(150, 30, 0);
+    robot.straight(30, 7, COAST);
+
+    //Turn towards gree room
+    robot.setLinearAccelParams(100, 0, -25);
+    robot.arc(60, -85, -3.5, NONE);
+    robot.setLinearAccelParams(100, -25, -25);
+    robot.arcUnlim(25, -3.5, BACKWARD, true);
+    while(leftSensor.getReflected() > 70)
+        robot.arcUnlim(25, -3.5, BACKWARD);
+    robot.stop(COAST);
+
+    btnEnter.waitForClick();
+
+    
+
+
+
+
+    grabber.stop();
+    // double min[4] = {1,2,1,2};
+    // double max[4] = {68,73,55,196};
+    // leftScanner.setRgbCalParams(min, max);
+    leftSensor.setNormalisation(false);
+    rightSensor.setNormalisation(false);
+    leftScanner.setNormalisation(false);
+    rightScanner.setNormalisation(false);
+    display.resetScreen();
+    while(true)
+    {
+        colorspaceRGB ll = leftScanner.getRGB();
+        colorspaceRGB l = leftSensor.getRGB();
+        colorspaceRGB r = rightSensor.getRGB();
+        colorspaceRGB rr = rightScanner.getRGB();
+        format(bt, "LL: R: %  G: %  B: %  W: %  \tL: R: %  G: %  B: %  W: %  \nR: R: %  G: %  B: %  W: %  \tRR: R: %  G: %  B: %  W: %  \n") %(int)ll.red %(int)ll.green %(int)ll.blue %(int)ll.white%(int)l.red %(int)l.green %(int)l.blue %(int)l.white %(int)r.red %(int)r.green %(int)r.blue %(int)r.white %(int)rr.red %(int)rr.green %(int)rr.blue %rr.white;
+        // colorspaceHSV l2 = leftScanner.getHSV();
+        // colorspaceHSV r2 = rightScanner.getHSV();
+        // format(bt, "L: H: %  S: %  V: %  \nR: H: %  S: %  V: %  \n\n") %l2.hue %l2.saturation %l2.value %r2.hue %r2.saturation %r2.value;
+        // display.format("L: %  \nR: %  \n\n\n") %static_cast<int>(scanLaundryBlock(leftScanner)) %static_cast<int>(scanLaundryBlock(rightScanner));
+        tslp_tsk(10);
+    }
 
 
     // btnEnter.waitForClick();
@@ -336,27 +491,28 @@ void main_task(intptr_t unused)
     // rooms[BLUE].executeAllActions();
 
 
-    startProcedure();
 
-    fullRouteStandard(W);
+    // startProcedure();
 
-    pickWater();
+    // fullRouteStandard(W);
 
-    fullRouteStandard(G);
-    rooms[GREEN].executeAllActions();
-    fullRouteStandard(R);
-    rooms[RED].executeAllActions();
-    fullRouteStandard(B);
-    rooms[BLUE].executeAllActions();
-    fullRouteStandard(Y);
-    rooms[YELLOW].executeAllActions();
-    fullRouteStandard(L);
+    // pickWater();
 
-    scanLaundryBaskets();
-    leaveLaundry();
+    // fullRouteStandard(G);
+    // rooms[GREEN].executeAllActions();
+    // fullRouteStandard(R);
+    // rooms[RED].executeAllActions();
+    // fullRouteStandard(B);
+    // rooms[BLUE].executeAllActions();
+    // fullRouteStandard(Y);
+    // rooms[YELLOW].executeAllActions();
+    // fullRouteStandard(L);
 
-    fullRouteStandard(S);
-    finishProcedure();
+    // scanLaundryBaskets();
+    // leaveLaundry();
+
+    // fullRouteStandard(S);
+    // finishProcedure();
 
     robot.stop(BRAKE);
 
@@ -421,27 +577,9 @@ while(!btnEnter.isPressed())
     tslp_tsk(10);
 }*/
 
-/*leftSensor.setRefCalParams(6, 44);
-rightSensor.setRefCalParams(4, 45);
-
-double minL[] = {17, 32, 7, 56};
-double maxL[] = {140, 174, 81, 395};
-double minR[] = {12, 20, 8, 42};
-double maxR[] = {127, 142, 83, 351};
-leftSensor.setRgbCalParams(minL, maxL);
-rightSensor.setRgbCalParams(minR, maxR);*/
-
-/*color_hue cols[5];
-cols[0] = {RED, 5, 10};
-cols[1] = {RED, 330, 60};
-cols[2] = {BLUE, 210, 80};
-cols[3] = {GREEN, 120, 80};
-cols[4] = {YELLOW, 40, 60};
-leftSensor.setColorCalParams(cols, 5, 50, 18);
-rightSensor.setColorCalParams(cols, 5, 50, 18);*/
 
 
-//CALIBRATION
+//SIMPLE CALIBRATION
 
 /*leftSensor.setNormalisation(false);
 rightSensor.setNormalisation(false);
@@ -477,70 +615,245 @@ maxRight[3] = rightSensor.getRGB().white;
 leftSensor.setRgbCalParams(minLeft, maxLeft);
 rightSensor.setRgbCalParams(minRight, maxRight);*/
 
-//GREATER CALIBRATION
-// leftSensor.setNormalisation(false);
-// rightSensor.setNormalisation(false);
-// double minLeft[4] = {1000, 1000, 1000, 1000};
-// double maxLeft[4] = {0, 0, 0, 0};
-// double minRight[4] = {1000, 1000, 1000, 1000};
-// double maxRight[4] = {0, 0, 0, 0};
-// int minLeftRef = 100;
-// int maxLeftRef = 0;
-// int minRightRef = 100;
-// int maxRightRef = 0;
+//GREATER LINE SENSOR CALIBRATION
+    // leftSensor.setNormalisation(false);
+    // rightSensor.setNormalisation(false);
+    // double minLeft[4] = {1000, 1000, 1000, 1000};
+    // double maxLeft[4] = {0, 0, 0, 0};
+    // double minRight[4] = {1000, 1000, 1000, 1000};
+    // double maxRight[4] = {0, 0, 0, 0};
+    // int minLeftRef = 100;
+    // int maxLeftRef = 0;
+    // int minRightRef = 100;
+    // int maxRightRef = 0;
+    //
+    // robot.setMode(CONTROLLED);
+    // robot.setLinearAccelParams(100, 20, 20);
+    // robot.straightUnlim(20, true);
+    // t.reset();
+    //
+    // while(t.secElapsed() < 2)
+    // {
+    //     rgb_raw_t leftRGB; ev3_color_sensor_get_rgb_raw(EV3_PORT_2, &leftRGB);
+    //     rgb_raw_t rightRGB; ev3_color_sensor_get_rgb_raw(EV3_PORT_3, &rightRGB);
+    //
+    //     minLeft[0] = min(minLeft[0], (double)leftRGB.r);
+    //     minLeft[1] = min(minLeft[1], (double)leftRGB.g);
+    //     minLeft[2] = min(minLeft[2], (double)leftRGB.b);
+    //     minLeft[3] = min(minLeft[3], (double)leftRGB.r+leftRGB.g+leftRGB.b);
+    //
+    //     minRight[0] = min(minRight[0], (double)rightRGB.r);
+    //     minRight[1] = min(minRight[1], (double)rightRGB.g);
+    //     minRight[2] = min(minRight[2], (double)rightRGB.b);
+    //     minRight[3] = min(minRight[3], (double)rightRGB.r+rightRGB.g+rightRGB.b);
+    //
+    //     maxLeft[0] = max(maxLeft[0], (double)leftRGB.r);
+    //     maxLeft[1] = max(maxLeft[1], (double)leftRGB.g);
+    //     maxLeft[2] = max(maxLeft[2], (double)leftRGB.b);
+    //     maxLeft[3] = max(maxLeft[3], (double)leftRGB.r+leftRGB.g+leftRGB.b);
+    //
+    //     maxRight[0] = max(maxRight[0], (double)rightRGB.r);
+    //     maxRight[1] = max(maxRight[1], (double)rightRGB.g);
+    //     maxRight[2] = max(maxRight[2], (double)rightRGB.b);
+    //     maxRight[3] = max(maxRight[3], (double)rightRGB.r+rightRGB.g+rightRGB.b);
+    // }
+    //
+    // robot.stop(BRAKE);
+    //
+    // btnEnter.waitForPress();
+    //
+    // t.reset();
+    // robot.straightUnlim(20, true);
+    // while(t.secElapsed() < 2)
+    // {
+    //     int left = leftSensor.getReflected();
+    //     int right = rightSensor.getReflected();
+    //
+    //     minLeftRef = min(minLeftRef, left);
+    //     minRightRef = min(minRightRef, right);
+    //
+    //     maxLeftRef = max(maxLeftRef, left);
+    //     maxRightRef = max(maxRightRef, right);
+    // }
+    //
+    // robot.stop(BRAKE);
+    //
+    // leftSensor.setRefCalParams(minLeftRef, maxLeftRef);
+    // rightSensor.setRefCalParams(minRightRef, maxRightRef);
+    // leftSensor.setRgbCalParams(minLeft, maxLeft);
+    // rightSensor.setRgbCalParams(minRight, maxRight);
 
-// robot.setMode(CONTROLLED);
-// robot.setLinearAccelParams(100, 20, 20);
-// robot.straightUnlim(20, true);
-// t.reset();
+// //SCANNER CALIBRATION 
+    // //Min measurements done with BLACK block 4 STUDS away
+    // //Max measurements done with WHITE block 0.5 STUDS away
+    // double minL[4] = {0,0,0,0};
+    // double maxL[4] = {0,0,0,0};
+    // double minR[4] = {0,0,0,0};
+    // double maxR[4] = {0,0,0,0};
+    //
+    // leftScanner.setNormalisation(false);
+    // rightScanner.setNormalisation(false);
+    // display.resetScreen();
+    // BrickButton right(BrickButtons::RIGHT);
+    // t.secDelay(1);
+    // colorspaceRGB sum = {0, 0, 0, 0};
+    // int times = 0;
+    // display.format("Calibrating Left Scanner Min");
+    // while(!btnEnter.isPressed())
+    // {
+    //     while(!right.isPressed() && !btnEnter.isPressed());
+    //     rgb_raw_t l; ev3_color_sensor_get_rgb_raw(EV3_PORT_1, &l);
+    //     format(bt, "LL: R: %  G: %  B: %  W:   \n") %l.r %l.g %l.b;
+    //     sum.red += l.r;
+    //     sum.green += l.g;
+    //     sum.blue += l.b;
+    //     times++;
+    //     while(right.isPressed());
+    // }
+    // minL[0] = sum.red / (double)times;
+    // minL[1] = sum.green / (double)times;
+    // minL[2] = sum.blue / (double)times;
+    // minL[3] = (sum.red+sum.green+sum.blue) / (double)times;
+    // t.secDelay(1);
+    // sum.red = sum.green = sum.blue = times = 0;
+    // display.resetScreen();
+    // display.format("Calibrating Left Scanner Max");
+    // while(!btnEnter.isPressed())
+    // {
+    //     while(!right.isPressed() && !btnEnter.isPressed());
+    //     rgb_raw_t l; ev3_color_sensor_get_rgb_raw(EV3_PORT_1, &l);
+    //     format(bt, "LL: R: %  G: %  B: %  W:   \n") %l.r %l.g %l.b;
+    //     sum.red += l.r;
+    //     sum.green += l.g;
+    //     sum.blue += l.b;
+    //     times++;
+    //     while(right.isPressed());
+    // }
+    // maxL[0] = sum.red / (double)times;
+    // maxL[1] = sum.green / (double)times;
+    // maxL[2] = sum.blue / (double)times;
+    // maxL[3] = (sum.red+sum.green+sum.blue) / (double)times;
+    // leftScanner.setRgbCalParams(minL, maxL);
+    // leftScanner.setNormalisation(true);
+    // display.resetScreen();
+    // display.format("Calibration Left Scanner DONE");
+    // format(bt, "LL: R: %  G: %  B: %  W:   \nRR: R: %  G: %  B: %  W:   \n") %minL[0] %minL[1] %minL[2] %maxL[0] %maxL[1] %maxL[2];
+    //
+    //
+    // t.secDelay(1);
+    // sum.red = sum.green = sum.blue = times = 0;
+    // display.format("Calibrating Right Scanner Min");
+    // while(!btnEnter.isPressed())
+    // {
+    //     while(!right.isPressed() && !btnEnter.isPressed());
+    //     rgb_raw_t r; ev3_color_sensor_get_rgb_raw(EV3_PORT_4, &r);
+    //     format(bt, "LL: R: %  G: %  B: %  W:   \n") %r.r %r.g %r.b;
+    //     sum.red += r.r;
+    //     sum.green += r.g;
+    //     sum.blue += r.b;
+    //     times++;
+    //     while(right.isPressed());
+    // }
+    // minR[0] = sum.red / (double)times;
+    // minR[1] = sum.green / (double)times;
+    // minR[2] = sum.blue / (double)times;
+    // minR[3] = (sum.red+sum.green+sum.blue) / (double)times;
+    // t.secDelay(1);
+    // sum.red = sum.green = sum.blue = times = 0;
+    // display.resetScreen();
+    // display.format("Calibrating Right Scanner Max");
+    // while(!btnEnter.isPressed())
+    // {
+    //     while(!right.isPressed() && !btnEnter.isPressed());
+    //     rgb_raw_t r; ev3_color_sensor_get_rgb_raw(EV3_PORT_4, &r);
+    //     format(bt, "LL: R: %  G: %  B: %  W:   \n") %r.r %r.g %r.b;
+    //     sum.red += r.r;
+    //     sum.green += r.g;
+    //     sum.blue += r.b;
+    //     times++;
+    //     while(right.isPressed());
+    // }
+    // maxR[0] = sum.red / (double)times;
+    // maxR[1] = sum.green / (double)times;
+    // maxR[2] = sum.blue / (double)times;
+    // maxR[3] = (sum.red+sum.green+sum.blue) / (double)times;
+    // rightScanner.setRgbCalParams(minR, maxR);
+    // rightScanner.setNormalisation(true);
+    // display.resetScreen();
+    // display.format("Calibration Right Scanner DONE");
+    // format(bt, "minL: R: %  G: %  B: %  W:   \nmaxL: R: %  G: %  B: %  W:   \n") %minL[0] %minL[1] %minL[2] %maxL[0] %maxL[1] %maxL[2];
+    // format(bt, "minR: R: %  G: %  B: %  W:   \nmaxR: R: %  G: %  B: %  W:   \n") %minR[0] %minR[1] %minR[2] %maxR[0] %maxR[1] %maxR[2];
+    //
+    // color_hue hues[5] = {{RED, 10, 20}, {RED, 350, 20}, {GREEN, 140, 80}, 
+    //                     {BLUE, 225, 50}, {YELLOW, 35, 30}};
+    //
+    // leftScanner.setColorCalParams(hues, 5, 70, 15);
+    // rightScanner.setColorCalParams(hues, 5, 70, 15);
 
-// while(t.secElapsed() < 5)
-// {
-//     colorspaceRGB leftRGB = leftSensor.getRGB();
-//     colorspaceRGB rightRGB = rightSensor.getRGB();
+//Motor benchmark
+    // ev3_motor_config(EV3_PORT_B, MEDIUM_MOTOR);
+    // ev3_motor_config(EV3_PORT_C, MEDIUM_MOTOR);
+    //
+    // // FILE *log = fopen("WRO2022/batteryTest.txt", "w");
+    // FILE *log = bluetooth;
+    //
+    // int setPower = 50;
+    // int maxPower = 85;
+    // int minPower = 40;
+    // bool isPowerAsc = true;
+    // int leftReportedPower, rightReportedPower;
+    // double leftActualSpeed, rightActualSpeed;
+    // int voltage = 8000, current, power;
+    // while(voltage > 7000)
+    // {
+    //     ev3_motor_set_power(EV3_PORT_B, -setPower);
+    //     ev3_motor_set_power(EV3_PORT_C, setPower);
+    //     ev3_motor_reset_counts(EV3_PORT_B);
+    //     ev3_motor_reset_counts(EV3_PORT_C);
+    //     t.reset();
+    //     t.secDelay(0.01);
+    //     leftReportedPower = ev3_motor_get_power(EV3_PORT_B);
+    //     rightReportedPower = ev3_motor_get_power(EV3_PORT_C);
+    //     leftActualSpeed = ev3_motor_get_counts(EV3_PORT_B) / t.secElapsed();
+    //     rightActualSpeed = ev3_motor_get_counts(EV3_PORT_C) / t.secElapsed();
+    //     voltage = ev3_battery_voltage_mV();
+    //     current = ev3_battery_current_mA();
+    //     power = voltage * current;
+    //
+    //
+    //     if(setPower == 0)
+    //     {
+    //         ev3_motor_stop(EV3_PORT_B, false);
+    //         ev3_motor_stop(EV3_PORT_C, false);
+    //
+    //         t.secDelay(5);
+    //
+    //         voltage = ev3_battery_voltage_mV();
+    //         current = ev3_battery_current_mA();
+    //         power = voltage * current;
+    //         fprintf(log, "%d\t%d\t%d\t%lf\t%lf\t%d\t%d\t%d\n", 0, 0, 0, 0.0, 0.0, voltage, current, power);
+    //     }
+    //     else
+    //     {
+    //         fprintf(log, "%d\t%d\t%d\t%lf\t%lf\t%d\t%d\t%d\n", setPower, leftReportedPower, rightReportedPower, leftActualSpeed, rightActualSpeed, voltage, current, power);
+    //     }
+    //  
+    //     if(abs(setPower) < minPower)
+    //         setPower = -sign(setPower) * minPower;
+    //
+    //     if(isPowerAsc && setPower < maxPower)
+    //         setPower++;
+    //     else if(!isPowerAsc && setPower > -maxPower)
+    //         setPower--;
+    //     else if(setPower == maxPower)
+    //     {
+    //         setPower--;
+    //         isPowerAsc = false;
+    //     }
+    //     else
+    //     {
+    //         setPower++;
+    //         isPowerAsc = true;
+    //     }
+    // }
 
-//     minLeft[0] = min(minLeft[0], leftRGB.red);
-//     minLeft[1] = min(minLeft[1], leftRGB.green);
-//     minLeft[2] = min(minLeft[2], leftRGB.blue);
-//     minLeft[3] = min(minLeft[3], leftRGB.white);
-
-//     minRight[0] = min(minRight[0], rightRGB.red);
-//     minRight[1] = min(minRight[1], rightRGB.green);
-//     minRight[2] = min(minRight[2], rightRGB.blue);
-//     minRight[3] = min(minRight[3], rightRGB.white);
-
-//     maxLeft[0] = max(maxLeft[0], leftRGB.red);
-//     maxLeft[1] = max(maxLeft[1], leftRGB.green);
-//     maxLeft[2] = max(maxLeft[2], leftRGB.blue);
-//     maxLeft[3] = max(maxLeft[3], leftRGB.white);
-
-//     maxRight[0] = max(maxRight[0], rightRGB.red);
-//     maxRight[1] = max(maxRight[1], rightRGB.green);
-//     maxRight[2] = max(maxRight[2], rightRGB.blue);
-//     maxRight[3] = max(maxRight[3], rightRGB.white);
-// }
-
-// robot.stop(BRAKE);
-
-// btnEnter.waitForPress();
-
-// t.reset();
-// robot.straightUnlim(20, true);
-// while(t.secElapsed() < 5)
-// {
-//     int left = leftSensor.getReflected();
-//     int right = rightSensor.getReflected();
-
-//     minLeftRef = min(minLeftRef, left);
-//     minRightRef = min(minRightRef, right);
-
-//     maxLeftRef = max(maxLeftRef, left);
-//     maxRightRef = max(maxRightRef, right);
-// }
-
-// robot.stop(BRAKE);
-
-// leftSensor.setRefCalParams(minLeftRef, maxLeftRef);
-// rightSensor.setRefCalParams(minRightRef, maxRightRef);
-// leftSensor.setRgbCalParams(minLeft, maxLeft);
-// rightSensor.setRgbCalParams(minRight, maxRight);
