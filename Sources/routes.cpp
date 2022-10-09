@@ -369,8 +369,8 @@ orientation S_W(orientation dir)
     DEBUGPRINT("\nS_W\n");
 
     resetLifo();
-    // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
-    lifo.setPIDparams(3, 3, 120, 1);
+    // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5);
+    lifo.setPIDparams(3, 3, 120);
     lifo.distance(robot.cmToTacho(35), 10, NONE);
     setLifoSlow();
     lifo.setAccelParams(150, 20, 20);
@@ -685,8 +685,8 @@ orientation Y_L(orientation dir)
 
     //Correct turn mistakes with slow lifo
     resetLifo();
-    // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
-    lifo.setPIDparams(3, 3, 120, 1);
+    // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5);
+    lifo.setPIDparams(3, 3, 120);
     lifo.distance(robot.cmToTacho(35), 5, NONE);
 
     //Lifo until the intersection
@@ -710,8 +710,8 @@ orientation Y_L(orientation dir)
 
     //Lifo until the intersection
     resetLifo();
-    // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
-    lifo.setPIDparams(3, 3, 120, 1);
+    // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5);
+    lifo.setPIDparams(3, 3, 120);
     lifo.distance(robot.cmToTacho(35), 10, NONE);
     setLifoSlow();
     lifo.setAccelParams(150, 20, 20);

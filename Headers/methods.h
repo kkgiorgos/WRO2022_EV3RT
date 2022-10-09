@@ -5,15 +5,10 @@
 extern double KP; //2
 extern double KI; //2
 extern double KD; //200
-extern double PIDspeed;
 
 extern double slowKP;
 extern double slowKI;
 extern double slowKD;
-
-extern double colorCoef;
-
-extern int prevLeft, prevRight;
 
 void resetLifo();
 void setLifoNormalReg();

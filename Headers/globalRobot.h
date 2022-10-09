@@ -20,6 +20,9 @@ extern FILE* bluetooth;
 extern bool grabberUsed, startPicking, stopScanning;
 extern int scanStage;
 
+extern ev3ys::colorSensor *scanner;
+extern ev3ys::colors scannedValue;
+
 #define DEBUG_BLUETOOTH
 //#define DEBUG_FILE
 

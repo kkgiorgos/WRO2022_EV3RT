@@ -808,8 +808,8 @@ void pickWater()
         robot.straightUnlim(30);
 
     resetLifo();
-    lifo.setPIDparams(KP*1.2, KI * 0.7, KD*1.5, 1);
-    lifo.setPIDparams(3, 3, 120, 1);
+    lifo.setPIDparams(KP*1.2, KI * 0.7, KD*1.5);
+    lifo.setPIDparams(3, 3, 120);
     lifo.distance(robot.cmToTacho(30), 8, NONE);
     // setLifoSlow();
     // lifo.setAccelParams(150, 30, 30);
@@ -885,7 +885,7 @@ void pickWaterTriple()
         robot.straightUnlim(30);
 
     resetLifo();
-    lifo.setPIDparams(KP*1.2, KI * 0.7, KD*1.5, 1);
+    lifo.setPIDparams(KP*1.2, KI * 0.7, KD*1.5);
     lifo.distance(robot.cmToTacho(30), 8, NONE);
     setLifoSlow();
     lifo.setAccelParams(150, 30, 30);
@@ -933,6 +933,7 @@ void scanLaundryBaskets()
 {
     DEBUGPRINT("\nScanning laundry baskets.\n");
 
+    stopScanning = false;
     act_tsk(BASKET_SCAN_TASK);
     tslp_tsk(1);
 
