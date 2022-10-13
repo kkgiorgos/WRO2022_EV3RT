@@ -118,7 +118,7 @@ void init()
 
     display.format("WAIT FOR SENSORS\n");
     btnEnter.waitForClick();
-    act_tsk(INIT_TASK);
+    // act_tsk(INIT_TASK);
     tslp_tsk(1);
 }
 
@@ -406,57 +406,90 @@ void main_task(intptr_t unused)
     lifo.addPIDparams(50, 5, 4, 40);    //50 speed
     lifo.addPIDparams(60, 6, 5, 60);    //60 speed
 
+
+    lineFollower lifoXtreme(400, &robot, &leftSensor, &rightSensor);
+    lifoXtreme.setDoubleFollowMode("SL", "SR");
+    lifoXtreme.initializeMotionMode(CONTROLLED);
+    robot.setUnregulatedDPS(true);
+    lifoXtreme.setSensorMode(REFLECTED);
+
+    lifoXtreme.addPIDparams(30, 2, 3, 70);
+    lifoXtreme.addPIDparams(40, 2, 3, 100);
+
+
+    double speed;
     
     // //Get out of start area
     // robot.setMode(CONTROLLED);
-    // robot.setLinearAccelParams(100, 0, 40);
-    // robot.straight(60, 15, NONE);
+    // robot.setLinearAccelParams(100, 0, 30);
+    // robot.straight(50, 15, NONE);
     // //S->W
-    // lifo.distance(40, 12, NONE);
-    // lifo.lines(40, 1, NONE);
+    // lifo.distance(30, 7, NONE);
+    // lifo.distance(30, 5, NONE);
+    // lifoXtreme.setAccelParams(100, 40, 40);
+    // lifoXtreme.lines(40, 1, NONE);
+    // // lifo.lines(40, 1, NONE);
 
     // //Pick First Block
-    // robot.setLinearAccelParams(100, 30, 30);
-    // robot.straight(30, 5, NONE);
+    // robot.setLinearAccelParams(100, 40, 30);
+    // robot.straight(30, 4, NONE);
     // act_tsk(WATER_GRABBER_TASK);
     // tslp_tsk(1);
-    // robot.straight(30, 1, COAST);
+    // robot.setLinearAccelParams(100, 30, 30);
+    // robot.straight(30, 2, COAST);
 
     // //Pick Second Block
     // robot.setLinearAccelParams(100, 0, 0);
-    // robot.arc(60, -40, -8.5, COAST);
+    // robot.arc(50, -40, -8.5, COAST);
     // robot.setLinearAccelParams(100, 0, 30);
-    // robot.straight(60, 10, NONE);
+    // robot.straight(50, 10, NONE);
     // act_tsk(PICK_BLOCK_TASK);
     // tslp_tsk(1);
     // robot.setLinearAccelParams(100, 30, 0);
     // robot.straight(30, 3, COAST);
 
     // //Get to TR intersection
-    // robot.setLinearAccelParams(100, 0, 0);
-    // robot.arc(60, 90, 3, COAST);
+    // // robot.setLinearAccelParams(100, 0, 0);
+    // // robot.arc(60, 90, 3, COAST);
+
+    // robot.setLinearAccelParams(100, 20, 20);
+    // robot.arc(40, 90, 3, COAST);
+
+    // robot.setLinearAccelParams(100, 20, 30);
+    // robot.straightUnlim(30, true);
+    // while(robot.getPosition() < 1) 
+    //     robot.straightUnlim(30);
+    // while(rightSensor.getReflected() > 80)
+    //     robot.straightUnlim(30);
+    // while(leftSensor.getReflected() > 80)
+    //     robot.straightUnlim(30);
 
     // lifo.setPIDparams(3, 3, 120);
     // lifo.distance(30, 7, NONE);
     // lifo.forcePIDparams(false);
-    // lifo.distance(40, 8, NONE);
-    // lifo.lines(40, 1, COAST);
+    // lifo.distance(40, 7, NONE);
+    // lifo.lines(40, 1, NONE);
+    // // lifoXtreme.setAccelParams(100, 40, 40);
+    // // lifoXtreme.lines(40, 1, NONE);
+    // robot.setMode(CONTROLLED);
+    // robot.setLinearAccelParams(100, 40, 40);
+    // robot.straight(40, 0.5, COAST);
 
     // //Special turn to go from TR to CR2(nearly) and scan red room task
     // robot.setMode(CONTROLLED);
-    // robot.setLinearAccelParams(100, 60, 60);
-    // robot.arc(60, 30, 15, NONE);
-    // robot.arc(60, 20, 40, NONE);
+    // robot.setLinearAccelParams(100, 50, 50);
+    // robot.arc(50, 30, 15, NONE);
+    // robot.arc(50, 20, 40, NONE);
     
     // stopScanning = false;
     // scanner = &leftScanner;
     // act_tsk(ROOM_TASK_SCAN_TASK);
     // tslp_tsk(1);
-    // robot.arc(60, 52, 15, NONE);
+    // robot.arc(50, 45, 15, NONE);
     // stopScanning = true;
 
-    // robot.setLinearAccelParams(100, 60, 60);
-    // robot.straight(60, 5, NONE);
+    // robot.setLinearAccelParams(100, 50, 50);
+    // robot.straight(50, 5, NONE);
 
     // rooms[RED].setTask(scannedValue);
     // display.resetScreen();
@@ -464,76 +497,268 @@ void main_task(intptr_t unused)
     
     // //Straight move but uses lines for location help
     // leftSensor.resetFiltering();
-    // robot.straightUnlim(60, true);
+    // robot.straightUnlim(50, true);
     // do
     // {
     //     leftSensor.getReflected();
-    //     robot.straightUnlim(60);
+    //     robot.straightUnlim(50);
     // } while (!leftSensor.getLineDetected());
-    // robot.straight(60, 7, NONE);
+    // robot.straight(50, 7, NONE);
     // leftSensor.resetFiltering();
-    // robot.straightUnlim(60, true);
+    // robot.straightUnlim(50, true);
     // do
     // {
     //     leftSensor.getReflected();
-    //     robot.straightUnlim(60);
+    //     robot.straightUnlim(50);
     // } while (!leftSensor.getLineDetected());
-    // robot.setLinearAccelParams(100, 60, 0);
-    // robot.straight(60, 9, COAST);
+    // robot.setLinearAccelParams(100, 50, 0);
+    // robot.straight(50, 9, COAST);
 
     // //Turn wide back and limit with line
     // robot.setLinearAccelParams(100, 0, -25);
-    // robot.arc(60, -85, 3.5, NONE);
+    // robot.arc(50, -85, 3.5, NONE);
     // robot.setLinearAccelParams(100, -25, -25);
     // robot.arcUnlim(25, 3.5, BACKWARD, true);
     // while(leftSensor.getReflected() < 50 && abs(robot.getAngle()) < 10)
     //     robot.arcUnlim(25, 3.5, BACKWARD, false);
     // robot.stop(COAST);
 
-    // //Lifo to CR3 intersection using blue-white lifo and scanning green room task
-    // lifo.setDoubleFollowMode("SL", "70");
-    // lifo.distance(30, 3, NONE);
-    // lifo.distance(40, 3, NONE);
+    act_tsk(CLOSE_RAMP_TASK);
+    tslp_tsk(1);
 
-    // stopScanning = false;
-    // scanner = &rightScanner;
-    // act_tsk(ROOM_TASK_SCAN_TASK);
-    // tslp_tsk(1);
-    // robot.resetPosition();
-    // t.reset();
-    // lifo.lines(40, 2, NONE, 9, false);
-    // stopScanning = true;
 
-    // double speed = robot.getPosition() / t.secElapsed();
-    // robot.setLinearAccelParams(100, speed, 0);
-    // robot.straight(35, 8, COAST);
-
-    // rooms[GREEN].setTask(scannedValue);
-    // display.format("%  \n")%static_cast<int>(scannedValue);
-
-    // //Wide back turn limited with sensor
-    // robot.setLinearAccelParams(100, 0, -25);
-    // robot.arc(60, -85, -5, NONE);
-    // robot.setLinearAccelParams(100, -25, -25);
-    // robot.arcUnlim(25, -5, BACKWARD, true);
-    // while(leftSensor.getReflected() > 50 && abs(robot.getAngle()) < 10)
-    //     robot.arcUnlim(25, -5, BACKWARD, false);
-    // robot.stop(COAST);
-
-    //Room entrance lifo
+    //Lifo to CR3 intersection using blue-white lifo and scanning green room task
+    lifo.setDoubleFollowMode("SL", "70");
+    lifoXtreme.setDoubleFollowMode("SL", "70");
     lifo.distance(30, 3, NONE);
+    lifo.distance(40, 3, NONE);
+
+    stopScanning = false;
+    scanner = &rightScanner;
+    act_tsk(ROOM_TASK_SCAN_TASK);
+    tslp_tsk(1);
     robot.resetPosition();
     t.reset();
-    lifo.distance(40, 9, NONE);
+    lifo.lines(40, 2, NONE, 9, false);
+    stopScanning = true;
+
     speed = robot.getPosition() / t.secElapsed();
-
-    //Entering room
     robot.setLinearAccelParams(100, speed, 0);
-    robot.straight(40, 30, BRAKE);
+    robot.straight(35, 8, COAST);
 
+    rooms[GREEN].setTask(scannedValue);
+    display.format("%  \n")%static_cast<int>(scannedValue);
+
+    //Wide back turn limited with sensor
+    robot.setLinearAccelParams(100, 0, -25);
+    robot.arc(50, -85, -5, NONE);
+    robot.setLinearAccelParams(100, -25, -25);
+    robot.arcUnlim(25, -5, BACKWARD, true);
+    while(leftSensor.getReflected() > 50 && abs(robot.getAngle()) < 10)
+        robot.arcUnlim(25, -5, BACKWARD, false);
+    robot.stop(COAST);
+
+    //Post interesection lifo till before the entrance of the room
+    lifo.distance(30, 8, NONE);
+    lifoXtreme.setAccelParams(100, 40, 40);
+    lifoXtreme.distance(40, 5, NONE);
+
+
+    //Get in the room
+    //1) detect start of room
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 40, 40);
+    robot.straightUnlim(40, true);
+    rightSensor.resetFiltering();
+    while(!rightSensor.getLineDetected())
+    {
+        robot.straightUnlim(40);
+        rightSensor.getRGB();
+        tslp_tsk(1);
+    }
+    //2) make sure colorSensors have good line-of-sight
+    robot.straight(40, 3, NONE);
+    //Start scanning
+    //3) go until the bed of the room
+    robot.straightUnlim(40, true);
+    rightSensor.resetFiltering();
+    while(!rightSensor.getLineDetected())
+    {
+        robot.straightUnlim(40);
+        rightSensor.getRGB();
+        tslp_tsk(1);
+    }
+    //Stop scanning
+    //4)Final maneuver of room entrance, depends on turn after and if room is RED...
+    robot.setLinearAccelParams(100, 40, 0);
+    robot.straight(40, 6.6, COAST);
+
+    
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    emptyRampWaterStage1(false);
+    robot.setLinearAccelParams(100, 0, -40);
+    robot.arc(40, -53, -8.5, NONE);
+    robot.setLinearAccelParams(100, -40, 0);
+    robot.arc(40, -50, -4, BRAKE);
+    emptyRampWaterStage2();
+
+    robot.setLinearAccelParams(100, 20, 50);
+    robot.straight(50, 7, NONE);
+    act_tsk(CLOSE_RAMP_TASK);
+    tslp_tsk(1);
+    act_tsk(PICK_BLOCK_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, 50, 20);
+    robot.straight(50, 5, COAST);
+
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(50, -10, COAST);
+
+    robot.setLinearAccelParams(100, 0, 25);
+    robot.arc(50, 95, 4, NONE);
+    robot.setLinearAccelParams(100, 25, 25);
+    robot.arcUnlim(25, 4, FORWARD, true);
+    while(rightSensor.getReflected() < 50 && abs(robot.getAngle()) < 10)
+        robot.arcUnlim(25, 4, FORWARD);
+    robot.stop(COAST);
+
+
+    // //Room entrance lifo
+    // lifo.distance(30, 5, NONE);
+    // robot.resetPosition();
+    // t.reset();
+    // lifo.distance(40, 5, NONE);
+    // speed = robot.getPosition() / t.secElapsed();
+
+    // //Entering room
+
+    // robot.setLinearAccelParams(100, 40, 40);
+    // robot.straightUnlim(40, true);
+    // rightSensor.resetFiltering();
+    // while(!rightSensor.getLineDetected())
+    // {
+    //     robot.straightUnlim(40);
+    //     rightSensor.getReflected();
+    //     tslp_tsk(1);
+    // }
+
+    // robot.tank(robot.cmToTacho(35), robot.cmToTacho(45), robot.cmToTacho(1), NONE);
+
+    // robot.setLinearAccelParams(100, 40, 0);
+    // robot.straight(40, 30, COAST);
+
+
+    robot.stop(BRAKE);
     btnEnter.waitForClick();
 
+    lifo.setDoubleFollowMode("64", "SR");
+    lifoXtreme.setDoubleFollowMode("64", "SR");
+    colorSensor *lineDetector = &leftSensor; 
+    int directionControl = 1;
+    
+    while (true)
+    {   
+        act_tsk(CLOSE_RAMP_TASK);
+        tslp_tsk(1);
+        // //Exit room
+        t.reset();
+        // robot.setLinearAccelParams(100, 0, 40);
+        // robot.straight(60, 20, NONE);
 
+
+        //Lifo after room exit
+        lifo.distance(30, 8, NONE);
+        lifoXtreme.setAccelParams(100, 40, 40);
+        lifoXtreme.distance(40, 8, NONE);
+        
+        //Straight to the intersection and beyond (could be improved to be lifo based I guess)
+        robot.setMode(CONTROLLED);
+        robot.setLinearAccelParams(100, 40, 40);
+        robot.straightUnlim(40, true);
+        lineDetector->resetFiltering();
+        while(!lineDetector->getLineDetected())
+        {
+            robot.straightUnlim(40);
+            lineDetector->getReflected();
+            tslp_tsk(1);
+        }
+        robot.setLinearAccelParams(100, 40, 40);
+        robot.straight(40, 9, NONE);
+
+        
+        //Post interesection lifo till before the entrance of the room
+        lifo.distance(30, 8, NONE);
+        lifoXtreme.setAccelParams(100, 40, 40);
+        lifoXtreme.distance(40, 5, NONE);
+
+
+        //Get in the room
+        //1) detect start of room
+        robot.setMode(CONTROLLED);
+        robot.setLinearAccelParams(100, 40, 40);
+        robot.straightUnlim(40, true);
+        lineDetector->resetFiltering();
+        while(!lineDetector->getLineDetected())
+        {
+            robot.straightUnlim(40);
+            lineDetector->getRGB();
+            tslp_tsk(1);
+        }
+        //2) make sure colorSensors have good line-of-sight
+        // robot.straight(40, 3, NONE);
+        robot.tank(robot.cmToTacho(40), robot.cmToTacho(50), robot.cmToTacho(3), NONE);
+        //Start scanning
+        //3) go until the bed of the room
+        robot.straightUnlim(40, true);
+        lineDetector->resetFiltering();
+        while(!lineDetector->getLineDetected())
+        {
+            robot.straightUnlim(40);
+            lineDetector->getRGB();
+            tslp_tsk(1);
+        }
+        //Stop scanning
+        //4)Final maneuver of room entrance, depends on turn after and if room is RED...
+        robot.setLinearAccelParams(100, 40, 0);
+        robot.straight(40, 6.6 - 0.6, COAST); //6.6 reg
+
+
+        //Task execution
+        act_tsk(OPEN_GRABBER_TASK);
+        tslp_tsk(1);
+        emptyRampWaterStage1(false);
+        robot.setLinearAccelParams(100, 0, -40);
+        robot.arc(40, -53, directionControl * 8.5, NONE);   //54
+        robot.setLinearAccelParams(100, -40, 0);
+        robot.arc(40, -50, directionControl * 4, BRAKE);    //50
+        emptyRampWaterStage2();
+
+        robot.setLinearAccelParams(100, 20, 50);
+        robot.straight(50, 7, NONE);
+        act_tsk(CLOSE_RAMP_TASK);
+        tslp_tsk(1);
+        act_tsk(PICK_BLOCK_TASK);
+        tslp_tsk(1);
+        robot.setLinearAccelParams(100, 50, 20);
+        robot.straight(50, 5, COAST);
+
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.straight(60, -10, COAST);
+
+        robot.setLinearAccelParams(100, 0, 25);
+        robot.arc(60, 95, -directionControl * 3, NONE);
+        robot.setLinearAccelParams(100, 25, 25);
+        robot.arcUnlim(25, -directionControl * 3, FORWARD, true);
+        while(lineDetector->getReflected() < 50 && abs(robot.getAngle()) < 10)
+            robot.arcUnlim(25, -directionControl * 3, FORWARD);
+        robot.stop(COAST);
+
+        display.resetScreen();
+        display.format("%  \n") %t.secElapsed();
+
+        btnEnter.waitForClick();
+    }
 
 
     
