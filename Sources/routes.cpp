@@ -368,14 +368,11 @@ orientation S_W(orientation dir)
 {
     DEBUGPRINT("\nS_W\n");
 
-    resetLifo();
-    // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
-    lifo.setPIDparams(3, 3, 120, 1);
-    lifo.distance(robot.cmToTacho(35), 10, NONE);
-    setLifoSlow();
-    lifo.setAccelParams(150, 20, 20);
-    lifo.distance(20, 3, NONE);
-    lifo.lines(20, 1, NONE);
+    lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+    lifo.distance(30, 5, NONE);
+    lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    lifo.distance(40, 7, NONE);
+    lifo.lines(40, 1, NONE);
 
     return NORTH;
 }
@@ -383,109 +380,94 @@ orientation W_G(orientation dir)
 {
     DEBUGPRINT("\nW_G\n");
 
-    //Complex turn to go from one area to another
-    robot.setLinearAccelParams(100, 35, 45);
-    robot.arc(45, 30, 15, NONE);
-    robot.setLinearAccelParams(100, 45, 25);
-    robot.arc(45, 20, 40, NONE);
-    robot.setLinearAccelParams(100, 35, 35);
-    robot.arcUnlim(45, 15, FORWARD, true);
-    //Scan left (red room) task block while turning
-    colors current = BLACK;
-    map<colors, int> appearances;
-    while(robot.getAngle() < 40)
-    {
-        if((current = scanCodeBlock(leftScanner)) != BLACK)
-        {
-            appearances[current]++;
-        }
-        robot.arcUnlim(45, 15, FORWARD, false);
-    }
-    current = analyzeFrequency(appearances, BLACK);
-    rooms[RED].setTask(current);
-    display.resetScreen();
-    display.format("%  \n")%static_cast<int>(current);
-
-    //Get in position to scan green room task.
-    robot.setLinearAccelParams(100, 20, 45);
-    robot.straightUnlim(45, true);
-    do{
-        leftSensor.getReflected();
-        robot.straightUnlim(45);
-    }while(!leftSensor.getLineDetected());
-    robot.resetPosition();
-    while(robot.getPosition() < 1) robot.straightUnlim(45);
-    while(leftSensor.getReflected() > 80) robot.straightUnlim(45);
-    robot.setLinearAccelParams(100, 45, 0);
-    robot.straight(45, 12, COAST);
+    //Special turn to go from TR to CR2(nearly) and scan red room task
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 50, 50);
+    robot.arc(50, 30, 15, NONE);
+    robot.arc(50, 20, 40, NONE);
     
+    stopScanning = false;
+    scanner = &leftScanner;
+    act_tsk(ROOM_TASK_SCAN_TASK);
+    tslp_tsk(1);
+    robot.arc(50, 45, 15, NONE);
+    stopScanning = true;
+
+    robot.setLinearAccelParams(100, 50, 50);
+    robot.straight(50, 5, NONE);
+
+    rooms[RED].setTask(scannedValue);
+    display.resetScreen();
+    display.format("%  \n")%static_cast<int>(scannedValue);
+    
+    //Straight move but uses lines for location help
+    leftSensor.resetFiltering();
+    robot.straightUnlim(50, true);
+    do
+    {
+        leftSensor.getReflected();
+        robot.straightUnlim(50);
+    } while (!leftSensor.getLineDetected());
+    robot.straight(50, 7, NONE);
+    leftSensor.resetFiltering();
+    robot.straightUnlim(50, true);
+    do
+    {
+        leftSensor.getReflected();
+        robot.straightUnlim(50);
+    } while (!leftSensor.getLineDetected());
+    robot.setLinearAccelParams(100, 50, 0);
+    robot.straight(50, 9, COAST);
+
+    //Turn wide back and limit with line
     robot.setLinearAccelParams(100, 0, -25);
-    robot.arc(45, -75, 3.5, COAST);
+    robot.arc(50, -85, 3.5, NONE);
     robot.setLinearAccelParams(100, -25, -25);
     robot.arcUnlim(25, 3.5, BACKWARD, true);
-    while(leftSensor.getReflected() < 50)
+    while(leftSensor.getReflected() < 50 && abs(robot.getAngle()) < 10)
         robot.arcUnlim(25, 3.5, BACKWARD, false);
+    robot.stop(COAST);
 
+    lifo.setDoubleFollowMode("SL", "70");
 
-    //Lifo until right before task block (green room)
-    resetLifo();
-    setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(30), 5, NONE);
-    setLifoLeft();
-    while(rightSensor.getReflected() < 60)
-        executeLifoLeftUnlim(robot.cmToTacho(30));
+    //Lifo until until before the task block
+    stopScanning = false;
+    scanner = &rightScanner;
+    act_tsk(ROOM_TASK_SCAN_TASK);
+    tslp_tsk(1);
 
-    //Scan (right) green room task while moving forwards on route to get in the room.
-    current = BLACK;
-    appearances.clear();
-    robot.resetPosition();
-    lifo.setDoubleFollowMode("N", "N");
-    lifo.unlimited(robot.cmToTacho(40), true);
-    while(robot.getPosition() < 8)
-    {
-        if((current = scanCodeBlock(rightScanner)) != BLACK)
-        {
-            appearances[current]++;
-        }
-        lifo.unlimited(robot.cmToTacho(40));
-    }
-    current = analyzeFrequency(appearances, BLACK);
-    rooms[GREEN].setTask(current);
-    display.format("%  \n")%static_cast<int>(current);
+    lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed    
+    lifo.distance(30, 5, NONE);
 
-
-    //Get to the intersection
+    //Lifo until intersection while scanning task
+    lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
     robot.resetPosition();
     timer t;
-    t.reset();
-    resetLifo();
-    setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(35), 8, NONE);
-    double speed = robot.getPosition()/t.secElapsed();
+    lifo.lines(40, 2, NONE, 9, false);
+    stopScanning = true;
 
-    setLifoLeft();
-    while(rightSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(35));
+    double speed = robot.getPosition() / t.secElapsed();
+    robot.setLinearAccelParams(100, speed, 0);
+    robot.straight(35, 8, COAST);
 
-    robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(150, speed, 0);
-    robot.straight(35, 7, NONE);
+    rooms[GREEN].setTask(scannedValue);
+    display.format("%  \n")%static_cast<int>(scannedValue);
 
-    //Turn towards green room
-    robot.setLinearAccelParams(100, 0, -20);
-    robot.arc(45, -80, -4, NONE);
-    robot.arcUnlim(20, -4, BACKWARD, true);
-    while(leftSensor.getReflected() > 60)
-        robot.arcUnlim(20, -4, BACKWARD);  
+    //Wide back turn limited with sensor
+    robot.setLinearAccelParams(100, 0, -25);
+    robot.arc(50, -85, -5, NONE);
+    robot.setLinearAccelParams(100, -25, -25);
+    robot.arcUnlim(25, -5, BACKWARD, true);
+    while(leftSensor.getReflected() > 50 && abs(robot.getAngle()) < 10)
+        robot.arcUnlim(25, -5, BACKWARD, false);
+    robot.stop(COAST);
 
     //Lifo until right before green room's entrance
-    resetLifo();
-    setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(30), 9, NONE);
-    setLifoSlow();
-    setLifoLeft(true);
-    lifo.setAccelParams(100, 20, 20);
-    lifo.distance(20, 4, NONE);
+    lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+    lifo.distance(30, 5, NONE);
+
+    lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    lifo.distance(40, 8, NONE);
 
     return SOUTH;
 }
@@ -493,25 +475,18 @@ orientation G_R(orientation dir)
 {
     DEBUGPRINT("\nG_R\n");
     
-    //Lifo till the middle (intersection)
-    resetLifo();
-    setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
-    setLifoRight();
-    while(leftSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(35));
-    lifo.setDoubleFollowMode("N", "N");
-    lifo.distance(robot.cmToTacho(35), 8, NONE);
+    lifo.setDoubleFollowMode("70", "SR");
 
+    //Lifo till the middle (intersection)
+    lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+    lifo.distance(30, 5, NONE);
+
+    lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    lifo.lines(40, 1, NONE, 8.5, true);
 
     //Lifo till right before the entrance of the red room
-    resetLifo();
-    setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(30), 9, NONE);
-    setLifoSlow();
-    setLifoRight(true);
-    lifo.setAccelParams(100, 20, 20);
-    lifo.distance(20, 4, NONE);
+    lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    lifo.distance(40, 13, NONE);
 
     return NORTH;
 }
@@ -522,10 +497,10 @@ orientation R_B(orientation dir)
     //Lifo exit red room till white part of intersection 
     resetLifo();
     setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    lifo.distance(30, 10, NONE);
     setLifoLeft();
     while(rightSensor.getReflected() < 60)
-        executeLifoLeftUnlim(robot.cmToTacho(30));
+        executeLifoLeftUnlim(30);
 
 
     //Complex turn to pass all the difficult lifo parts and get ready to cross
@@ -541,56 +516,56 @@ orientation R_B(orientation dir)
     robot.setMode(CONTROLLED);    
     resetLifo();
     setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    lifo.distance(30, 10, NONE);
     //Increase speed until the intersection
     setLifoRight();
-    lifo.unlimited(robot.cmToTacho(45), true);
+    lifo.unlimited(45, true);
     while(leftSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(45));
+        lifo.unlimited(45);
     //Move until right before the start/finish square
     lifo.setDoubleFollowMode("N", "N");
-    lifo.distance(robot.cmToTacho(45), 8, NONE);
+    lifo.distance(45, 8, NONE);
     setLifoRight();
     robot.resetPosition();
     timer t;
     while(robot.getPosition() < 17)
-        lifo.unlimited(robot.cmToTacho(45));
+        lifo.unlimited(45);
     double speed = robot.getPosition() / t.secElapsed();    //Real speed calculation because of unreg/reg discrepancy
     //Pass the square (no lifo here)
     robot.setLinearAccelParams(100, speed, speed);
     robot.straight(speed, 33, NONE);    
     //Continue lifo high speed till the intersection and half way to the blue room scan area
     setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(35), 6, NONE);
+    lifo.distance(35, 6, NONE);
     setLifoRight();
     while(leftSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(45));
+        lifo.unlimited(45);
     lifo.setDoubleFollowMode("N", "N");
-    lifo.distance(robot.cmToTacho(45), 8, NONE);
+    lifo.distance(45, 8, NONE);
     setLifoRight();
-    lifo.distance(robot.cmToTacho(45), 12, NONE);
+    lifo.distance(45, 12, NONE);
 
     //Slow down to correct possible mistakes and get to right before scan area
     resetLifo();
     setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(35), 5, NONE);
+    lifo.distance(35, 5, NONE);
     setLifoRight();
     while(leftSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(40));
+        lifo.unlimited(40);
 
     //Continue forwards scanning left (blue room) same way as green just mirrored
     colors current = BLACK;
     map<colors, int> appearances;
     robot.resetPosition();
     lifo.setDoubleFollowMode("N", "N");
-    lifo.unlimited(robot.cmToTacho(40), true);
+    lifo.unlimited(40, true);
     while(robot.getPosition() < 8)
     {
         if((current = scanCodeBlock(leftScanner)) != BLACK)
         {
             appearances[current]++;
         }
-        lifo.unlimited(robot.cmToTacho(40));
+        lifo.unlimited(40);
     }
     current = analyzeFrequency(appearances, BLACK);
     rooms[BLUE].setTask(current);
@@ -612,12 +587,12 @@ orientation R_B(orientation dir)
     t.reset();
     resetLifo();
     setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(35), 8, NONE);
+    lifo.distance(35, 8, NONE);
     speed = robot.getPosition()/t.secElapsed();
 
     setLifoRight();
     while(leftSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(35));
+        lifo.unlimited(35);
 
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(150, speed, 0);
@@ -633,7 +608,7 @@ orientation R_B(orientation dir)
     //Lifo until right before blue room's entrance
     resetLifo();
     setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(30), 9, NONE);
+    lifo.distance(30, 9, NONE);
     setLifoSlow();
     setLifoRight(true);
     lifo.setAccelParams(100, 20, 20);
@@ -648,17 +623,17 @@ orientation B_Y(orientation dir)
     //Lifo until intersection
     resetLifo();
     setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    lifo.distance(30, 10, NONE);
     setLifoLeft();
     while(rightSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(35));
+        lifo.unlimited(35);
     lifo.setDoubleFollowMode("N", "N");
-    lifo.distance(robot.cmToTacho(35), 8, NONE);
+    lifo.distance(35, 8, NONE);
 
     //Lifo until right before yellow room entrance
     resetLifo();
     setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(30), 9, NONE);
+    lifo.distance(30, 9, NONE);
     setLifoSlow();
     setLifoLeft(true);
     lifo.setAccelParams(100, 20, 20);
@@ -673,10 +648,10 @@ orientation Y_L(orientation dir)
     //Exit yellow room
     resetLifo();
     setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
+    lifo.distance(30, 10, NONE);
     setLifoRight();
     while(leftSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(30));
+        lifo.unlimited(30);
 
     
     //Special turn to pass through trouble and put line between the two sensors
@@ -686,19 +661,19 @@ orientation Y_L(orientation dir)
     //Correct turn mistakes with slow lifo
     resetLifo();
     // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
-    lifo.setPIDparams(3, 3, 120, 1);
-    lifo.distance(robot.cmToTacho(35), 5, NONE);
+    lifo.setPIDparams(3, 3, 120);
+    lifo.distance(35, 5, NONE);
 
     //Lifo until the intersection
     timer t;
     resetLifo();
-    lifo.distance(robot.cmToTacho(45), 10, NONE);
-    lifo.lines(robot.cmToTacho(45), 1, NONE);
+    lifo.distance(45, 10, NONE);
+    lifo.lines(45, 1, NONE);
 
     //Lifo until right before the start/finish square
     robot.resetPosition();
     t.reset();
-    lifo.distance(robot.cmToTacho(45), 22, NONE);
+    lifo.distance(45, 22, NONE);
 
     double speed = robot.getPosition() / t.secElapsed(); //Speed calculation for unreg/reg behaviour
     //Complex arc turn to get into the right position before the laundry baskets
@@ -711,8 +686,8 @@ orientation Y_L(orientation dir)
     //Lifo until the intersection
     resetLifo();
     // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
-    lifo.setPIDparams(3, 3, 120, 1);
-    lifo.distance(robot.cmToTacho(35), 10, NONE);
+    lifo.setPIDparams(3, 3, 120);
+    lifo.distance(35, 10, NONE);
     setLifoSlow();
     lifo.setAccelParams(150, 20, 20);
     lifo.distance(20, 3, NONE);

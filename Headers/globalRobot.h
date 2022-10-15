@@ -18,7 +18,12 @@ extern ev3ys::timer universalTimer;
 extern FILE* bluetooth;
 
 extern bool grabberUsed, startPicking, stopScanning;
-extern int scanStage;
+extern int roomScanStage;
+
+extern ev3ys::colorSensor *scanner;
+extern ev3ys::colors scannedValue;
+extern ev3ys::colorSensor *lineDetector;
+extern ev3ys::colors roomColor;
 
 #define DEBUG_BLUETOOTH
 //#define DEBUG_FILE

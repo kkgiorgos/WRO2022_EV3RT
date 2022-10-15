@@ -29,7 +29,7 @@ motor grabber(MotorPort::A, true);
 motor ramp(MotorPort::D, false);
 motor leftMotor(MotorPort::B, true, MotorType::MEDIUM);
 motor rightMotor(MotorPort::C, false, MotorType::MEDIUM);
-chassis robot(&leftMotor, &rightMotor, 6.24, 17, 0.1, 0.007);
+chassis robot(&leftMotor, &rightMotor, 6.24, 17, 0.1, 0.007, 0);
 colorSensor leftSensor(SensorPort::S2, false, "WRO2022");
 colorSensor rightSensor(SensorPort::S3, false, "WRO2022");
 colorSensor leftScanner(SensorPort::S1, false, "WRO2022");
@@ -61,6 +61,16 @@ std::vector<int> graph[V];
 
 BrickButton btnEnter(BrickButtons::ENTER);
 
+bool grabberUsed = false;
+bool startPicking = false;
+bool stopScanning = false;
+int roomScanStage = 0;
+
+colorSensor *scanner;
+colors scannedValue;
+colorSensor *lineDetector;
+colors roomColor;
+
 void startData()
 {
     rooms.insert(pair<colors, room>(RED, room(RED)));
@@ -88,18 +98,22 @@ void init()
     lifo.initializeMotionMode(speedMode::CONTROLLED);
     lifo.setSensorMode(sensorModes::REFLECTED);
     lifo.setAccelParams(100, 5, 50);
-    lifo.setPIDparams(0.5, 0.05, 5, 75);  //UNREGULATED VALUES
+    lifo.setPIDparams(0.5, 0.05, 5);  //UNREGULATED VALUES
     //lifo.setPIDparams(1, 1, 100, 1000);      //REGULATED VALUES
 
     leftSensor.setNormalisation(true);
-    leftSensor.setFiltering(false);
+    leftSensor.setFilteringRef(false);
+    leftSensor.setFilteringRGB(false);
     leftSensor.setCutoffValue(27);
     rightSensor.setNormalisation(true);
-    rightSensor.setFiltering(false);
+    rightSensor.setFilteringRef(false);
+    rightSensor.setFilteringRGB(false);
     rightSensor.setCutoffValue(27);
 
-    leftScanner.setFiltering(false);
-    rightScanner.setFiltering(false);
+    leftScanner.setFilteringRef(false);
+    leftScanner.setFilteringRGB(false);
+    rightScanner.setFilteringRef(false);
+    rightScanner.setFilteringRGB(false);
     leftScanner.setNormalisation(true);
     rightScanner.setNormalisation(true);
     
@@ -109,30 +123,24 @@ void init()
 
     display.format("WAIT FOR SENSORS\n");
     btnEnter.waitForClick();
-    act_tsk(INIT_TASK);
+    // act_tsk(INIT_TASK);
     tslp_tsk(1);
 }
-
-bool grabberUsed = false;
-bool startPicking = false;
-bool stopScanning = false;
-int scanStage = 0;
-int prevLeft = -1, prevRight = -1;
 
 void open_grabber_task(intptr_t unused)
 {
     //OPENS GRABBER FULLY
     grabber.setMode(REGULATED);
-    grabber.moveUnlimited(-1000, true);
+    grabber.moveUnlimited(-1200, true);
     tslp_tsk(50);
-    while(grabber.getCurrentSpeed() > -450)
+    while(grabber.getCurrentSpeed() > -900)
     {
-        grabber.moveUnlimited(-1000);
+        grabber.moveUnlimited(-1200);
         tslp_tsk(1);
     }
-    while(grabber.getCurrentSpeed() < -400)
+    while(grabber.getCurrentSpeed() < -800)
     {
-        grabber.moveUnlimited(-1000);
+        grabber.moveUnlimited(-1200);
         tslp_tsk(1);
     }
     grabber.stop(BRAKE);
@@ -179,20 +187,25 @@ void water_grabber_task(intptr_t unused)
 {
     //PICKS ONE OBJECT AND IMMEDIATELY OPENS GRABBER TO BE READY FOR THE NEXT
     grabberUsed = true;
-    grabber.setMode(REGULATED);
-    grabber.moveUnlimited(800, true);
-    tslp_tsk(50);
-    while(grabber.getCurrentSpeed() > 350)
+    grabber.moveDegrees(1200, 350, NONE);
+    grabber.moveUnlimited(700, true);
+    while(grabber.getCurrentSpeed() > 600)
     {
-        grabber.moveUnlimited(800);
+        grabber.moveUnlimited(700);
         tslp_tsk(1);
     }
-    grabber.stop(BRAKE_COAST);
-    grabber.moveUnlimited(-1000, true);
+    grabber.stop(COAST);
+    grabber.setMode(REGULATED);
+    grabber.moveUnlimited(-1200, true);
     tslp_tsk(50);
-    while(grabber.getCurrentSpeed() < -400)
+    while(grabber.getCurrentSpeed() > -900)
     {
-        grabber.moveUnlimited(-1000);
+        grabber.moveUnlimited(-1200);
+        tslp_tsk(1);
+    }
+    while(grabber.getCurrentSpeed() < -800)
+    {
+        grabber.moveUnlimited(-1200);
         tslp_tsk(1);
     }
     grabber.stop(BRAKE);
@@ -202,15 +215,14 @@ void water_grabber_task(intptr_t unused)
 void pick_block_task(intptr_t unused)
 {
     //RAISES GRABBER FULLY
-    grabber.setMode(REGULATED);
+    grabber.moveDegrees(1200, 350, NONE);
     grabber.moveUnlimited(700, true);
-    tslp_tsk(50);
-    while(grabber.getCurrentSpeed() > 350)
+    while(grabber.getCurrentSpeed() > 600)
     {
         grabber.moveUnlimited(700);
         tslp_tsk(1);
     }
-    grabber.stop(BRAKE_COAST);
+    grabber.stop(COAST);
 }
 
 void empty_water_ramp_task(intptr_t unused)
@@ -270,6 +282,54 @@ void basket_scan_task(intptr_t unused)
     laundryBaskets[BASKET_RIGHT] = rightBasket;
 }
 
+void room_task_scan_task(intptr_t unused)
+{
+    colors current = NO_COLOR;
+    map<colors, int> appearances;
+    while(!stopScanning)
+    {
+        if((current = scanCodeBlock(*scanner)) != NO_COLOR)
+            appearances[current]++;
+        tslp_tsk(1);
+    }
+    current = analyzeFrequency(appearances, NO_COLOR);
+    scannedValue = current;
+}
+
+void room_entrance_task(intptr_t unused)
+{
+    colors current = NO_COLOR;
+    map<colors, int> appearances;
+
+    roomScanStage = 1;  //until you find the entrance
+    lineDetector->resetFiltering();
+    while(!lineDetector->getLineDetected())
+    {
+        lineDetector->getRGB();
+    }
+
+    roomScanStage = 2;  //3 cm until before the laundry
+    robot.resetPosition();
+    while(robot.getPosition() < 3)
+    {
+        tslp_tsk(10);
+    }
+
+    roomScanStage = 3;  //until the bed (scanning)
+    lineDetector->resetFiltering();
+    while(!lineDetector->getLineDetected())
+    {
+        lineDetector->getRGB();
+        if((current = scanLaundryBlock(*scanner)) != NO_COLOR)
+            appearances[current]++;
+    }
+
+    current = analyzeFrequency(appearances, NO_COLOR);
+    if(current != RED && current != YELLOW && current != NO_COLOR) current = BLACK;
+    scannedValue = current;
+    roomScanStage = 4;  //final distance based on room 
+}
+
 void end_task(intptr_t unused)
 {
     //CLOSES EVERYTHING
@@ -285,6 +345,7 @@ void end_task(intptr_t unused)
     }
     ramp.stop(BRAKE);   
 }
+
 
 void main_task(intptr_t unused) 
 {
@@ -309,13 +370,13 @@ void main_task(intptr_t unused)
     // display.resetScreen();
     // while(true)
     // {
-    //     colorspaceRGB l = leftScanner.getRGB();
-    //     colorspaceRGB r = rightScanner.getRGB();
+    //     // colorspaceRGB l = leftScanner.getRGB();
+    //     // colorspaceRGB r = rightScanner.getRGB();
     //     // format(bt, "L: R: %  G: %  B: %  W: %  \nR: R: %  G: %  B: %  W: %  \n") %l.red %l.green %l.blue %l.white %r.red %r.green %r.blue %r.white;
-    //     colorspaceHSV l2 = leftScanner.getHSV();
-    //     colorspaceHSV r2 = rightScanner.getHSV();
+    //     // colorspaceHSV l2 = leftScanner.getHSV();
+    //     // colorspaceHSV r2 = rightScanner.getHSV();
     //     // format(bt, "L: H: %  S: %  V: %  \nR: H: %  S: %  V: %  \n\n") %l2.hue %l2.saturation %l2.value %r2.hue %r2.saturation %r2.value;
-    //     display.format("L: %  \nR: %  \n\n\n") %static_cast<int>(scanLaundryBlock(leftScanner)) %static_cast<int>(scanLaundryBlock(rightScanner));
+    //     display.format("L: %  \nR: %  \n\n\n") %static_cast<int>(scanCodeBlock(leftScanner)) %static_cast<int>(scanCodeBlock(rightScanner));
     //     tslp_tsk(10);
     // }
 
@@ -335,28 +396,150 @@ void main_task(intptr_t unused)
     // rooms[BLUE].setTask(GREEN);
     // rooms[BLUE].executeAllActions();
 
+    leftSensor.setFilteringRef(true, 0.01, 10);
+    leftSensor.setFilteringRGB(true, 0.01, 30);
 
-    startProcedure();
+    rightSensor.setFilteringRef(true, 0.01, 10);
+    rightSensor.setFilteringRGB(true, 0.01, 30);
 
-    fullRouteStandard(W);
 
-    pickWater();
+    lifo.setDoubleFollowMode("SL", "SR");
+    lifo.initializeMotionMode(UNREGULATED);
+    robot.setUnregulatedDPS(true);
+    lifo.setSensorMode(REFLECTED);
+    lifo.addPIDparams(30, 4, 1, 30);    //30 speed
+    lifo.addPIDparams(40, 4, 3, 40);    //40 speed
+    lifo.addPIDparams(50, 5, 4, 40);    //50 speed
+    lifo.addPIDparams(60, 6, 5, 60);    //60 speed
 
+    // // lineFollower lifoFinisher(400, &robot, &leftSensor, &rightSensor);
+    // // lifoFinisher.setDoubleFollowMode("SL", "SR");
+    // // lifoFinisher.initializeMotionMode(CONTROLLED);
+    // // lifoFinisher.setSensorMode(REFLECTED);
+
+    // while(true)
+    // {
+    //     // // lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+        
+    //     // // lifo.distance(30, 5, NONE);
+
+    //     // // // lifo.setPIDparams(4, 0.5, 60);   //About normal 30speed
+    //     // // lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    //     // // lifo.lines(40, 1, NONE, 8.5, true);
+
+    //     // lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+    //     // // lifo.distance(40, 3, NONE);
+
+    //     // lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    //     // lifo.distance(40, 13, NONE);
+
+
+    //     // // lifo.setPIDparams(3, 0, 30);    //Finisher 30speed
+    //     // lifo.setPIDparams(4, 0, 40);    //Finisher 40speed
+        
+    //     lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+    //     lifo.distance(30, 5, NONE);
+
+    //     lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    //     lifo.distance(40, 8, NONE);
+
+
+    //     //Get in the room
+    //     //Task setup
+    //     scanner = &rightScanner;
+    //     lineDetector = &rightSensor;
+    //     roomScanStage = 1;
+    //     act_tsk(ROOM_ENTRANCE_TASK);
+    //     tslp_tsk(1);
+
+    //     robot.setMode(CONTROLLED);
+    //     robot.setLinearAccelParams(100, 40, 40);
+    //     robot.straightUnlim(40, true);
+    //     while(roomScanStage != 4)
+    //     {
+    //         robot.straightUnlim(40);
+    //         tslp_tsk(1);
+    //     }
+
+    //     robot.setLinearAccelParams(100, 40, 0);
+    //     robot.straight(40, 6.6, COAST);
+
+    //     display.resetScreen();
+    //     display.format("%  \n") %static_cast<int>(scannedValue);
+
+
+    //     btnEnter.waitForClick();
+    // }
+
+
+    // startProcedure();
+
+    // fullRouteStandard(W);
+
+    // pickWater();
+
+    currentPos = W;
+    rampQueue.push(BOTTLE);
+    rampQueue.push(BOTTLE);
+    act_tsk(CLOSE_RAMP_TASK);
+    tslp_tsk(1);
+    lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+    lifo.distance(30, 7, NONE);
+    lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    lifo.distance(40, 3, NONE);
+    lifo.lines(40, 1, NONE);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 40, 40);
+    robot.straight(40, 0.5, COAST);
+    
     fullRouteStandard(G);
     rooms[GREEN].executeAllActions();
     fullRouteStandard(R);
     rooms[RED].executeAllActions();
-    fullRouteStandard(B);
-    rooms[BLUE].executeAllActions();
-    fullRouteStandard(Y);
-    rooms[YELLOW].executeAllActions();
-    fullRouteStandard(L);
 
-    scanLaundryBaskets();
-    leaveLaundry();
+    lifo.setDoubleFollowMode("SL", "70");
 
-    fullRouteStandard(S);
-    finishProcedure();
+    lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+    lifo.distance(30, 5, NONE);
+
+    lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    lifo.lines(40, 1, NONE, 8.5);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 40, 50);
+    robot.arc(50, 40, 8.5, NONE); 
+    robot.setLinearAccelParams(100, 50, 40);
+    robot.arc(50, 65, 18, NONE);
+    robot.setLinearAccelParams(100, 40, 40);
+    robot.arcUnlim(40, 18, FORWARD, true);
+    while(rightSensor.getReflected() < 60)
+        robot.arcUnlim(40, 18, FORWARD);
+    robot.stop(COAST);
+
+    lifo.setDoubleFollowMode("70", "SR");
+
+    lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+    lifo.distance(30, 5, NONE);
+
+    lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    lifo.lines(40, 1, NONE, 8.5, true);
+
+    lifo.distance(40, 10, COAST);
+
+    // rooms[GREEN].executeAllActions();
+    // fullRouteStandard(R);
+    // rooms[RED].executeAllActions();
+    // fullRouteStandard(B);
+    // rooms[BLUE].executeAllActions();
+    // fullRouteStandard(Y);
+    // rooms[YELLOW].executeAllActions();
+    // fullRouteStandard(L);
+
+    // scanLaundryBaskets();
+    // leaveLaundry();
+
+    // fullRouteStandard(S);
+    // finishProcedure();
 
     robot.stop(BRAKE);
 
