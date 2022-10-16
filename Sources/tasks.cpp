@@ -247,8 +247,8 @@ void room::pickBall(int stage)
     {
         DEBUGPRINT("Picking the ball at the %s room.\n", name);
         currentState = PLAYING_BALL;
-        grabber.moveDegrees(600, 250, NONE, true);
-        grabber.moveDegrees(400, 115, BRAKE, false);
+        grabber.moveDegrees(800, 200, NONE, true);
+        grabber.moveDegrees(400, 110, BRAKE, false);
     }
 }
 
@@ -258,7 +258,9 @@ void room::leaveBall()
     currentState = PLAYING_BALL;
 
     //Leave Ball Code
-    act_tsk(PICK_BLOCK_TASK);
+    grabber.setMode(REGULATED);
+    grabber.moveDegrees(400, 50, COAST, false);
+    act_tsk(LEAVE_BALL_TASK);
     tslp_tsk(1);
 }
 
@@ -381,43 +383,35 @@ void room::taskBall()
     {
         pickBall(1);
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(45, 51, 3, COAST);
-        robot.straight(45, 5.7, BRAKE);
+        robot.arc(50, 50, 3, COAST);
+        robot.straight(50, 4, COAST);
         pickBall(2);
-        robot.arc(45, -120, 2, COAST);
-        
-        robot.setLinearAccelParams(100, 0, 15);
-        robot.straight(45, 14, NONE);
+        robot.arc(50, -121, 2, COAST);
+
+        robot.straight(50, 15, COAST);
         leaveBall();
-        robot.setLinearAccelParams(100, 15, 0);
-        robot.straight(15, 2, COAST);
-        
-        robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(45, -10.5, COAST);
-        robot.arc(45, -110, 0, COAST);
-        robot.setLinearAccelParams(100, 0, 20);
-        robot.straight(45, 16.5, COAST);
+
+        robot.straight(50, -10, COAST);
+        robot.arc(50, -115, 0, COAST);
+        robot.setLinearAccelParams(100, 0, 30);
+        robot.straight(50, 16, NONE);
     }
     else    //RED_BLUE
     {
         pickBall(1);
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(45, 47, -3, COAST);
-        robot.straight(45, 6, BRAKE);
+        robot.arc(50, 50, -3, COAST);
+        robot.straight(50, 4, COAST);
         pickBall(2);
-        robot.arc(45, -120, -2, COAST); //-117
+        robot.arc(50, -119, -2, COAST);
 
-        robot.setLinearAccelParams(100, 0, 15);
-        robot.straight(45, 14, NONE);
+        robot.straight(50, 15, COAST);
         leaveBall();
-        robot.setLinearAccelParams(100, 15, 0);
-        robot.straight(15, 2, COAST);
-        
-        robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(45, -10, COAST);
-        robot.arc(45, 113, 0, COAST);
-        robot.setLinearAccelParams(100, 0, 20);
-        robot.straight(45, 16, COAST);
+
+        robot.straight(50, -10, COAST);
+        robot.arc(50, 115, 0, COAST);
+        robot.setLinearAccelParams(100, 0, 30);
+        robot.straight(50, 16, NONE);
     }
 }
 

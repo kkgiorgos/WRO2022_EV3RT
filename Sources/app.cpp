@@ -123,7 +123,7 @@ void init()
 
     display.format("WAIT FOR SENSORS\n");
     btnEnter.waitForClick();
-    // act_tsk(INIT_TASK);
+    act_tsk(INIT_TASK);
     tslp_tsk(1);
 }
 
@@ -217,6 +217,22 @@ void pick_block_task(intptr_t unused)
     //RAISES GRABBER FULLY
     grabber.moveDegrees(1200, 350, NONE);
     grabber.moveUnlimited(700, true);
+    while(grabber.getCurrentSpeed() > 600)
+    {
+        grabber.moveUnlimited(700);
+        tslp_tsk(1);
+    }
+    grabber.stop(COAST);
+}
+
+void leave_ball_task(intptr_t unused)
+{
+    grabber.moveUnlimited(700, true);
+    while(grabber.getCurrentSpeed() < 650)
+    {
+        grabber.moveUnlimited(700);
+        tslp_tsk(1);
+    }
     while(grabber.getCurrentSpeed() > 600)
     {
         grabber.moveUnlimited(700);
@@ -472,28 +488,29 @@ void main_task(intptr_t unused)
     // }
 
 
-    // startProcedure();
+    startProcedure();
 
-    // fullRouteStandard(W);
+    fullRouteStandard(W);
 
-    // pickWater();
+    pickWater();
 
-    currentPos = W;
-    rampQueue.push(BOTTLE);
-    rampQueue.push(BOTTLE);
-    act_tsk(CLOSE_RAMP_TASK);
-    tslp_tsk(1);
-    lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
-    lifo.distance(30, 7, NONE);
-    lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
-    lifo.distance(40, 3, NONE);
-    lifo.lines(40, 1, NONE);
-    robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 40, 40);
-    robot.straight(40, 0.5, COAST);
+    // currentPos = W;
+    // rampQueue.push(BOTTLE);
+    // rampQueue.push(BOTTLE);
+    // act_tsk(CLOSE_RAMP_TASK);
+    // tslp_tsk(1);
+    // lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+    // lifo.distance(30, 7, NONE);
+    // lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    // lifo.distance(40, 3, NONE);
+    // lifo.lines(40, 1, NONE);
+    // robot.setMode(CONTROLLED);
+    // robot.setLinearAccelParams(100, 40, 40);
+    // robot.straight(40, 0.5, COAST);
     
     fullRouteStandard(G);
     rooms[GREEN].executeAllActions();
+
     fullRouteStandard(R);
     rooms[RED].executeAllActions();
 
@@ -509,11 +526,11 @@ void main_task(intptr_t unused)
     robot.setLinearAccelParams(100, 40, 50);
     robot.arc(50, 40, 8.5, NONE); 
     robot.setLinearAccelParams(100, 50, 40);
-    robot.arc(50, 65, 18, NONE);
+    robot.arc(50, 70, 17.5, NONE);
     robot.setLinearAccelParams(100, 40, 40);
-    robot.arcUnlim(40, 18, FORWARD, true);
+    robot.arcUnlim(40, 17.5, FORWARD, true);
     while(rightSensor.getReflected() < 60)
-        robot.arcUnlim(40, 18, FORWARD);
+        robot.arcUnlim(40, 17.5, FORWARD);
     robot.stop(COAST);
 
     lifo.setDoubleFollowMode("70", "SR");
