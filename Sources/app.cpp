@@ -526,11 +526,11 @@ void main_task(intptr_t unused)
     robot.setLinearAccelParams(100, 40, 50);
     robot.arc(50, 40, 8.5, NONE); 
     robot.setLinearAccelParams(100, 50, 40);
-    robot.arc(50, 70, 17.5, NONE);
+    robot.arc(50, 70, 17, NONE);
     robot.setLinearAccelParams(100, 40, 40);
-    robot.arcUnlim(40, 17.5, FORWARD, true);
+    robot.arcUnlim(40, 17, FORWARD, true);
     while(rightSensor.getReflected() < 60)
-        robot.arcUnlim(40, 17.5, FORWARD);
+        robot.arcUnlim(40, 17, FORWARD);
     robot.stop(COAST);
 
     lifo.setDoubleFollowMode("70", "SR");

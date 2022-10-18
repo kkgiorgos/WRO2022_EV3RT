@@ -417,7 +417,7 @@ orientation W_G(orientation dir)
         robot.straightUnlim(50);
     } while (!leftSensor.getLineDetected());
     robot.setLinearAccelParams(100, 50, 0);
-    robot.straight(50, 9, COAST);
+    robot.straight(50, 10, COAST);
 
     //Turn wide back and limit with line
     robot.setLinearAccelParams(100, 0, -25);
