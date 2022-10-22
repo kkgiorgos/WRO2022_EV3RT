@@ -127,16 +127,16 @@ void room::scanLaundry()
 
     //Get in the room
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 40, 40);
-    robot.straightUnlim(40, true);
+    robot.setLinearAccelParams(100, 30, 30);
+    robot.straightUnlim(30, true);
     while(roomScanStage != 4)
     {
-        robot.straightUnlim(40);
-        tslp_tsk(1);
+        robot.straightUnlim(30);
+        // tslp_tsk(1);
     }
 
-    robot.setLinearAccelParams(100, 40, 0);
-    robot.straight(40, (color == RED) ? 5.6 : 6.2, COAST);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(30, (color == RED) ? 4.6 : 5.2, COAST);
     laundry = scannedValue;
 
     leftSensor.getReflected();
@@ -271,17 +271,17 @@ void room::taskWater()
     if(roomOrientation == GREEN_YELLOW)
     {
         leaveWater(1);
-        robot.setLinearAccelParams(100, 0, -40);
-        robot.arc(40, -60, -8.5, NONE);
+        robot.setLinearAccelParams(100, 0, -25);
+        robot.arc(35, -50, -8.5, NONE);
         
-        robot.setLinearAccelParams(100, -40, 0);
-        robot.arc(40, -42, -4, BRAKE);
+        robot.setLinearAccelParams(100, -30, -30);
+        robot.arc(35, -50, -4, BRAKE);
         leaveWater(2);
 
         robot.setLinearAccelParams(100, 0, 20);
-        robot.straight(50, 4, COAST);
+        robot.straight(25, 5, NONE);
 
-        robot.setLinearAccelParams(100, 0, 25);
+        robot.setLinearAccelParams(100, 20, 25);
         robot.arc(50, 90, 3, NONE);
         robot.setLinearAccelParams(100, 25, 25);
         robot.arcUnlim(25, 3, FORWARD, true);
@@ -294,17 +294,17 @@ void room::taskWater()
     else //RED_BLUE
     {
         leaveWater(1);
-        robot.setLinearAccelParams(100, 0, -40);
-        robot.arc(40, -60, 8.5, NONE);
-
-        robot.setLinearAccelParams(100, -40, 0);
-        robot.arc(40, -42, 4, BRAKE);
+        robot.setLinearAccelParams(100, 0, -25);
+        robot.arc(35, -50, 8.5, NONE);
+        
+        robot.setLinearAccelParams(100, -30, -30);
+        robot.arc(35, -50, 4, BRAKE);
         leaveWater(2);
 
         robot.setLinearAccelParams(100, 0, 20);
-        robot.straight(50, 4, COAST);
+        robot.straight(25, 5, NONE);
 
-        robot.setLinearAccelParams(100, 0, 25);
+        robot.setLinearAccelParams(100, 20, 25);
         robot.arc(50, 90, -3, NONE);
         robot.setLinearAccelParams(100, 25, 25);
         robot.arcUnlim(25, -3, FORWARD, true);
@@ -322,28 +322,29 @@ void room::taskWaterLaundry()
     {
         pickLaundry(1);
         leaveWater(1);
-        robot.setLinearAccelParams(100, 0, -40);
-        robot.arc(40, -60, -8.5, NONE);
-        robot.setLinearAccelParams(100, -40, 0);
-        robot.arc(40, -42, -4, BRAKE);
+        robot.setLinearAccelParams(100, 0, -25);
+        robot.arc(35, -50, -8.5, NONE);
+        
+        robot.setLinearAccelParams(100, -30, -30);
+        robot.arc(35, -50, -4, BRAKE);
         leaveWater(2);
 
-        robot.setLinearAccelParams(100, 20, 50);
-        robot.straight(50, 7, NONE);
+        robot.setLinearAccelParams(100, 0, 40);
+        robot.straight(40, 7, NONE);
         leaveWater(3);
         pickLaundry(2);
-        robot.setLinearAccelParams(100, 50, 20);
-        robot.straight(50, 5, COAST);
+        robot.setLinearAccelParams(100, 40, 20);
+        robot.straight(40, 5, COAST);
 
         robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(50, -10.5, COAST);
+        robot.straight(40, -9, COAST);
 
-        robot.setLinearAccelParams(100, 0, 25);
-        robot.arc(50, 90, 4, NONE);
+        robot.setLinearAccelParams(100, 20, 25);
+        robot.arc(50, 90, 3, NONE);
         robot.setLinearAccelParams(100, 25, 25);
-        robot.arcUnlim(25, 4, FORWARD, true);
+        robot.arcUnlim(25, 3, FORWARD, true);
         while(rightSensor.getReflected() < 50 && abs(robot.getAngle()) < 10)
-            robot.arcUnlim(25, 4, FORWARD);   
+            robot.arcUnlim(25, 3, FORWARD);   
         // robot.stop(COAST);
 
     }
@@ -351,28 +352,29 @@ void room::taskWaterLaundry()
     {
         pickLaundry(1);
         leaveWater(1);
-        robot.setLinearAccelParams(100, 0, -40);
-        robot.arc(40, -60, 8.5, NONE);
-        robot.setLinearAccelParams(100, -40, 0);
-        robot.arc(40, -42, 4, BRAKE);
+        robot.setLinearAccelParams(100, 0, -25);
+        robot.arc(35, -50, 8.5, NONE);
+        
+        robot.setLinearAccelParams(100, -30, -30);
+        robot.arc(35, -50, 4, BRAKE);
         leaveWater(2);
 
-        robot.setLinearAccelParams(100, 20, 50);
-        robot.straight(50, 7, NONE);
+        robot.setLinearAccelParams(100, 0, 40);
+        robot.straight(40, 7, NONE);
         leaveWater(3);
         pickLaundry(2);
-        robot.setLinearAccelParams(100, 50, 20);
-        robot.straight(50, 5, COAST);
+        robot.setLinearAccelParams(100, 40, 20);
+        robot.straight(40, 5, COAST);
 
         robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(50, -10.5, COAST);
+        robot.straight(40, -9, COAST);
 
-        robot.setLinearAccelParams(100, 0, 25);
-        robot.arc(50, 90, -4, NONE);
+        robot.setLinearAccelParams(100, 20, 25);
+        robot.arc(50, 90, -3, NONE);
         robot.setLinearAccelParams(100, 25, 25);
-        robot.arcUnlim(25, -4, FORWARD, true);
+        robot.arcUnlim(25, -3, FORWARD, true);
         while(leftSensor.getReflected() < 50 && abs(robot.getAngle()) < 10)
-            robot.arcUnlim(25, -4, FORWARD);   
+            robot.arcUnlim(25, -3, FORWARD);   
         // robot.stop(COAST);
     }
 }
@@ -383,35 +385,35 @@ void room::taskBall()
     {
         pickBall(1);
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(50, 55, 3, COAST);
-        robot.straight(50, 3.7, COAST);
+        robot.arc(40, 50, 3, COAST);
+        robot.straight(40, 5, COAST);
         pickBall(2);
-        robot.arc(50, -125, 2, COAST);
+        robot.arc(40, -122, 2, COAST);
 
-        robot.straight(50, 15, COAST);
+        robot.straight(40, 17, COAST);
         leaveBall();
 
-        robot.straight(50, -10, COAST);
-        robot.arc(50, -117, 0, COAST);
+        robot.straight(40, -10, COAST);
+        robot.arc(40, -115, 0, COAST);
         robot.setLinearAccelParams(100, 0, 30);
-        robot.straight(50, 16, NONE);
+        robot.straight(40, 15, NONE);
     }
     else    //RED_BLUE
     {
         pickBall(1);
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(50, 55, -3, COAST);
-        robot.straight(50, 3.7, COAST);
+        robot.arc(40, 50, -3, COAST);
+        robot.straight(40, 5, COAST);
         pickBall(2);
-        robot.arc(50, -125, -2, COAST);
+        robot.arc(40, -122, -2, COAST);
 
-        robot.straight(50, 15, COAST);
+        robot.straight(40, 17, COAST);
         leaveBall();
 
-        robot.straight(50, -10, COAST);
-        robot.arc(50, 117, 0, COAST);
+        robot.straight(40, -10, COAST);
+        robot.arc(40, 115, 0, COAST);
         robot.setLinearAccelParams(100, 0, 30);
-        robot.straight(50, 16, NONE);
+        robot.straight(40, 15, NONE);
     }
 }
 
@@ -420,70 +422,68 @@ void room::taskBallLaundry()
     if(roomOrientation == GREEN_YELLOW)
     {
         pickLaundry(1);
-        robot.setLinearAccelParams(100, 0, -40);
-        robot.arc(40, -60, -8.5, NONE);
-        robot.setLinearAccelParams(100, -40, 0);
-        robot.arc(40, -40, -4, BRAKE);
+        robot.setLinearAccelParams(100, 0, -25);
+        robot.arc(35, -48, -8.5, NONE);
+        robot.setLinearAccelParams(100, -30, 0);
+        robot.arc(35, -48, -4, COAST);
 
-        robot.setLinearAccelParams(100, 20, 50);
-        robot.straight(50, 7, NONE);
+        robot.setLinearAccelParams(100, 10, 40);
+        robot.straight(40, 7, NONE);    
         pickLaundry(2);
-        robot.setLinearAccelParams(100, 50, 0);
-        robot.straight(50, 11, COAST);
+        robot.setLinearAccelParams(100, 40, 20);
+        robot.straight(40, 8.5, NONE);
         
-        robot.setLinearAccelParams(100, 10, 10);
-        robot.arc(40, 97, -2, COAST);
+        robot.setLinearAccelParams(100, 20, 0);
+        robot.arc(40, 92, -3, BRAKE);
 
         robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(50, 7.8, BRAKE);
+        robot.straight(40, 8.5, BRAKE);
         pickBall(2);
         robot.setLinearAccelParams(100, 10, 10);
-        robot.arc(40, 82, -3, COAST);
+        robot.arc(40, 83, -3, COAST);
 
-        robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(50, 20, COAST);
+        robot.setLinearAccelParams(100, 10, 10);
+        robot.straight(40, 20, COAST);
         leaveBall();
 
         robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(50, -8.5, COAST);
-        robot.setLinearAccelParams(100, -10, -10);
-        robot.arc(50, -110, 0, COAST);
-        robot.setLinearAccelParams(100, 0, 30);
-        robot.straight(50, 19, NONE);
+        robot.straight(40, -8, COAST);
+        robot.arc(40, -105, 0, COAST);
+        robot.setLinearAccelParams(100, 0, 20);
+        robot.straight(40, 20, COAST);
     }
     else    //RED_BLUE
     {
         pickLaundry(1);
-        robot.setLinearAccelParams(100, 0, -40);
-        robot.arc(40, -60, 8.5, NONE);
-        robot.setLinearAccelParams(100, -40, 0);
-        robot.arc(40, -40, 4, BRAKE);
+        robot.setLinearAccelParams(100, 0, -25);
+        robot.arc(35, -48, 8.5, NONE);
+        robot.setLinearAccelParams(100, -30, 0);
+        robot.arc(35, -48, 4, COAST);
 
-        robot.setLinearAccelParams(100, 20, 50);
-        robot.straight(50, 7, NONE);
+        robot.setLinearAccelParams(100, 10, 40);
+        robot.straight(40, 7, NONE);    
         pickLaundry(2);
-        robot.setLinearAccelParams(100, 50, 0);
-        robot.straight(50, 11, COAST);
+        robot.setLinearAccelParams(100, 40, 20);
+        robot.straight(40, 8.5, NONE);
         
-        robot.setLinearAccelParams(100, 10, 10);
-        robot.arc(40, 107, 2, COAST);
+        robot.setLinearAccelParams(100, 20, 0);
+        robot.arc(40, 95, 3, BRAKE);
 
         robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(50, 7.8, BRAKE);
+        robot.straight(40, 8.5, BRAKE);
         pickBall(2);
         robot.setLinearAccelParams(100, 10, 10);
-        robot.arc(40, 82, 3, COAST);
+        robot.arc(40, 83, 3, COAST);
 
-        robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(50, 20, COAST);
+        robot.setLinearAccelParams(100, 10, 10);
+        robot.straight(40, 20, COAST);
         leaveBall();
 
         robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(50, -8.5, COAST);
-        robot.setLinearAccelParams(100, 10, 10);
-        robot.arc(50, 113, 0, COAST);
-        robot.setLinearAccelParams(100, 0, 30);
-        robot.straight(50, 19, NONE);
+        robot.straight(40, -8, COAST);
+        robot.arc(40, 105, 0, COAST);
+        robot.setLinearAccelParams(100, 0, 20);
+        robot.straight(40, 20, COAST);
     }
 }
 
@@ -732,11 +732,11 @@ void pickWater()
     DEBUGPRINT("\nPicking water bottles.\n");
     
     //Pick First Block
-    robot.setLinearAccelParams(100, 40, 30);
-    robot.straight(30, 4, NONE);
+    robot.setLinearAccelParams(100, 30, 30);
+    robot.straight(30, 5, NONE);
     act_tsk(WATER_GRABBER_TASK);
     tslp_tsk(1);
-    robot.setLinearAccelParams(100, 30, 30);
+    robot.setLinearAccelParams(100, 30, 0);
     robot.straight(30, 2, COAST);
     DEBUGPRINT("First bottle of water has been loaded.\n");
     rampQueue.push(BOTTLE);
@@ -766,14 +766,25 @@ void pickWater()
     while(leftSensor.getReflected() > 80)
         robot.straightUnlim(30);
 
-    lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
-    lifo.distance(30, 10, NONE);
-    lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
-    lifo.distance(40, 7, NONE);
-    lifo.lines(40, 1, NONE);
-    robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 40, 40);
-    robot.straight(40, 0.5, COAST);
+    // lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+    // lifo.distance(30, 10, NONE);
+    // lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    // lifo.distance(40, 7, NONE);
+    // lifo.lines(40, 1, NONE);
+    // robot.setMode(CONTROLLED);
+    // robot.setLinearAccelParams(100, 40, 40);
+    // robot.straight(40, 0.5, COAST);
+
+    lifo.initializeMotionMode(CONTROLLED);
+    lifo.setDoubleFollowMode("SL", "SR");
+    lifo.setPIDparams(5, 3, 150);
+    lifo.setAccelParams(100, 30, 30);
+    lifo.distance(30, 7, NONE);
+    lifo.setPIDparams(2, 1, 60);
+    lifo.distance(30, 7, NONE);
+    lifo.lines(30, 1, NONE);
+    robot.setLinearAccelParams(100, 30, 30);
+    robot.straight(30, 2, NONE);
 }
 void pickWaterTriple()
 {
@@ -846,7 +857,7 @@ void pickWaterTriple()
     lifo.setAccelParams(150, 30, 30);
     lifo.distance(30, 6, NONE);
     lifo.lines(30, 1, NONE);
-    lifo.distance(30, 1, NONE);
+    lifo.distance(30, 2, NONE);
 }
 void pickWaterLast()
 {

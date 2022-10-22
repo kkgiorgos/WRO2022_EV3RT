@@ -368,11 +368,20 @@ orientation S_W(orientation dir)
 {
     DEBUGPRINT("\nS_W\n");
 
-    lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+    // lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+    // lifo.distance(30, 5, NONE);
+    // lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    // lifo.distance(40, 7, NONE);
+    // lifo.lines(40, 1, NONE);
+
+    lifo.initializeMotionMode(CONTROLLED);
+    lifo.setDoubleFollowMode("SL", "SR");
+    lifo.setPIDparams(5, 3, 150);
+    lifo.setAccelParams(100, 30, 30);
     lifo.distance(30, 5, NONE);
-    lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
-    lifo.distance(40, 7, NONE);
-    lifo.lines(40, 1, NONE);
+    lifo.setPIDparams(2, 0.5, 80);
+    lifo.distance(30, 6, NONE);
+    lifo.lines(30, 1, NONE);
 
     return NORTH;
 }
@@ -382,19 +391,21 @@ orientation W_G(orientation dir)
 
     //Special turn to go from TR to CR2(nearly) and scan red room task
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 50, 50);
-    robot.arc(50, 30, 15, NONE);
-    robot.arc(50, 20, 40, NONE);
-    
+    robot.setLinearAccelParams(100, 35, 45);
+    robot.arc(45, 30, 15, NONE);
+    robot.setLinearAccelParams(100, 45, 45);
+    robot.arc(45, 20, 40, NONE);
+    robot.setLinearAccelParams(100, 45, 35);
+
     stopScanning = false;
     scanner = &leftScanner;
     act_tsk(ROOM_TASK_SCAN_TASK);
     tslp_tsk(1);
-    robot.arc(50, 45, 15, NONE);
+    robot.arc(45, 40, 15, NONE);
     stopScanning = true;
 
-    robot.setLinearAccelParams(100, 50, 50);
-    robot.straight(50, 5, NONE);
+    robot.setLinearAccelParams(100, 35, 45);
+    robot.straight(45, 5, NONE);
 
     rooms[RED].setTask(scannedValue);
     display.resetScreen();
@@ -402,26 +413,27 @@ orientation W_G(orientation dir)
     
     //Straight move but uses lines for location help
     leftSensor.resetFiltering();
-    robot.straightUnlim(50, true);
+    robot.setLinearAccelParams(100, 45, 45);
+    robot.straightUnlim(45, true);
     do
     {
         leftSensor.getReflected();
-        robot.straightUnlim(50);
+        robot.straightUnlim(45);
     } while (!leftSensor.getLineDetected());
-    robot.straight(50, 7, NONE);
+    robot.straight(45, 7, NONE);
     leftSensor.resetFiltering();
-    robot.straightUnlim(50, true);
+    robot.straightUnlim(45, true);
     do
     {
         leftSensor.getReflected();
-        robot.straightUnlim(50);
+        robot.straightUnlim(45);
     } while (!leftSensor.getLineDetected());
-    robot.setLinearAccelParams(100, 50, 0);
-    robot.straight(50, 9.5, COAST);
+    robot.setLinearAccelParams(100, 45, 0);
+    robot.straight(45, 9.5, COAST);
 
     //Turn wide back and limit with line
     robot.setLinearAccelParams(100, 0, -25);
-    robot.arc(50, -85, 3.5, NONE);
+    robot.arc(45, -85, 3.5, NONE);
     robot.setLinearAccelParams(100, -25, -25);
     robot.arcUnlim(25, 3.5, BACKWARD, true);
     while(leftSensor.getReflected() < 50 && abs(robot.getAngle()) < 10)
@@ -436,19 +448,24 @@ orientation W_G(orientation dir)
     act_tsk(ROOM_TASK_SCAN_TASK);
     tslp_tsk(1);
 
-    lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed    
+    lifo.setPIDparams(5, 3, 150);
+    lifo.setAccelParams(100, 30, 30);
     lifo.distance(30, 5, NONE);
+    lifo.lines(30, 2, NONE, 9, false);
+
+    // lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed    
+    // lifo.distance(30, 5, NONE);
 
     //Lifo until intersection while scanning task
-    lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
-    robot.resetPosition();
-    timer t;
-    lifo.lines(40, 2, NONE, 9, false);
+    // lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    // robot.resetPosition();
+    // timer t;
+    // lifo.lines(40, 2, NONE, 9, false);
     stopScanning = true;
 
-    double speed = robot.getPosition() / t.secElapsed();
-    robot.setLinearAccelParams(100, speed, 0);
-    robot.straight(35, 8, COAST);
+    // double speed = robot.getPosition() / t.secElapsed();
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(30, 8, COAST);
 
     rooms[GREEN].setTask(scannedValue);
     display.format("%  \n")%static_cast<int>(scannedValue);
@@ -463,11 +480,18 @@ orientation W_G(orientation dir)
     robot.stop(COAST);
 
     //Lifo until right before green room's entrance
-    lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
-    lifo.distance(30, 5, NONE);
+    // lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+    // lifo.distance(30, 5, NONE);
 
-    lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
-    lifo.distance(40, 8, NONE);
+    // lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    // lifo.distance(40, 8, NONE);
+
+    lifo.initializeMotionMode(CONTROLLED);    
+
+    lifo.setPIDparams(5, 3, 150);
+    lifo.distance(30, 7, NONE);
+    lifo.setPIDparams(2, 0.5, 80);
+    lifo.distance(30, 5, NONE);
 
     return SOUTH;
 }
@@ -477,22 +501,43 @@ orientation G_R(orientation dir)
     
     lifo.setDoubleFollowMode("70", "SR");
 
-    //Lifo till the middle (intersection)
-    lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+    // //Lifo till the middle (intersection)
+    // lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
+    // lifo.distance(30, 5, NONE);
+
+    // lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    // lifo.lines(40, 1, NONE, 8.5, true);
+
+    // //Lifo till right before the entrance of the red room
+    // lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
+    // lifo.distance(40, 13, NONE);
+
+    lifo.setPIDparams(5, 3, 150);
+    lifo.setAccelParams(100, 30, 30);
+    lifo.distance(30, 13, NONE);
+    lifo.setPIDparams(1, 0, 20);
+    lifo.lines(30, 1, NONE, 9, true);
+    lifo.setPIDparams(5, 3, 150);
+    lifo.distance(30, 7, NONE);
+    lifo.setPIDparams(2, 0.5, 80);
     lifo.distance(30, 5, NONE);
-
-    lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
-    lifo.lines(40, 1, NONE, 8.5, true);
-
-    //Lifo till right before the entrance of the red room
-    lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
-    lifo.distance(40, 13, NONE);
 
     return NORTH;
 }
 orientation R_B(orientation dir)
 {
     DEBUGPRINT("\nR_B\n");
+
+    lifo.setDoubleFollowMode("SL", "70");
+
+    lifo.setPIDparams(5, 3, 150);
+    lifo.setAccelParams(100, 30, 30);
+    lifo.distance(30, 13, NONE);
+    lifo.setPIDparams(1, 0, 20);
+    lifo.lines(30, 1, BRAKE, 9, true);
+
+    BrickButton btnEnter(BrickButtons::ENTER);
+    btnEnter.waitForClick();
 
     //Lifo exit red room till white part of intersection 
     resetLifo();

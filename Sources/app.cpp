@@ -29,7 +29,7 @@ motor grabber(MotorPort::A, true);
 motor ramp(MotorPort::D, false);
 motor leftMotor(MotorPort::B, true, MotorType::MEDIUM);
 motor rightMotor(MotorPort::C, false, MotorType::MEDIUM);
-chassis robot(&leftMotor, &rightMotor, 6.24, 17, 0.1, 0.007, 0);
+chassis robot(&leftMotor, &rightMotor, 6.24, 17, 0.07, 0, 0);
 colorSensor leftSensor(SensorPort::S2, false, "WRO2022");
 colorSensor rightSensor(SensorPort::S3, false, "WRO2022");
 colorSensor leftScanner(SensorPort::S1, false, "WRO2022");
@@ -123,7 +123,7 @@ void init()
 
     display.format("WAIT FOR SENSORS\n");
     btnEnter.waitForClick();
-    act_tsk(INIT_TASK);
+    // act_tsk(INIT_TASK);
     tslp_tsk(1);
 }
 
@@ -427,6 +427,81 @@ void main_task(intptr_t unused)
     lifo.addPIDparams(40, 4, 3, 40);    //40 speed
     lifo.addPIDparams(50, 5, 4, 40);    //50 speed
     lifo.addPIDparams(60, 6, 5, 60);    //60 speed
+
+    // startProcedure();
+    // fullRouteStandard(W);
+    // pickWater();
+
+    // fullRouteStandard(G);
+
+    currentPos = G;
+    lifo.initializeMotionMode(CONTROLLED);    
+    lifo.setDoubleFollowMode("SL", "70");
+    lifo.setAccelParams(100, 30, 30);
+    lifo.setPIDparams(5, 3, 150);
+    lifo.distance(30, 7, NONE);
+    lifo.setPIDparams(2, 0.5, 80);
+    lifo.distance(30, 5, NONE);
+
+    rooms[GREEN].setTask(WHITE);
+    rooms[GREEN].executeAllActions();
+    fullRouteStandard(R);
+    rooms[BLUE].setTask(WHITE);
+    rooms[BLUE].executeAllActions();
+    fullRouteStandard(B);
+
+
+    
+    act_tsk(CLOSE_RAMP_TASK);
+    tslp_tsk(1);
+    lifo.initializeMotionMode(CONTROLLED);    
+    while(true)
+    {
+        rampQueue.push(BOTTLE);
+        rampQueue.push(BOTTLE);
+
+
+        lifo.setDoubleFollowMode("SL", "70");
+        
+        lifo.setPIDparams(5, 3, 150);
+        lifo.setAccelParams(100, 30, 30);
+        lifo.distance(30, 13, NONE);
+        lifo.setPIDparams(1, 0, 20);
+        lifo.lines(30, 1, NONE, 9, true);
+        lifo.setPIDparams(5, 3, 150);
+        lifo.distance(30, 7, NONE);
+        lifo.setPIDparams(2, 0.5, 80);
+        lifo.distance(30, 5, NONE);
+
+        rooms[GREEN].setTask(WHITE);
+        rooms[GREEN].executeAllActions();
+        
+        lifo.setDoubleFollowMode("70", "SR");
+        
+        lifo.setPIDparams(5, 3, 150);
+        lifo.setAccelParams(100, 30, 30);
+        lifo.distance(30, 13, NONE);
+        lifo.setPIDparams(1, 0, 20);
+        lifo.lines(30, 1, NONE, 9, true);
+        lifo.setPIDparams(5, 3, 150);
+        lifo.distance(30, 7, NONE);
+        lifo.setPIDparams(2, 0.5, 80);
+        lifo.distance(30, 5, NONE);
+
+        rooms[RED].setTask(GREEN);
+        rooms[RED].executeAllActions();
+        
+        lifo.setDoubleFollowMode("SL", "70");
+        
+        lifo.setPIDparams(5, 3, 150);
+        lifo.setAccelParams(100, 30, 30);
+        lifo.distance(30, 13, NONE);
+        lifo.setPIDparams(1, 0, 20);
+        lifo.lines(30, 1, BRAKE, 9, true);
+
+
+        btnEnter.waitForClick();
+    }
 
     // // lineFollower lifoFinisher(400, &robot, &leftSensor, &rightSensor);
     // // lifoFinisher.setDoubleFollowMode("SL", "SR");
