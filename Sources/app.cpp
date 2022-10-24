@@ -29,7 +29,7 @@ motor grabber(MotorPort::A, true);
 motor ramp(MotorPort::D, false);
 motor leftMotor(MotorPort::B, true, MotorType::MEDIUM);
 motor rightMotor(MotorPort::C, false, MotorType::MEDIUM);
-chassis robot(&leftMotor, &rightMotor, 6.24, 17, 0.07, 0, 0);
+chassis robot(&leftMotor, &rightMotor, 6.24, 17, 0.07, 0.005, 0);
 colorSensor leftSensor(SensorPort::S2, false, "WRO2022");
 colorSensor rightSensor(SensorPort::S3, false, "WRO2022");
 colorSensor leftScanner(SensorPort::S1, false, "WRO2022");
@@ -418,6 +418,230 @@ void main_task(intptr_t unused)
     rightSensor.setFilteringRef(true, 0.01, 10);
     rightSensor.setFilteringRGB(true, 0.01, 30);
 
+    lineFollower lifo(400, &robot, &leftSensor, &rightSensor);
+
+
+    // while(true)
+    // {
+    //     lifo.initializeMotionMode(CONTROLLED);
+    //     lifo.setSensorMode(REFLECTED);
+    //     lifo.setDoubleFollowMode("SL", "SR");
+    //     lifo.setPIDparams(2, 3, 70);
+    //     lifo.setAccelParams(100, 30, 30);
+    //     lifo.distance(30, 40, COAST);
+    //     // lifo.setPIDparams(2, 1, 30);
+    //     // lifo.lines(30, 1, NONE, 2, true);
+    //     // lifo.setPIDparams(2, 3, 70);
+    //     // lifo.setAccelParams(100, 30, 30);
+    //     // lifo.distance(30, 2, NONE);
+    //     // lifo.setPIDparams(2, 1, 30);
+    //     // lifo.lines(30, 1, COAST, 2, false);
+    //     btnEnter.waitForClick();
+    // }
+
+
+    lifo.initializeMotionMode(CONTROLLED);
+    lifo.setSensorMode(REFLECTED);
+    lifo.setAccelParams(100, 30, 30);
+    lifo.setPIDparams(2, 3, 70);
+    lifo.setDoubleFollowMode("SL", "SR");
+
+    act_tsk(INIT_TASK);
+    tslp_tsk(1);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 30);
+    robot.straight(45, 15, NONE);
+
+    lifo.setPIDparams(2, 3, 70);
+    lifo.setAccelParams(100, 30, 30);
+    lifo.distance(30, 10, NONE);
+    lifo.unlimited(30, true);
+    while(leftSensor.getReflected() > 30 || rightSensor.getReflected() > 30)
+    {
+        lifo.unlimited(30);
+    }
+    // lifo.stop(COAST);
+
+    robot.setLinearAccelParams(100, 30, 20);
+    robot.straight(30, 6, NONE);
+    act_tsk(WATER_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, 20, 0);
+    robot.straight(20, 2, COAST);
+
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(50, -40, -8.5, COAST);
+
+    robot.setLinearAccelParams(100, 0, 30);
+    robot.straight(45, 10, NONE);
+    act_tsk(PICK_BLOCK_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, 30, 10);
+    robot.straight(30, 3, COAST);
+
+    robot.setLinearAccelParams(100, 10, 20);
+    robot.arc(40, 95, 3, COAST);
+
+    robot.setLinearAccelParams(100, 20, 30);
+    robot.straightUnlim(30, true);
+    while(leftSensor.getReflected() < 80)
+        robot.straightUnlim(30);
+    robot.resetPosition();
+    while(robot.getPosition() < 0.5) 
+        robot.straightUnlim(30);
+    while(leftSensor.getReflected() > 80)
+        robot.straightUnlim(30);
+
+    lifo.setPIDparams(2, 3, 70);
+    lifo.setAccelParams(100, 30, 30);
+    lifo.distance(30, 15, NONE);
+    lifo.unlimited(30, true);
+    while(leftSensor.getReflected() > 30 || rightSensor.getReflected() > 30)
+    {
+        lifo.unlimited(30);
+    }
+
+    robot.setLinearAccelParams(100, 30, 30);
+    robot.straight(30, 0.5, NONE);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 30, 45);
+    robot.arc(45, 30, 15, NONE);
+    robot.setLinearAccelParams(100, 45, 45);
+    robot.arc(45, 20, 40, NONE);
+    robot.setLinearAccelParams(100, 45, 40);
+
+    stopScanning = false;
+    scanner = &leftScanner;
+    act_tsk(ROOM_TASK_SCAN_TASK);
+    tslp_tsk(1);
+    robot.arc(45, 50, 15, NONE);
+    stopScanning = true;
+
+
+    robot.setLinearAccelParams(100, 25, 40);
+    robot.straight(40, 5, NONE);
+
+    rooms[RED].setTask(scannedValue);
+    display.resetScreen();
+    display.format("%  \n")%static_cast<int>(scannedValue);
+
+    robot.setLinearAccelParams(100, 40, 40);
+    robot.straightUnlim(40, true);
+    while(leftSensor.getReflected() > 30 || rightSensor.getReflected() > 30)
+        robot.straightUnlim(40);
+
+    robot.setLinearAccelParams(100, 40, 0);
+    robot.straight(40, 13, COAST);
+
+    robot.setLinearAccelParams(100, 0, -25);
+    robot.arc(45, -85, 3.5, NONE);
+    robot.setLinearAccelParams(100, -25, -25);
+    robot.arcUnlim(25, 3.5, BACKWARD, true);
+    while(leftSensor.getReflected() < 50 && abs(robot.getAngle()) < 10)
+        robot.arcUnlim(25, 3.5, BACKWARD, false);
+    robot.stop(COAST);
+
+    lifo.setDoubleFollowMode("SL", "70");
+    stopScanning = false;
+    scanner = &rightScanner;
+    act_tsk(ROOM_TASK_SCAN_TASK);
+    tslp_tsk(1);
+
+    lifo.setPIDparams(2, 3, 70);
+    lifo.setAccelParams(100, 30, 30);
+    lifo.distance(30, 4, NONE);
+    lifo.setPIDparams(2, 1, 30);
+    lifo.unlimited(30, true);
+    while(rightSensor.getReflected() < 45)
+    {
+        lifo.unlimited(30);
+    }
+    robot.setLinearAccelParams(100, 30, 30);
+    robot.straight(30, 8, NONE);
+    stopScanning = true;
+    lifo.setPIDparams(2, 3, 70);
+    lifo.distance(30, 7, NONE);
+    lifo.setPIDparams(2, 1, 30);
+    lifo.unlimited(30, true);
+    while(rightSensor.getReflected() < 45)
+    {
+        lifo.unlimited(30);
+    }
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(30, 8, COAST);
+
+    rooms[GREEN].setTask(scannedValue);
+    display.format("%  \n")%static_cast<int>(scannedValue);
+
+    robot.setLinearAccelParams(100, 0, -25);
+    robot.arc(45, -85, -5, NONE);
+    robot.setLinearAccelParams(100, -25, -25);
+    robot.arcUnlim(25, -5, BACKWARD, true);
+    while(leftSensor.getReflected() > 50 && abs(robot.getAngle()) < 10)
+        robot.arcUnlim(25, -5, BACKWARD, false);
+    robot.stop(COAST);
+
+    lifo.setPIDparams(2, 3, 70);
+    lifo.setAccelParams(100, 30, 30);
+    lifo.distance(30, 7, NONE);
+    lifo.setPIDparams(2, 1, 30);
+    lifo.distance(30, 8, NONE);
+
+    rampQueue.push(BOTTLE);
+    rampQueue.push(BOTTLE);
+
+    rooms[GREEN].executeAllActions();
+
+    lifo.setDoubleFollowMode("70", "SR");
+    lifo.setPIDparams(2, 3, 70);
+    lifo.setAccelParams(100, 30, 30);
+    lifo.distance(30, 5, NONE);
+    lifo.setPIDparams(2, 1, 30);
+    lifo.lines(30, 1, NONE, 8.5, true);
+    lifo.setAccelParams(100, 30, 30);
+    lifo.distance(30, 7, NONE);
+    lifo.setPIDparams(2, 1, 30);
+    lifo.distance(30, 8, NONE);
+
+    rooms[RED].executeAllActions();
+
+    robot.stop(BRAKE);
+    btnEnter.waitForClick();
+
+    // pickWater();
+
+    // fullRouteStandard(G);
+
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 30, 30);
+
+    // display.resetScreen();
+    // while(true)
+    // {
+    //     display.format("%  \n%  \n\n\n")%leftSensor.getReflected() %rightSensor.getReflected();
+    //     tslp_tsk(1);
+    // }
+
+    // while(true)
+    // {
+    //     lifo.setAccelParams(100, 30, 30);
+    //     lifo.distance(30, 12, NONE);
+    //     lifo.setPIDparams(0, 0, 0);
+    //     lifo.lines(30, 1, NONE, 9, true);
+    //     lifo.setPIDparams(2, 3, 70);
+    //     lifo.distance(30, 13, NONE);
+    //     robot.setLinearAccelParams(100, 30, 0);
+    //     robot.straight(30, 20, COAST);
+    //     robot.setLinearAccelParams(100, 0, 0);
+    //     robot.straight(30, -10, COAST);
+
+    //     btnEnter.waitForClick();
+    // }
+
+
 
     lifo.setDoubleFollowMode("SL", "SR");
     lifo.initializeMotionMode(UNREGULATED);
@@ -433,6 +657,8 @@ void main_task(intptr_t unused)
     // pickWater();
 
     // fullRouteStandard(G);
+
+    // btnEnter.waitForClick();
 
     currentPos = G;
     lifo.initializeMotionMode(CONTROLLED);    
@@ -473,6 +699,7 @@ void main_task(intptr_t unused)
         lifo.setPIDparams(2, 0.5, 80);
         lifo.distance(30, 5, NONE);
 
+    
         rooms[GREEN].setTask(WHITE);
         rooms[GREEN].executeAllActions();
         
