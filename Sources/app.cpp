@@ -29,12 +29,15 @@ motor grabber(MotorPort::A, true);
 motor ramp(MotorPort::D, false);
 motor leftMotor(MotorPort::B, true, MotorType::MEDIUM);
 motor rightMotor(MotorPort::C, false, MotorType::MEDIUM);
-chassis robot(&leftMotor, &rightMotor, 6.24, 17, 0.07, 0.007, 0);
+chassis robot(&leftMotor, &rightMotor, 6.24, 17.3, 0.07, 0.002, 0);
 colorSensor leftSensor(SensorPort::S2, false, "WRO2022");
 colorSensor rightSensor(SensorPort::S3, false, "WRO2022");
 colorSensor leftScanner(SensorPort::S1, false, "WRO2022");
 colorSensor rightScanner(SensorPort::S4, false, "WRO2022");
 lineFollower lifo(700, &robot, &leftSensor, &rightSensor);
+lineFollower lifoControlled(400, &robot, &leftSensor, &rightSensor);
+lineFollower lifoUnregNormal(700, &robot, &leftSensor, &rightSensor);
+lineFollower lifoUnregExtreme(400, &robot, &leftSensor, &rightSensor);
 timer universalTimer;
 
 queue<items, list<items>> rampQueue;
@@ -418,7 +421,77 @@ void main_task(intptr_t unused)
     rightSensor.setFilteringRef(true, 0.01, 10);
     rightSensor.setFilteringRGB(true, 0.01, 30);
 
-    lineFollower lifo(400, &robot, &leftSensor, &rightSensor);
+    lifoControlled.initializeMotionMode(CONTROLLED);
+    lifoControlled.setSensorMode(REFLECTED);
+    lifoControlled.setAccelParams(100, 30, 30);
+    lifoControlled.setPIDparams(2, 3, 70);  //HIGH CORRECTIONS
+    lifoControlled.setPIDparams(2, 2, 60);  //SMOOTHER / FINISHER
+    lifoControlled.setDoubleFollowMode("SL", "SR");
+
+    lifoUnregNormal.initializeMotionMode(UNREGULATED);
+    lifoUnregNormal.setSensorMode(REFLECTED);
+    robot.setUnregulatedDPS(true);
+    lifoUnregNormal.setDoubleFollowMode("SL", "SR");
+    lifoUnregNormal.addPIDparams(30, 4, 1, 30);    //30 speed
+    lifoUnregNormal.addPIDparams(40, 4, 3, 40);    //40 speed
+    lifoUnregNormal.addPIDparams(50, 5, 4, 60);    //50 speed
+
+    lifoUnregExtreme.initializeMotionMode(UNREGULATED);
+    lifoUnregExtreme.setSensorMode(REFLECTED);
+    robot.setUnregulatedDPS(true);
+    lifoUnregExtreme.setDoubleFollowMode("SL", "SR");
+    lifoUnregExtreme.addPIDparams(30, 4, 2, 50);    //30 speed
+    lifoUnregExtreme.addPIDparams(40, 4, 4, 60);    //40 speed
+
+    currentDirection = SOUTH;
+    
+    while(true)
+    {
+        currentDirection = NORTH;    
+        currentAlignment = CENTERED;
+
+        setLifo("SL", "SR");
+        lifoUnregExtreme.distance(30, 5, NONE);
+        lifoUnregNormal.distance(40, 50, NONE);
+        lifoUnregNormal.distance(30, 5, NONE);
+        lifoControlled.lines(30, 1, NONE, 5);
+
+        standardTurn(currentDirection, WEST, CENTERED);
+        lifoUnregExtreme.distance(30, 5, NONE);
+        lifoControlled.lines(30, 1, NONE, 5);
+
+        standardTurn(currentDirection, SOUTH, CENTERED);
+        setLifo("SL", "50");
+        lifoUnregExtreme.distance(30, 5, NONE);
+        lifoUnregNormal.lines(40, 3, NONE, 5, 2, true);
+        lifoUnregNormal.distance(40, 10, NONE);
+        lifoUnregNormal.distance(30, 5, NONE);
+        lifoControlled.lines(30, 1, NONE, 5);
+
+        standardTurn(currentDirection, WEST, CENTERED);
+        setLifo("SL", "SR");
+        lifoUnregExtreme.distance(30, 5, NONE);
+        lifoUnregNormal.distance(40, 10, NONE);
+        lifoUnregNormal.distance(30, 5, NONE);
+        lifoControlled.lines(30, 1, NONE, 5);
+        
+        standardTurn(currentDirection, EAST, RIGHT_OF_LINE);
+        setLifo("50", "SL");
+        lifoUnregExtreme.distance(30, 10, NONE);
+        lifoUnregNormal.distance(40, 20, NONE);
+        lifoUnregNormal.distance(30, 5, NONE);
+        lifoControlled.lines(30, 1, NONE, 5);
+
+        robot.setLinearAccelParams(100, 30, 0);
+        robot.straight(30, 5, COAST);
+        standardTurn(currentDirection, WEST, RIGHT_OF_LINE);
+        lifoControlled.lines(30, 1, NONE, 1);
+
+
+
+        robot.stop(BRAKE);
+        btnEnter.waitForClick();
+    }
 
 
     // while(true)

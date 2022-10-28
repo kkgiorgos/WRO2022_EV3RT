@@ -11,6 +11,8 @@ extern double slowKP;
 extern double slowKI;
 extern double slowKD;
 
+void setLifo(const char *leftPos, const char *rightPos);
+
 void resetLifo();
 void setLifoNormalReg();
 void setLifoSlow();

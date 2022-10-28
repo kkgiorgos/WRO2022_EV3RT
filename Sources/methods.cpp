@@ -8,6 +8,13 @@ using namespace std;
 using namespace ev3ys;
 using namespace ev3cxx;
 
+void setLifo(const char *leftPos, const char *rightPos)
+{
+    lifoControlled.setDoubleFollowMode(leftPos, rightPos);
+    lifoUnregNormal.setDoubleFollowMode(leftPos, rightPos);
+    lifoUnregExtreme.setDoubleFollowMode(leftPos, rightPos);
+}
+
 void resetLifo()
 {
     // lifo.setDoubleFollowMode("SL", "SR");
@@ -280,7 +287,7 @@ void reverse(lifoRobotPosition startAlignment, lifoRobotPosition endAlignment, e
 void leftTurn(lifoRobotPosition endAlignment, ev3ys::breakMode stopMode)
 {
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 10, 20);
+    robot.setLinearAccelParams(100, 20, 20);
     
     double arcCenter;
     if(endAlignment == CENTERED) arcCenter = -5.5;
