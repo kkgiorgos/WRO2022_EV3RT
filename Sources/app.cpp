@@ -29,7 +29,7 @@ motor grabber(MotorPort::A, true);
 motor ramp(MotorPort::D, false);
 motor leftMotor(MotorPort::B, true, MotorType::MEDIUM);
 motor rightMotor(MotorPort::C, false, MotorType::MEDIUM);
-chassis robot(&leftMotor, &rightMotor, 6.24, 17.3, 0.07, 0.002, 0);
+chassis robot(&leftMotor, &rightMotor, 6.24, 17.3, 0.06, 0.002, 0);
 colorSensor leftSensor(SensorPort::S2, false, "WRO2022");
 colorSensor rightSensor(SensorPort::S3, false, "WRO2022");
 colorSensor leftScanner(SensorPort::S1, false, "WRO2022");
@@ -325,6 +325,7 @@ void room_entrance_task(intptr_t unused)
     while(!lineDetector->getLineDetected())
     {
         lineDetector->getRGB();
+        tslp_tsk(5);
     }
 
     roomScanStage = 2;  //3 cm until before the laundry
@@ -338,6 +339,7 @@ void room_entrance_task(intptr_t unused)
     lineDetector->resetFiltering();
     while(!lineDetector->getLineDetected())
     {
+        tslp_tsk(5);
         lineDetector->getRGB();
         if((current = scanLaundryBlock(*scanner)) != NO_COLOR)
             appearances[current]++;
@@ -443,8 +445,89 @@ void main_task(intptr_t unused)
     lifoUnregExtreme.addPIDparams(30, 4, 2, 50);    //30 speed
     lifoUnregExtreme.addPIDparams(40, 4, 4, 60);    //40 speed
 
-    currentDirection = SOUTH;
-    
+    // while(true)
+    // {
+    //     setLifo("SL", "SR");
+    //     // lifoControlled.setPIDparams(2, 1, 30);
+    //     // lifoControlled.lines(30, 1, NONE, 20, 9, true);
+    //     // lifoControlled.distance(30, 20, COAST);
+
+    //     robot.stop(BRAKE);
+    //     btnEnter.waitForClick();
+    // }
+
+    while(true)
+    {
+        act_tsk(CLOSE_RAMP_TASK);
+        tslp_tsk(1);
+        rampQueue.push(BOTTLE);
+        rampQueue.push(BOTTLE);
+
+        setLifo("70", "SR");
+        lifoUnregExtreme.distance(30, 5, NONE);
+        lifoUnregExtreme.distance(40, 5, NONE);
+        lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
+        lifoUnregNormal.distance(30, 5, NONE);
+        lifoControlled.lines(30, 1, NONE, 5);
+
+        robot.setLinearAccelParams(100, 30, 0);
+        robot.straight(30, 8, COAST);
+
+        robot.setLinearAccelParams(100, 0, -25);
+        robot.arc(50, -85, 5, NONE);
+        robot.setLinearAccelParams(100, -25, -25);
+        robot.arcUnlim(25, 5, BACKWARD, true);
+        while(rightSensor.getReflected() > 80 && abs(robot.getAngle()) < 10)
+            robot.arcUnlim(25, 5, BACKWARD, false);
+        robot.stop(COAST);
+
+        setLifo("70", "SR");
+        lifoUnregNormal.distance(30, 12, NONE);
+        // lifoControlled.distance(30, 10, NONE);
+
+        rooms[BLUE].setTask(GREEN);
+        rooms[BLUE].executeAllActions();
+
+        setLifo("SL", "70");
+        lifoUnregExtreme.distance(30, 5, NONE);
+        lifoUnregExtreme.distance(40, 5, NONE);
+        lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
+        lifoUnregNormal.distance(30, 12, NONE);
+
+        // robot.stop(BRAKE);
+        // btnEnter.waitForClick();
+
+
+        // setLifo("SL", "70");
+        // lifoUnregExtreme.distance(30, 5, NONE);
+        // lifoUnregExtreme.distance(40, 5, NONE);
+        // lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
+        // lifoUnregNormal.distance(30, 5, NONE);
+        // lifoControlled.lines(30, 1, NONE, 5);
+
+        // robot.setLinearAccelParams(100, 30, 0);
+        // robot.straight(30, 8, COAST);
+
+        // robot.setLinearAccelParams(100, 0, -25);
+        // robot.arc(50, -85, -5, NONE);
+        // robot.setLinearAccelParams(100, -25, -25);
+        // robot.arcUnlim(25, -5, BACKWARD, true);
+        // while(leftSensor.getReflected() > 80 && abs(robot.getAngle()) < 10)
+        //     robot.arcUnlim(25, -5, BACKWARD, false);
+        // robot.stop(COAST);
+
+        // setLifo("SL", "70");
+        // lifoUnregNormal.distance(30, 12, NONE);
+        // // lifoControlled.distance(30, 10, NONE);
+
+        rooms[YELLOW].setTask(GREEN);
+        rooms[YELLOW].executeAllActions();
+
+        robot.stop(BRAKE);
+        btnEnter.waitForClick();
+    }
+
+
     while(true)
     {
         currentDirection = NORTH;    
@@ -487,6 +570,64 @@ void main_task(intptr_t unused)
         standardTurn(currentDirection, WEST, RIGHT_OF_LINE);
         lifoControlled.lines(30, 1, NONE, 1);
 
+        standardTurn(currentDirection, NORTH, RIGHT_OF_LINE);
+        setLifo("50", "SL");
+        lifoUnregExtreme.distance(30, 5, NONE);
+        lifoUnregExtreme.distance(40, 5, NONE);
+        lifoUnregNormal.distance(40, 60, NONE);
+        lifoControlled.lines(30, 1, NONE, 5);
+
+        standardTurn(currentDirection, SOUTH, CENTERED);
+        setLifo("SL", "SR");
+        lifoUnregExtreme.distance(30, 5, NONE);
+        lifoUnregNormal.lines(40, 1, NONE, 5, 2, true);
+        lifoUnregNormal.distance(40, 5, NONE);
+        lifoUnregNormal.distance(30, 5, NONE);
+        lifoControlled.lines(30, 1, NONE, 5);
+
+        standardTurn(currentDirection, WEST, CENTERED);
+        lifoControlled.setSensorMode(WHITE_RGB);
+        lifoUnregExtreme.distance(30, 5, NONE);
+        // lifoUnregNormal.distance(40, 5, NONE);
+        lifoUnregNormal.distance(30, 5, NONE);
+        lifoControlled.lines(30, 1, NONE, 5);
+        lifoControlled.setSensorMode(REFLECTED);
+
+        standardTurn(currentDirection, EAST, LEFT_OF_LINE);
+        setLifo("SR", "50");
+        lifoUnregExtreme.distance(30, 5, NONE);
+        // lifoUnregNormal.distance(40, 5, NONE);
+        lifoUnregNormal.distance(30, 5, NONE);
+        lifoControlled.lines(30, 1, NONE, 5);
+
+        standardTurn(currentDirection, SOUTH, RIGHT_OF_LINE);
+        setLifo("50", "SL");
+        lifoUnregExtreme.distance(30, 5, NONE);
+        lifoControlled.lines(30, 1, NONE, 5);
+        
+        standardTurn(currentDirection, WEST, LEFT_OF_LINE);
+        lifoControlled.setSensorMode(WHITE_RGB);
+        setLifo("SR", "50");
+        lifoUnregExtreme.distance(30, 5, NONE);
+        // lifoUnregNormal.distance(40, 5, NONE);
+        lifoUnregNormal.distance(30, 5, NONE);
+        lifoControlled.lines(30, 1, NONE, 5);
+        lifoControlled.setSensorMode(REFLECTED);
+
+        standardTurn(currentDirection, EAST, CENTERED);
+        setLifo("SL", "SR");
+        lifoUnregExtreme.distance(30, 5, NONE);
+        // lifoUnregNormal.distance(40, 5, NONE);
+        lifoUnregNormal.distance(30, 5, NONE);
+        lifoControlled.lines(30, 1, NONE, 5);
+
+        standardTurn(currentDirection, NORTH, CENTERED);
+        setLifo("50", "SR");
+        lifoUnregExtreme.distance(30, 5, NONE);
+        lifoUnregNormal.lines(40, 2, NONE, 5, 2, true);
+        lifoUnregNormal.distance(40, 10, NONE);
+        lifoUnregNormal.distance(30, 5, NONE);
+        lifoControlled.lines(30, 1, NONE, 5);
 
 
         robot.stop(BRAKE);
@@ -494,23 +635,7 @@ void main_task(intptr_t unused)
     }
 
 
-    // while(true)
-    // {
-    //     lifo.initializeMotionMode(CONTROLLED);
-    //     lifo.setSensorMode(REFLECTED);
-    //     lifo.setDoubleFollowMode("SL", "SR");
-    //     lifo.setPIDparams(2, 3, 70);
-    //     lifo.setAccelParams(100, 30, 30);
-    //     lifo.distance(30, 40, COAST);
-    //     // lifo.setPIDparams(2, 1, 30);
-    //     // lifo.lines(30, 1, NONE, 2, true);
-    //     // lifo.setPIDparams(2, 3, 70);
-    //     // lifo.setAccelParams(100, 30, 30);
-    //     // lifo.distance(30, 2, NONE);
-    //     // lifo.setPIDparams(2, 1, 30);
-    //     // lifo.lines(30, 1, COAST, 2, false);
-    //     btnEnter.waitForClick();
-    // }
+
 
 
     lifo.initializeMotionMode(CONTROLLED);
@@ -1014,7 +1139,6 @@ void main_task(intptr_t unused)
     format(bt, "\n\rENDING\n\r");
     bt.close();
 }
-
 //COLOR SENSOR TEST LOOPS
 /*leftScanner.setNormalisation(false);
 rightScanner.setNormalisation(true);
@@ -1068,27 +1192,7 @@ while(!btnEnter.isPressed())
     tslp_tsk(10);
 }*/
 
-/*leftSensor.setRefCalParams(6, 44);
-rightSensor.setRefCalParams(4, 45);
-
-double minL[] = {17, 32, 7, 56};
-double maxL[] = {140, 174, 81, 395};
-double minR[] = {12, 20, 8, 42};
-double maxR[] = {127, 142, 83, 351};
-leftSensor.setRgbCalParams(minL, maxL);
-rightSensor.setRgbCalParams(minR, maxR);*/
-
-/*color_hue cols[5];
-cols[0] = {RED, 5, 10};
-cols[1] = {RED, 330, 60};
-cols[2] = {BLUE, 210, 80};
-cols[3] = {GREEN, 120, 80};
-cols[4] = {YELLOW, 40, 60};
-leftSensor.setColorCalParams(cols, 5, 50, 18);
-rightSensor.setColorCalParams(cols, 5, 50, 18);*/
-
-
-//CALIBRATION
+//SIMPLE CALIBRATION RGB
 
 /*leftSensor.setNormalisation(false);
 rightSensor.setNormalisation(false);
@@ -1120,74 +1224,358 @@ maxRight[0] = rightSensor.getRGB().red;
 maxRight[1] = rightSensor.getRGB().green;
 maxRight[2] = rightSensor.getRGB().blue;
 maxRight[3] = rightSensor.getRGB().white;
-
 leftSensor.setRgbCalParams(minLeft, maxLeft);
 rightSensor.setRgbCalParams(minRight, maxRight);*/
 
-//GREATER CALIBRATION
+//SIMPLE CALIBRATION REF
 // leftSensor.setNormalisation(false);
 // rightSensor.setNormalisation(false);
-// double minLeft[4] = {1000, 1000, 1000, 1000};
-// double maxLeft[4] = {0, 0, 0, 0};
-// double minRight[4] = {1000, 1000, 1000, 1000};
-// double maxRight[4] = {0, 0, 0, 0};
-// int minLeftRef = 100;
-// int maxLeftRef = 0;
-// int minRightRef = 100;
-// int maxRightRef = 0;
-
-// robot.setMode(CONTROLLED);
-// robot.setLinearAccelParams(100, 20, 20);
-// robot.straightUnlim(20, true);
-// t.reset();
-
-// while(t.secElapsed() < 5)
-// {
-//     colorspaceRGB leftRGB = leftSensor.getRGB();
-//     colorspaceRGB rightRGB = rightSensor.getRGB();
-
-//     minLeft[0] = min(minLeft[0], leftRGB.red);
-//     minLeft[1] = min(minLeft[1], leftRGB.green);
-//     minLeft[2] = min(minLeft[2], leftRGB.blue);
-//     minLeft[3] = min(minLeft[3], leftRGB.white);
-
-//     minRight[0] = min(minRight[0], rightRGB.red);
-//     minRight[1] = min(minRight[1], rightRGB.green);
-//     minRight[2] = min(minRight[2], rightRGB.blue);
-//     minRight[3] = min(minRight[3], rightRGB.white);
-
-//     maxLeft[0] = max(maxLeft[0], leftRGB.red);
-//     maxLeft[1] = max(maxLeft[1], leftRGB.green);
-//     maxLeft[2] = max(maxLeft[2], leftRGB.blue);
-//     maxLeft[3] = max(maxLeft[3], leftRGB.white);
-
-//     maxRight[0] = max(maxRight[0], rightRGB.red);
-//     maxRight[1] = max(maxRight[1], rightRGB.green);
-//     maxRight[2] = max(maxRight[2], rightRGB.blue);
-//     maxRight[3] = max(maxRight[3], rightRGB.white);
-// }
-
-// robot.stop(BRAKE);
-
+// double minLeft = 1000;
+// double minRight = 1000;
+// double maxLeft = 0;
+// double maxRight = 0;
+// t.secDelay(1);
+// display.resetScreen();
+// display.format("LEFT -> BLACK");
 // btnEnter.waitForPress();
+// minLeft = leftSensor.getReflected();
+// t.secDelay(1);
+// display.resetScreen();
+// display.format("LEFT -> WHITE");
+// btnEnter.waitForPress();
+// maxLeft = leftSensor.getReflected();
+// t.secDelay(1);
+// display.resetScreen();
+// display.format("RIGHT -> BLACK");
+// btnEnter.waitForPress();
+// minRight = rightSensor.getReflected();
+// t.secDelay(1);
+// display.resetScreen();
+// display.format("RIGHT -> WHITE");
+// btnEnter.waitForPress();
+// maxRight = rightSensor.getReflected();
+// leftSensor.setRefCalParams(minLeft, maxLeft);
+// rightSensor.setRefCalParams(minRight, maxRight);
+// btnEnter.waitForClick();
 
-// t.reset();
-// robot.straightUnlim(20, true);
-// while(t.secElapsed() < 5)
-// {
-//     int left = leftSensor.getReflected();
-//     int right = rightSensor.getReflected();
+//GREATER LINE SENSOR CALIBRATION
+    // leftSensor.setNormalisation(false);
+    // rightSensor.setNormalisation(false);
+    // double minLeft[4] = {1000, 1000, 1000, 1000};
+    // double maxLeft[4] = {0, 0, 0, 0};
+    // double minRight[4] = {1000, 1000, 1000, 1000};
+    // double maxRight[4] = {0, 0, 0, 0};
+    // int minLeftRef = 100;
+    // int maxLeftRef = 0;
+    // int minRightRef = 100;
+    // int maxRightRef = 0;
+    //
+    // robot.setMode(CONTROLLED);
+    // robot.setLinearAccelParams(100, 20, 20);
+    // robot.straightUnlim(20, true);
+    // t.reset();
+    //
+    // while(t.secElapsed() < 2)
+    // {
+    //     rgb_raw_t leftRGB; ev3_color_sensor_get_rgb_raw(EV3_PORT_2, &leftRGB);
+    //     rgb_raw_t rightRGB; ev3_color_sensor_get_rgb_raw(EV3_PORT_3, &rightRGB);
+    //
+    //     minLeft[0] = min(minLeft[0], (double)leftRGB.r);
+    //     minLeft[1] = min(minLeft[1], (double)leftRGB.g);
+    //     minLeft[2] = min(minLeft[2], (double)leftRGB.b);
+    //     minLeft[3] = min(minLeft[3], (double)leftRGB.r+leftRGB.g+leftRGB.b);
+    //
+    //     minRight[0] = min(minRight[0], (double)rightRGB.r);
+    //     minRight[1] = min(minRight[1], (double)rightRGB.g);
+    //     minRight[2] = min(minRight[2], (double)rightRGB.b);
+    //     minRight[3] = min(minRight[3], (double)rightRGB.r+rightRGB.g+rightRGB.b);
+    //
+    //     maxLeft[0] = max(maxLeft[0], (double)leftRGB.r);
+    //     maxLeft[1] = max(maxLeft[1], (double)leftRGB.g);
+    //     maxLeft[2] = max(maxLeft[2], (double)leftRGB.b);
+    //     maxLeft[3] = max(maxLeft[3], (double)leftRGB.r+leftRGB.g+leftRGB.b);
+    //
+    //     maxRight[0] = max(maxRight[0], (double)rightRGB.r);
+    //     maxRight[1] = max(maxRight[1], (double)rightRGB.g);
+    //     maxRight[2] = max(maxRight[2], (double)rightRGB.b);
+    //     maxRight[3] = max(maxRight[3], (double)rightRGB.r+rightRGB.g+rightRGB.b);
+    // }
+    //
+    // robot.stop(BRAKE);
+    //
+    // btnEnter.waitForPress();
+    //
+    // t.reset();
+    // robot.straightUnlim(20, true);
+    // while(t.secElapsed() < 2)
+    // {
+    //     int left = leftSensor.getReflected();
+    //     int right = rightSensor.getReflected();
+    //
+    //     minLeftRef = min(minLeftRef, left);
+    //     minRightRef = min(minRightRef, right);
+    //
+    //     maxLeftRef = max(maxLeftRef, left);
+    //     maxRightRef = max(maxRightRef, right);
+    // }
+    //
+    // robot.stop(BRAKE);
+    //
+    // leftSensor.setRefCalParams(minLeftRef, maxLeftRef);
+    // rightSensor.setRefCalParams(minRightRef, maxRightRef);
+    // leftSensor.setRgbCalParams(minLeft, maxLeft);
+    // rightSensor.setRgbCalParams(minRight, maxRight);
 
-//     minLeftRef = min(minLeftRef, left);
-//     minRightRef = min(minRightRef, right);
+// //SCANNER CALIBRATION 
+    // //Min measurements done with BLACK block 4 STUDS away
+    // //Max measurements done with WHITE block 0.5 STUDS away
+    // double minL[4] = {0,0,0,0};
+    // double maxL[4] = {0,0,0,0};
+    // double minR[4] = {0,0,0,0};
+    // double maxR[4] = {0,0,0,0};
+    //
+    // leftScanner.setNormalisation(false);
+    // rightScanner.setNormalisation(false);
+    // display.resetScreen();
+    // BrickButton right(BrickButtons::RIGHT);
+    // t.secDelay(1);
+    // colorspaceRGB sum = {0, 0, 0, 0};
+    // int times = 0;
+    // display.format("Calibrating Left Scanner Min");
+    // while(!btnEnter.isPressed())
+    // {
+    //     while(!right.isPressed() && !btnEnter.isPressed());
+    //     rgb_raw_t l; ev3_color_sensor_get_rgb_raw(EV3_PORT_1, &l);
+    //     format(bt, "LL: R: %  G: %  B: %  W:   \n") %l.r %l.g %l.b;
+    //     sum.red += l.r;
+    //     sum.green += l.g;
+    //     sum.blue += l.b;
+    //     times++;
+    //     while(right.isPressed());
+    // }
+    // minL[0] = sum.red / (double)times;
+    // minL[1] = sum.green / (double)times;
+    // minL[2] = sum.blue / (double)times;
+    // minL[3] = (sum.red+sum.green+sum.blue) / (double)times;
+    // t.secDelay(1);
+    // sum.red = sum.green = sum.blue = times = 0;
+    // display.resetScreen();
+    // display.format("Calibrating Left Scanner Max");
+    // while(!btnEnter.isPressed())
+    // {
+    //     while(!right.isPressed() && !btnEnter.isPressed());
+    //     rgb_raw_t l; ev3_color_sensor_get_rgb_raw(EV3_PORT_1, &l);
+    //     format(bt, "LL: R: %  G: %  B: %  W:   \n") %l.r %l.g %l.b;
+    //     sum.red += l.r;
+    //     sum.green += l.g;
+    //     sum.blue += l.b;
+    //     times++;
+    //     while(right.isPressed());
+    // }
+    // maxL[0] = sum.red / (double)times;
+    // maxL[1] = sum.green / (double)times;
+    // maxL[2] = sum.blue / (double)times;
+    // maxL[3] = (sum.red+sum.green+sum.blue) / (double)times;
+    // leftScanner.setRgbCalParams(minL, maxL);
+    // leftScanner.setNormalisation(true);
+    // display.resetScreen();
+    // display.format("Calibration Left Scanner DONE");
+    // format(bt, "LL: R: %  G: %  B: %  W:   \nRR: R: %  G: %  B: %  W:   \n") %minL[0] %minL[1] %minL[2] %maxL[0] %maxL[1] %maxL[2];
+    //
+    //
+    // t.secDelay(1);
+    // sum.red = sum.green = sum.blue = times = 0;
+    // display.format("Calibrating Right Scanner Min");
+    // while(!btnEnter.isPressed())
+    // {
+    //     while(!right.isPressed() && !btnEnter.isPressed());
+    //     rgb_raw_t r; ev3_color_sensor_get_rgb_raw(EV3_PORT_4, &r);
+    //     format(bt, "LL: R: %  G: %  B: %  W:   \n") %r.r %r.g %r.b;
+    //     sum.red += r.r;
+    //     sum.green += r.g;
+    //     sum.blue += r.b;
+    //     times++;
+    //     while(right.isPressed());
+    // }
+    // minR[0] = sum.red / (double)times;
+    // minR[1] = sum.green / (double)times;
+    // minR[2] = sum.blue / (double)times;
+    // minR[3] = (sum.red+sum.green+sum.blue) / (double)times;
+    // t.secDelay(1);
+    // sum.red = sum.green = sum.blue = times = 0;
+    // display.resetScreen();
+    // display.format("Calibrating Right Scanner Max");
+    // while(!btnEnter.isPressed())
+    // {
+    //     while(!right.isPressed() && !btnEnter.isPressed());
+    //     rgb_raw_t r; ev3_color_sensor_get_rgb_raw(EV3_PORT_4, &r);
+    //     format(bt, "LL: R: %  G: %  B: %  W:   \n") %r.r %r.g %r.b;
+    //     sum.red += r.r;
+    //     sum.green += r.g;
+    //     sum.blue += r.b;
+    //     times++;
+    //     while(right.isPressed());
+    // }
+    // maxR[0] = sum.red / (double)times;
+    // maxR[1] = sum.green / (double)times;
+    // maxR[2] = sum.blue / (double)times;
+    // maxR[3] = (sum.red+sum.green+sum.blue) / (double)times;
+    // rightScanner.setRgbCalParams(minR, maxR);
+    // rightScanner.setNormalisation(true);
+    // display.resetScreen();
+    // display.format("Calibration Right Scanner DONE");
+    // format(bt, "minL: R: %  G: %  B: %  W:   \nmaxL: R: %  G: %  B: %  W:   \n") %minL[0] %minL[1] %minL[2] %maxL[0] %maxL[1] %maxL[2];
+    // format(bt, "minR: R: %  G: %  B: %  W:   \nmaxR: R: %  G: %  B: %  W:   \n") %minR[0] %minR[1] %minR[2] %maxR[0] %maxR[1] %maxR[2];
+    //
+    // color_hue hues[5] = {{RED, 10, 20}, {RED, 350, 20}, {GREEN, 140, 80}, 
+    //                     {BLUE, 225, 50}, {YELLOW, 35, 30}};
+    //
+    // leftScanner.setColorCalParams(hues, 5, 70, 15);
+    // rightScanner.setColorCalParams(hues, 5, 70, 15);
 
-//     maxLeftRef = max(maxLeftRef, left);
-//     maxRightRef = max(maxRightRef, right);
-// }
+//Motor benchmark
+    // ev3_motor_config(EV3_PORT_B, MEDIUM_MOTOR);
+    // ev3_motor_config(EV3_PORT_C, MEDIUM_MOTOR);
+    //
+    // // FILE *log = fopen("WRO2022/batteryTest.txt", "w");
+    // FILE *log = bluetooth;
+    //
+    // int setPower = 50;
+    // int maxPower = 85;
+    // int minPower = 40;
+    // bool isPowerAsc = true;
+    // int leftReportedPower, rightReportedPower;
+    // double leftActualSpeed, rightActualSpeed;
+    // int voltage = 8000, current, power;
+    // while(voltage > 7000)
+    // {
+    //     ev3_motor_set_power(EV3_PORT_B, -setPower);
+    //     ev3_motor_set_power(EV3_PORT_C, setPower);
+    //     ev3_motor_reset_counts(EV3_PORT_B);
+    //     ev3_motor_reset_counts(EV3_PORT_C);
+    //     t.reset();
+    //     t.secDelay(0.01);
+    //     leftReportedPower = ev3_motor_get_power(EV3_PORT_B);
+    //     rightReportedPower = ev3_motor_get_power(EV3_PORT_C);
+    //     leftActualSpeed = ev3_motor_get_counts(EV3_PORT_B) / t.secElapsed();
+    //     rightActualSpeed = ev3_motor_get_counts(EV3_PORT_C) / t.secElapsed();
+    //     voltage = ev3_battery_voltage_mV();
+    //     current = ev3_battery_current_mA();
+    //     power = voltage * current;
+    //
+    //
+    //     if(setPower == 0)
+    //     {
+    //         ev3_motor_stop(EV3_PORT_B, false);
+    //         ev3_motor_stop(EV3_PORT_C, false);
+    //
+    //         t.secDelay(5);
+    //
+    //         voltage = ev3_battery_voltage_mV();
+    //         current = ev3_battery_current_mA();
+    //         power = voltage * current;
+    //         fprintf(log, "%d\t%d\t%d\t%lf\t%lf\t%d\t%d\t%d\n", 0, 0, 0, 0.0, 0.0, voltage, current, power);
+    //     }
+    //     else
+    //     {
+    //         fprintf(log, "%d\t%d\t%d\t%lf\t%lf\t%d\t%d\t%d\n", setPower, leftReportedPower, rightReportedPower, leftActualSpeed, rightActualSpeed, voltage, current, power);
+    //     }
+    //  
+    //     if(abs(setPower) < minPower)
+    //         setPower = -sign(setPower) * minPower;
+    //
+    //     if(isPowerAsc && setPower < maxPower)
+    //         setPower++;
+    //     else if(!isPowerAsc && setPower > -maxPower)
+    //         setPower--;
+    //     else if(setPower == maxPower)
+    //     {
+    //         setPower--;
+    //         isPowerAsc = false;
+    //     }
+    //     else
+    //     {
+    //         setPower++;
+    //         isPowerAsc = true;
+    //     }
+    // }
 
-// robot.stop(BRAKE);
-
-// leftSensor.setRefCalParams(minLeftRef, maxLeftRef);
-// rightSensor.setRefCalParams(minRightRef, maxRightRef);
-// leftSensor.setRgbCalParams(minLeft, maxLeft);
-// rightSensor.setRgbCalParams(minRight, maxRight);
+/*//Calibration Debug
+vector<char*> ports = {"S1", "S2", "S3", "S4"};
+    for(auto port : ports)
+    {
+        tslp_tsk(1);
+        double offsetRef, scaleRef;
+        bool normalisedRef = true;
+        char filename[32];
+        sprintf(filename, "%s/%srefCal.txt", "WRO2022", port);
+        FILE *calData = fopen(filename, "r+");
+        if(calData != nullptr)
+        {
+            fscanf(calData, "%lf", &offsetRef);
+            fscanf(calData, "%lf", &scaleRef);
+        }
+        else
+            normalisedRef = false;
+        fclose(calData);
+        
+        
+        if(normalisedRef)
+        {
+            DEBUGPRINT("%s: REF:\tOffset:%lf\tScale:%lf\n", port, offsetRef, scaleRef);
+        }
+        tslp_tsk(1);
+        double offsetRGB[4] = {0, 0, 0, 0}, scaleRGB[4] = {0, 0, 0, 0};
+        bool normalisedRGB = true;
+        sprintf(filename, "%s/%srgbCal.txt", "WRO2022", port);
+        calData = fopen(filename, "r+");
+        if(calData != nullptr)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                fscanf(calData, "%lf", &offsetRGB[i]);
+                fscanf(calData, "%lf", &scaleRGB[i]);
+            }
+        }
+        else
+            normalisedRGB = false;
+        
+        fclose(calData);
+        if(normalisedRGB)
+        {
+            DEBUGPRINT("%s: RGB:\nR:\tOffset:%lf\tScale:%lf\nG:\tOffset:%lf\tScale:%lf\nB:\tOffset:%lf\tScale:%lf\nW:\tOffset:%lf\tScale:%lf\n", port, offsetRGB[0], scaleRGB[0], offsetRGB[1], scaleRGB[1], offsetRGB[2], scaleRGB[2], offsetRGB[3], scaleRGB[3]);
+        }
+        tslp_tsk(1);
+        sprintf(filename, "%s/%scolorCal.txt", "WRO2022", port);
+        calData = fopen(filename, "r+");
+        int colorsAmount = 5;
+        colorCalibration colorData;
+        colorData.hues.clear();
+        if(calData != nullptr)
+        {
+            fscanf(calData, "%lf", &colorData.minColorSaturation);
+            fscanf(calData, "%lf", &colorData.greyscaleIntersection);
+            for (int i = 0; i < colorsAmount; i++)
+            {
+                color_hue data;
+                fscanf(calData, "%d", &data.color);
+                fscanf(calData, "%lf", &data.hue);
+                fscanf(calData, "%lf", &data.zoneSize);
+                colorData.hues.push_back(data);
+            }
+        }
+        if(calData != nullptr)
+        {
+            DEBUGPRINT("%s: Color:\n", port);
+            DEBUGPRINT("MinColorSaturation: %lf\n", colorData.minColorSaturation);
+            DEBUGPRINT("GreyscaleIntersection: %lf\n", colorData.greyscaleIntersection);
+            for (int i = 0; i < colorsAmount; i++)
+            {
+                DEBUGPRINT("Color: %d\t", colorData.hues[i].color);
+                DEBUGPRINT("Mid Hue: %lf\t", colorData.hues[i].hue);
+                DEBUGPRINT("Hue Range Size: %lf\n", colorData.hues[i].zoneSize);
+            }
+        }
+        fclose(calData);
+    }
+    */
