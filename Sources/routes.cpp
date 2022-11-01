@@ -19,11 +19,15 @@ void graphInit()
 {
     //Main network
     addEdge(S, W);
-    addEdge(W, G);
+    addEdge(W, IR);
+    addEdge(IR, G);
     addEdge(G, R);
-    addEdge(R, B);
+    addEdge(R, IR);
+    addEdge(IR, IL);
+    addEdge(IL, B);
     addEdge(B, Y);
-    addEdge(Y, L);
+    addEdge(Y, IL);
+    addEdge(IL, L);
     addEdge(L, S);
 
     //Full (surprise) network
@@ -55,6 +59,36 @@ void graphInit()
     addEdge(TR, TRRH);
     addEdge(BL, BLLH);
     addEdge(BL, BRRH);
+
+    //Secondary routing (faster, but may require higher maintenance)
+    //Vertical
+    addEdge(BM, TM);
+    addEdge(BL, TL);
+    addEdge(BR, TR);
+    addEdge(BR1, YR1);
+    addEdge(BR2, YR2);
+    addEdge(GR1, RR1);
+    addEdge(GR2, RR2);
+    //Double skips
+    addEdge(CL3, CL1);
+    addEdge(CL2, M);
+    addEdge(CL1, CR1);
+    addEdge(M, CR2);
+    addEdge(CR1, CR3);
+    //Triple skips
+    addEdge(CL3, M);
+    addEdge(CL2, CR1);
+    addEdge(CL1, CR2);
+    addEdge(M, CR3);
+    //Quadraple skips
+    addEdge(CL3, CR1);
+    addEdge(CL2, CR2);
+    addEdge(CL1, CR3);
+    //Quintiple skips
+    addEdge(CL3, CR2);
+    addEdge(CL2, CR3);
+    //Sixtiple ?? skios
+    addEdge(CL3, CR3);
 }
 
 int dijkstra(int source, int target, vector<int> *path)
@@ -120,7 +154,7 @@ void constructRoute(routeFunc *route, vector<int> *pathNodes, int distance)
         }
         else if(firstNode == W)
         {
-            if(secondNode == G) route[i] = W_G;
+            if(secondNode == IR) route[i] = W_IR;
         }
         else if(firstNode == L)
         {
@@ -132,7 +166,7 @@ void constructRoute(routeFunc *route, vector<int> *pathNodes, int distance)
         }
         else if(firstNode == R)
         {
-            if(secondNode == B) route[i] = R_B;
+            if(secondNode == IR) route[i] = R_IR;
         }
         else if(firstNode == B)
         {
@@ -140,7 +174,17 @@ void constructRoute(routeFunc *route, vector<int> *pathNodes, int distance)
         }
         else if(firstNode == Y)
         {
-            if(secondNode == L) route[i] = Y_L;
+            if(secondNode == IL) route[i] = Y_IL;
+        }
+        else if(firstNode == IL)
+        {
+            if(secondNode == L) route[i] = IL_L;
+            else if(secondNode == B) route[i] = IL_B;
+        }
+        else if(firstNode == IR)
+        {
+            if(secondNode == IL) route[i] = IR_IL;
+            else if(secondNode == G) route[i] = IR_G;
         }
         else if(firstNode == M)
         {
@@ -385,9 +429,9 @@ orientation S_W(orientation dir)
 
     return NORTH;
 }
-orientation W_G(orientation dir)
+orientation W_IR(orientation dir)
 {
-    DEBUGPRINT("\nW_G\n");
+    DEBUGPRINT("\nW_IR\n");
 
     //Special turn to go from TR to CR2(nearly) and scan red room task
     robot.setMode(CONTROLLED);
@@ -439,6 +483,12 @@ orientation W_G(orientation dir)
     while(leftSensor.getReflected() < 50 && abs(robot.getAngle()) < 10)
         robot.arcUnlim(25, 3.5, BACKWARD, false);
     robot.stop(COAST);
+ 
+    return EAST;
+}
+orientation IR_G(orientation dir)
+{
+    DEBUGPRINT("\nIR_G\n");
 
     lifo.setDoubleFollowMode("SL", "70");
 
@@ -524,9 +574,9 @@ orientation G_R(orientation dir)
 
     return NORTH;
 }
-orientation R_B(orientation dir)
+orientation R_IR(orientation dir)
 {
-    DEBUGPRINT("\nR_B\n");
+    DEBUGPRINT("\nR_IR\n");
 
     lifo.setDoubleFollowMode("SL", "70");
 
@@ -556,6 +606,11 @@ orientation R_B(orientation dir)
     while(rightSensor.getReflected() < 60)
         robot.arcUnlim(35, 19.5, FORWARD);
 
+    return WEST;
+}
+orientation IR_IL(orientation dir)
+{
+    DEBUGPRINT("\nIR_IL\n");
 
     //Lifo slower speed to correct from turn
     robot.setMode(CONTROLLED);    
@@ -598,6 +653,13 @@ orientation R_B(orientation dir)
     while(leftSensor.getReflected() < 60)
         lifo.unlimited(40);
 
+    return WEST;
+
+}
+orientation IL_B(orientation dir)
+{
+    DEBUGPRINT("\nIL_B\n");
+
     //Continue forwards scanning left (blue room) same way as green just mirrored
     colors current = BLACK;
     map<colors, int> appearances;
@@ -629,11 +691,11 @@ orientation R_B(orientation dir)
 
     //Move to the intersection 
     robot.resetPosition();
-    t.reset();
+    timer t;
     resetLifo();
     setLifoRightExtreme();
     lifo.distance(35, 8, NONE);
-    speed = robot.getPosition()/t.secElapsed();
+    double speed = robot.getPosition()/t.secElapsed();
 
     setLifoRight();
     while(leftSensor.getReflected() < 60)
@@ -686,9 +748,9 @@ orientation B_Y(orientation dir)
 
     return NORTH;
 }
-orientation Y_L(orientation dir)
+orientation Y_IL(orientation dir)
 {
-    DEBUGPRINT("\nY_L\n");
+    DEBUGPRINT("\nY_IL\n");
 
     //Exit yellow room
     resetLifo();
@@ -702,6 +764,12 @@ orientation Y_L(orientation dir)
     //Special turn to pass through trouble and put line between the two sensors
     robot.setLinearAccelParams(100, 30, 30);
     robot.arc(45, 90, -8.5, COAST);
+
+    return EAST;
+}
+orientation IL_L(orientation dir)
+{
+    DEBUGPRINT("\nIL_L\n");
 
     //Correct turn mistakes with slow lifo
     resetLifo();
@@ -738,7 +806,7 @@ orientation Y_L(orientation dir)
     lifo.distance(20, 3, NONE);
     lifo.lines(20, 1, BRAKE);
 
-    return SOUTH;
+    return EAST;
 }
 orientation L_S(orientation dir)
 {
