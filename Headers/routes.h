@@ -1,6 +1,6 @@
 #pragma once
 
-#define V 36
+#define V 38
 
 #include <vector>
 #include <queue>
@@ -170,6 +170,41 @@ orientation GR2_RR2(orientation dir);
 orientation RR2_GR2(orientation dir);
 
 //Double skips
+orientation CL3_CL1(orientation dir);
+orientation CL1_CL3(orientation dir);
+orientation CL2_M(orientation dir);
+orientation M_CL2(orientation dir);
+orientation CL1_CR1(orientation dir);
+orientation CR1_CL1(orientation dir);
+orientation M_CR2(orientation dir);
+orientation CR2_M(orientation dir);
+orientation CR1_CR3(orientation dir);
+orientation CR3_CR1(orientation dir);
 
+//Triple skips
+orientation CL3_M(orientation dir);
+orientation M_CL3(orientation dir);
+orientation CL2_CR1(orientation dir);
+orientation CR1_CL2(orientation dir);
+orientation CL1_CR2(orientation dir);
+orientation CR2_CL1(orientation dir);
+orientation M_CR3(orientation dir);
+orientation CR3_M(orientation dir);
 
+//Quadruple skips
+orientation CL3_CR1(orientation dir);
+orientation CR1_CL3(orientation dir);
+orientation CL2_CR2(orientation dir);
+orientation CR2_CL2(orientation dir);
+orientation CL1_CR3(orientation dir);
+orientation CR3_CL1(orientation dir);
 
+//Quintuple skips
+orientation CL3_CR2(orientation dir);
+orientation CR2_CL3(orientation dir);
+orientation CL2_CR3(orientation dir);
+orientation CR3_CL2(orientation dir);
+
+//Sixtuple skips
+orientation CL3_CR3(orientation dir);
+orientation CR3_CL3(orientation dir);

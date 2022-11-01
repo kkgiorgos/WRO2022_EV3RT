@@ -80,14 +80,14 @@ void graphInit()
     addEdge(CL2, CR1);
     addEdge(CL1, CR2);
     addEdge(M, CR3);
-    //Quadraple skips
+    //Quadruple skips
     addEdge(CL3, CR1);
     addEdge(CL2, CR2);
     addEdge(CL1, CR3);
-    //Quintiple skips
+    //Quintuple skips
     addEdge(CL3, CR2);
     addEdge(CL2, CR3);
-    //Sixtiple ?? skios
+    //Sixtuple skips
     addEdge(CL3, CR3);
 }
 
@@ -196,14 +196,20 @@ void constructRoute(routeFunc *route, vector<int> *pathNodes, int distance)
             else if(secondNode == TRH) route[i] = M_TRH;
             else if(secondNode == BLH) route[i] = M_BLH;
             else if(secondNode == BRH) route[i] = M_BRH;
+            else if(secondNode == CL2) route[i] = M_CL2;
+            else if(secondNode == CR2) route[i] = M_CR2;
+            else if(secondNode == CL3) route[i] = M_CL3;
+            else if(secondNode == CR3) route[i] = M_CR3;
         }
         else if(firstNode == TM)
         {
             if(secondNode == M) route[i] = TM_M;
+            else if(secondNode == BM) route[i] = TM_BM;
         }
         else if(firstNode == BM)
         {
             if(secondNode == M) route[i] = BM_M;
+            else if(secondNode == TM) route[i] = BM_TM;
         }
         else if(firstNode == CL1)
         {
@@ -211,6 +217,10 @@ void constructRoute(routeFunc *route, vector<int> *pathNodes, int distance)
             else if(secondNode == CL2) route[i] = CL1_CL2;
             else if(secondNode == TL) route[i] = CL1_TL;
             else if(secondNode == BL) route[i] = CL1_BL;
+            else if(secondNode == CL3) route[i] = CL1_CL3;
+            else if(secondNode == CR1) route[i] = CL1_CR1;
+            else if(secondNode == CR2) route[i] = CL1_CR2;
+            else if(secondNode == CR3) route[i] = CL1_CR3;
         }
         else if(firstNode == CR1)
         {
@@ -218,26 +228,34 @@ void constructRoute(routeFunc *route, vector<int> *pathNodes, int distance)
             else if(secondNode == CR2) route[i] = CR1_CR2;
             else if(secondNode == TR) route[i] = CR1_TR;
             else if(secondNode == BR) route[i] = CR1_BR;
+            else if(secondNode == CL1) route[i] = CR1_CL1; 
+            else if(secondNode == CR3) route[i] = CR1_CR3;
+            else if(secondNode == CL2) route[i] = CR1_CL2;
+            else if(secondNode == CL3) route[i] = CR1_CL3;
         }
         else if(firstNode == TL)
         {
             if(secondNode == CL1) route[i] = TL_CL1;
             else if(secondNode == TLLH) route[i] = TL_TLLH;
+            else if(secondNode == BL) route[i] = TL_BL;
         }
         else if(firstNode == TR)
         {
             if(secondNode == CR1) route[i] = TR_CR1;
             else if(secondNode == TRRH) route[i] = TR_TRRH;
+            else if(secondNode == BR) route[i] = TR_BR;
         }
         else if(firstNode == BL)
         {
             if(secondNode == CL1) route[i] = BL_CL1;
             else if(secondNode == BLLH) route[i] = BL_BLLH;
+            else if(secondNode == TL) route[i] = BL_TL;
         }
         else if(firstNode == BR)
         {
             if(secondNode == CR1) route[i] = BR_CR1;
             else if(secondNode == BRRH) route[i] = BR_BRRH;
+            else if(secondNode == TR) route[i] = BR_TR;
         }
         else if(firstNode == CL2)
         {
@@ -245,6 +263,10 @@ void constructRoute(routeFunc *route, vector<int> *pathNodes, int distance)
             else if(secondNode == CL3) route[i] = CL2_CL3;
             else if(secondNode == YR1) route[i] = CL2_YR1;
             else if(secondNode == BR1) route[i] = CL2_BR1;
+            else if(secondNode == M) route[i] = CL2_M;
+            else if(secondNode == CR1) route[i] = CL2_CR1;
+            else if(secondNode == CR2) route[i] = CL2_CR2;
+            else if(secondNode == CR3) route[i] = CL2_CR3;
         }
         else if(firstNode == CR2)
         {
@@ -252,50 +274,72 @@ void constructRoute(routeFunc *route, vector<int> *pathNodes, int distance)
             else if(secondNode == CR3) route[i] = CR2_CR3;
             else if(secondNode == GR1) route[i] = CR2_GR1;
             else if(secondNode == RR1) route[i] = CR2_RR1;
+            else if(secondNode == M) route[i] = CR2_M;
+            else if(secondNode == CL1) route[i] = CR2_CL1;
+            else if(secondNode == CL2) route[i] = CR2_CL2;
+            else if(secondNode == CL3) route[i] = CR2_CL3;
         }
         else if(firstNode == CL3)
         {
             if(secondNode == CL2) route[i] = CL3_CL2;
             else if(secondNode == YR2) route[i] = CL3_YR2;
             else if(secondNode == BR2) route[i] = CL3_BR2;
+            else if(secondNode == CL1) route[i] = CL3_CL1;
+            else if(secondNode == M) route[i] = CL3_M;
+            else if(secondNode == CR1) route[i] = CL3_CR1;
+            else if(secondNode == CR2) route[i] = CL3_CR2;
+            else if(secondNode == CR3) route[i] = CL3_CR3;
         }
         else if(firstNode == CR3)
         {
             if(secondNode == CR2) route[i] = CR3_CR2;
             else if(secondNode == GR2) route[i] = CR3_GR2;
             else if(secondNode == RR2) route[i] = CR3_RR2;
+            else if(secondNode == CR1) route[i] = CR3_CR1;
+            else if(secondNode == M) route[i] = CR3_M;
+            else if(secondNode == CL1) route[i] = CR3_CL1;
+            else if(secondNode == CL2) route[i] = CR3_CL2;
+            else if(secondNode == CL3) route[i] = CR3_CL3;
         }
         else if(firstNode == YR1)
         {
             if(secondNode == CL2) route[i] = YR1_CL2;
+            else if(secondNode == BR1) route[i] = YR1_BR1;
         }
         else if(firstNode == YR2)
         {
             if(secondNode == CL3) route[i] = YR2_CL3;
+            else if(secondNode == BR2) route[i] = YR2_BR2;
         }
         else if(firstNode == BR1)
         {
             if(secondNode == CL2) route[i] = BR1_CL2;
+            else if(secondNode == YR1) route[i] = BR1_YR1;
         }
         else if(firstNode == BR2)
         {
             if(secondNode == CL3) route[i] = BR2_CL3;
+            else if(secondNode == YR2) route[i] = BR2_YR2;
         }
         else if(firstNode == GR1)
         {
             if(secondNode == CR2) route[i] = GR1_CR2;
+            else if(secondNode == RR1) route[i] = GR1_RR1;
         }
         else if(firstNode == GR2)
         {
             if(secondNode == CR3) route[i] = GR2_CR3;
+            else if(secondNode == RR2) route[i] = GR2_RR2;
         }
         else if(firstNode == RR1)
         {
             if(secondNode == CR2) route[i] = RR1_CR2;
+            else if(secondNode == GR1) route[i] = RR1_GR1;
         }
         else if(firstNode == RR2)
         {
             if(secondNode == CR3) route[i] = RR2_CR3;
+            else if(secondNode == GR2) route[i] = RR2_GR2;
         }
         else if(firstNode == TLH)
         {
@@ -1318,4 +1362,286 @@ orientation BRRH_BR(orientation dir)
     DEBUGPRINT("\nBRRH_BR\n");
 
     return NORTH;
+}
+
+
+//Secondary routing (faster, but may require higher maintenance)
+//Vertical
+orientation BM_TM(orientation dir)
+{
+    DEBUGPRINT("\nBM_TM\n");
+
+    return NORTH;
+}
+orientation TM_BM(orientation dir)
+{
+    DEBUGPRINT("\nTM_BM\n");
+
+    return SOUTH;
+}
+
+orientation BL_TL(orientation dir)
+{
+    DEBUGPRINT("\nBL_TL\n");
+
+    return NORTH;
+}
+orientation TL_BL(orientation dir)
+{
+    DEBUGPRINT("\nTL_BL\n");
+
+    return SOUTH;
+}
+
+orientation BR_TR(orientation dir)
+{
+    DEBUGPRINT("\nBR_TR\n");
+
+    return NORTH;
+}
+orientation TR_BR(orientation dir)
+{
+    DEBUGPRINT("\nTR_BR\n");
+
+    return SOUTH;
+}
+
+orientation BR1_YR1(orientation dir)
+{
+    DEBUGPRINT("\nBR1_YR1\n");
+
+    return NORTH;
+}
+orientation YR1_BR1(orientation dir)
+{
+    DEBUGPRINT("\nYR1_BR1\n");
+
+    return SOUTH;
+}
+orientation BR2_YR2(orientation dir)
+{
+    DEBUGPRINT("\nBR2_YR2\n");
+
+    return NORTH;
+}
+orientation YR2_BR2(orientation dir)
+{
+    DEBUGPRINT("\nYR2_BR2\n");
+
+    return SOUTH;
+}
+
+orientation GR1_RR1(orientation dir)
+{
+    DEBUGPRINT("\nGR1_RR1\n");
+
+    return NORTH;
+}
+orientation RR1_GR1(orientation dir)
+{
+    DEBUGPRINT("\nRR1_GR1\n");
+
+    return SOUTH;
+}
+orientation GR2_RR2(orientation dir)
+{
+    DEBUGPRINT("\nGR2_RR2\n");
+
+    return NORTH;
+}
+orientation RR2_GR2(orientation dir)
+{
+    DEBUGPRINT("\nRR2_GR2\n");
+
+    return SOUTH;
+}
+
+//Double skips
+orientation CL3_CL1(orientation dir)
+{
+    DEBUGPRINT("\nCL3_CL1\n");
+
+    return EAST;
+}
+orientation CL1_CL3(orientation dir)
+{
+    DEBUGPRINT("\nCL1_CL3\n");
+
+    return WEST;
+}
+orientation CL2_M(orientation dir)
+{
+    DEBUGPRINT("\nCL2_M\n");
+
+    return EAST;
+}
+orientation M_CL2(orientation dir)
+{
+    DEBUGPRINT("\nM_CL2\n");
+
+    return WEST;
+}
+orientation CL1_CR1(orientation dir)
+{
+    DEBUGPRINT("\nCL1_CR1\n");
+
+    return EAST;
+}
+orientation CR1_CL1(orientation dir)
+{
+    DEBUGPRINT("\nCR1_CL1\n");
+
+    return WEST;
+}
+orientation M_CR2(orientation dir)
+{
+    DEBUGPRINT("\nM_CR2\n");
+
+    return EAST;
+}
+orientation CR2_M(orientation dir)
+{
+    DEBUGPRINT("\nCR2_M\n");
+
+    return WEST;
+}
+orientation CR1_CR3(orientation dir)
+{
+    DEBUGPRINT("\nCR1_CR3\n");
+
+    return EAST;
+}
+orientation CR3_CR1(orientation dir)
+{
+    DEBUGPRINT("\nCR3_CR1\n");
+
+    return WEST;
+}
+
+//Triple skips
+orientation CL3_M(orientation dir)
+{
+    DEBUGPRINT("\nCL3_M\n");
+
+    return EAST;
+}
+orientation M_CL3(orientation dir)
+{
+    DEBUGPRINT("\nM_CL3\n");
+
+    return WEST;
+}
+orientation CL2_CR1(orientation dir)
+{
+    DEBUGPRINT("\nCL2_CR1\n");
+
+    return EAST;
+}
+orientation CR1_CL2(orientation dir)
+{
+    DEBUGPRINT("\nCR1_CL2\n");
+
+    return WEST;
+}
+orientation CL1_CR2(orientation dir)
+{
+    DEBUGPRINT("\nCL1_CR2\n");
+
+    return EAST;
+}
+orientation CR2_CL1(orientation dir)
+{
+    DEBUGPRINT("\nCR2_CL1\n");
+
+    return WEST;
+}
+orientation M_CR3(orientation dir)
+{
+    DEBUGPRINT("\nM_CR3\n");
+
+    return EAST;
+}
+orientation CR3_M(orientation dir)
+{
+    DEBUGPRINT("\nCR3_M\n");
+
+    return WEST;
+}
+
+//Quadruple skips
+orientation CL3_CR1(orientation dir)
+{
+    DEBUGPRINT("\nCL3_CR1\n");
+
+    return EAST;
+}
+orientation CR1_CL3(orientation dir)
+{
+    DEBUGPRINT("\nCR1_CL3\n");
+
+    return WEST;
+}
+orientation CL2_CR2(orientation dir)
+{
+    DEBUGPRINT("\nCL2_CR2\n");
+
+    return EAST;
+}
+orientation CR2_CL2(orientation dir)
+{
+    DEBUGPRINT("\nCR2_CL2\n");
+
+    return WEST;
+}
+orientation CL1_CR3(orientation dir)
+{
+    DEBUGPRINT("\nCL1_CR3\n");
+
+    return EAST;
+}
+orientation CR3_CL1(orientation dir)
+{
+    DEBUGPRINT("\nCR3_CL1\n");
+
+    return WEST;
+}
+
+//Quintuple skips
+orientation CL3_CR2(orientation dir)
+{
+    DEBUGPRINT("\nCL3_CR2\n");
+
+    return EAST;
+}
+orientation CR2_CL3(orientation dir)
+{
+    DEBUGPRINT("\nCR2_CL3\n");
+
+    return WEST;
+}
+orientation CL2_CR3(orientation dir)
+{
+    DEBUGPRINT("\nCL2_CR3\n");
+
+    return EAST;
+}
+orientation CR3_CL2(orientation dir)
+{
+    DEBUGPRINT("\nCR3_CL2\n");
+
+    return WEST;
+}
+
+//Sixtuple skips
+orientation CL3_CR3(orientation dir)
+{
+    DEBUGPRINT("\nCL3_CR3\n");
+
+    return EAST;
+}
+orientation CR3_CL3(orientation dir)
+{
+    DEBUGPRINT("\nCR3_CL3\n");
+
+    return WEST;
 }
