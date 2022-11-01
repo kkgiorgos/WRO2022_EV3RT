@@ -567,6 +567,18 @@ void room::taskBoth()
     }
 }
 
+void room::taskBoth()
+{
+    if(roomOrientation == GREEN_YELLOW)
+    {
+
+    }
+    else
+    {
+        
+    }
+}
+
 void room::enterRoom()
 {
     //Setup code for everything to happen inside the room

@@ -15,14 +15,15 @@ enum matPos
     //Main network
     S = 0,
     W = 1, L = 2,
-    G = 3, R = 4, B = 5, Y = 6,
+    IR = 3, IL = 4,
+    G = 5, R = 6, B = 7, Y = 8,
 
     //Surprise network
-    M = 7, BM = 8, TM = 9, BL = 10, BR = 11, TL = 12, TR = 13,
-    CL1 = 14, CL2 = 15, CL3 = 16,
-    CR1 = 17, CR2 = 18, CR3 = 19,
-    GR1 = 20, GR2 = 21, RR1 = 22, RR2 = 23, BR1 = 24, BR2 = 25, YR1 = 26, YR2 = 27,
-    TLLH = 28, TLH = 29, TRH = 30, TRRH = 31, BLLH = 32, BLH = 33, BRH = 34, BRRH = 35
+    M = 9, BM = 10, TM = 11, BL = 12, BR = 13, TL = 14, TR = 15,
+    CL1 = 16, CL2 = 17, CL3 = 18,
+    CR1 = 19, CR2 = 20, CR3 = 21,
+    GR1 = 22, GR2 = 23, RR1 = 24, RR2 = 25, BR1 = 26, BR2 = 27, YR1 = 28, YR2 = 29,
+    TLLH = 30, TLH = 31, TRH = 32, TRRH = 33, BLLH = 34, BLH = 35, BRH = 36, BRRH = 37
 };
 
 enum orientation
@@ -61,11 +62,15 @@ void centralTurn(orientation start, orientation finish);
 //Actual route implementations
 //Main network
 orientation S_W(orientation dir);
-orientation W_G(orientation dir);
+orientation W_IR(orientation dir);
+orientation IR_G(orientation dir);
 orientation G_R(orientation dir);
-orientation R_B(orientation dir);
+orientation R_IR(orientation dir);
+orientation IR_IL(orientation dir);
+orientation IL_B(orientation dir);
 orientation B_Y(orientation dir);
-orientation Y_L(orientation dir);
+orientation Y_IL(orientation dir);
+orientation IL_L(orientation dir);
 orientation L_S(orientation dir);
 
 //Full network standard for surprise use
@@ -142,3 +147,29 @@ orientation BL_BLLH(orientation dir);
 orientation BLLH_BL(orientation dir);
 orientation BR_BRRH(orientation dir);
 orientation BRRH_BR(orientation dir);
+
+//Secondary routing (faster, but may require higher maintenance)
+//Vertical
+orientation BM_TM(orientation dir);
+orientation TM_BM(orientation dir);
+
+orientation BL_TL(orientation dir);
+orientation TL_BL(orientation dir);
+
+orientation BR_TR(orientation dir);
+orientation TR_BR(orientation dir);
+
+orientation BR1_YR1(orientation dir);
+orientation YR1_BR1(orientation dir);
+orientation BR2_YR2(orientation dir);
+orientation YR2_BR2(orientation dir);
+
+orientation GR1_RR1(orientation dir);
+orientation RR1_GR1(orientation dir);
+orientation GR2_RR2(orientation dir);
+orientation RR2_GR2(orientation dir);
+
+//Double skips
+
+
+
