@@ -72,6 +72,8 @@ private:
     void taskBall();
     void taskBallLaundry();
 
+    void taskBoth();
+
 public:
     room() : currentState(WAITING) {}
     room(ev3ys::colors col);

@@ -435,21 +435,21 @@ void room::taskBallLaundry()
         robot.straight(40, 9.5, COAST);
         
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(40, 95, -3, COAST);
+        robot.arc(40, 93, -3, COAST);
 
         robot.setLinearAccelParams(100, 0, 0);
         robot.straight(40, 7.5, BRAKE);
         pickBall(2);
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(40, 82.5, -3, COAST);
+        robot.arc(40, 80, -3, COAST);
 
         robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(40, 20, COAST);
+        robot.straight(40, 21, COAST);
         leaveBall();
 
         robot.setLinearAccelParams(100, 0, 0);
         robot.straight(40, -9, COAST);
-        robot.arc(40, -101, 0, COAST);
+        robot.arc(40, -103, 0, COAST);
         robot.setLinearAccelParams(100, 0, 30);
         robot.straight(40, 20, COAST);
     }
@@ -469,21 +469,99 @@ void room::taskBallLaundry()
         robot.straight(40, 9.5, COAST);
         
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(40, 95, 3, COAST);
+        robot.arc(40, 98, 3, COAST);
 
         robot.setLinearAccelParams(100, 0, 0);
         robot.straight(40, 7.5, BRAKE);
         pickBall(2);
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(40, 82.5, 3, COAST);
+        robot.arc(40, 80, 3, COAST);
 
         robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(40, 20, COAST);
+        robot.straight(40, 21, COAST);
         leaveBall();
 
         robot.setLinearAccelParams(100, 0, 0);
         robot.straight(40, -9, COAST);
-        robot.arc(40, 101, 0, COAST);
+        robot.arc(40, 103, 0, COAST);
+        robot.setLinearAccelParams(100, 0, 30);
+        robot.straight(40, 20, COAST);
+    }
+}
+
+void room::taskBoth()
+{
+    if(roomOrientation == GREEN_YELLOW)
+    {
+        pickLaundry(1);
+        leaveWater(1);
+        robot.setLinearAccelParams(100, 0, -25);
+        robot.arc(35, -48, -8.5, NONE);
+        
+        robot.setLinearAccelParams(100, -30, 0);
+        robot.arc(35, -48, -4, COAST);
+        leaveWater(2);
+
+        robot.setLinearAccelParams(100, 0, 40);
+        robot.straight(40, 7, NONE);    
+        pickLaundry(2);
+        leaveWater(3);
+        robot.setLinearAccelParams(100, 40, 0);
+        robot.straight(40, 9.5, COAST);
+        
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.arc(40, 93, -3, COAST);
+
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.straight(40, 7.5, BRAKE);
+        pickBall(2);
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.arc(40, 80, -3, COAST);
+
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.straight(40, 21, COAST);
+        leaveBall();
+
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.straight(40, -9, COAST);
+        robot.arc(40, -103, 0, COAST);
+        robot.setLinearAccelParams(100, 0, 30);
+        robot.straight(40, 20, COAST);
+    }
+    else
+    {
+        pickLaundry(1);
+        leaveWater(1);
+        robot.setLinearAccelParams(100, 0, -25);
+        robot.arc(35, -48, 8.5, NONE);
+        
+        robot.setLinearAccelParams(100, -30, 0);
+        robot.arc(35, -48, 4, COAST);
+        leaveWater(2);
+
+        robot.setLinearAccelParams(100, 0, 40);
+        robot.straight(40, 7, NONE);    
+        pickLaundry(2);
+        leaveWater(3);
+        robot.setLinearAccelParams(100, 40, 0);
+        robot.straight(40, 9.5, COAST);
+        
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.arc(40, 98, 3, COAST);
+
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.straight(40, 7.5, BRAKE);
+        pickBall(2);
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.arc(40, 80, 3, COAST);
+
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.straight(40, 21, COAST);
+        leaveBall();
+
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.straight(40, -9, COAST);
+        robot.arc(40, 103, 0, COAST);
         robot.setLinearAccelParams(100, 0, 30);
         robot.straight(40, 20, COAST);
     }
@@ -499,12 +577,16 @@ void room::enterRoom()
 
 void room::executeTask()
 {
-    if(task == WATER || task == BOTH)
+    if(task == WATER)
     {
         if(doLaundry)
             taskWaterLaundry();
         else //NO LAUNDRY
             taskWater();
+    }
+    else if(task == BOTH)
+    {
+        taskBoth();
     }
     else //BALL
     {
