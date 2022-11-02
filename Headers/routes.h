@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <queue>
+#include <map>
 #include <cstdio>
 #include <climits>
 #include "ev3ys.h"
@@ -43,6 +44,7 @@ typedef std::pair<int, int> weightedVertex;
 typedef orientation (*routeFunc)( orientation );
 
 extern std::vector<int> graph[V];
+extern std::map<std::pair<matPos, matPos>, routeFunc> routeMapping;
 
 void addEdge(int u, int v);
 void graphInit();

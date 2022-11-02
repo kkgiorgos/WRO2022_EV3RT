@@ -816,8 +816,8 @@ void pickWater()
     DEBUGPRINT("\nPicking water bottles.\n");
     
     //Pick First Block
-    robot.setLinearAccelParams(100, 30, 30);
-    robot.straight(30, 5, NONE);
+    robot.setLinearAccelParams(100, 40, 30);
+    robot.straight(40, 5, NONE);
     act_tsk(WATER_GRABBER_TASK);
     tslp_tsk(1);
     robot.setLinearAccelParams(100, 30, 0);
@@ -870,13 +870,13 @@ void pickWater()
 //     robot.setLinearAccelParams(100, 30, 30);
 //     robot.straight(30, 2, NONE);
 
-    lifo.initializeMotionMode(CONTROLLED);
-    lifo.setAccelParams(100, 30, 30);
-    lifo.setPIDparams(2, 3, 70);
-    lifo.distance(30, 10, NONE);
-    lifo.lines(30, 1, NONE);
-    robot.setLinearAccelParams(100, 30, 30);
-    robot.straight(30, 1, NONE);
+    // lifo.initializeMotionMode(CONTROLLED);
+    // lifo.setAccelParams(100, 30, 30);
+    // lifo.setPIDparams(2, 3, 70);
+    // lifo.distance(30, 10, NONE);
+    // lifo.lines(30, 1, NONE);
+    // robot.setLinearAccelParams(100, 30, 30);
+    // robot.straight(30, 1, NONE);
 }
 void pickWaterTriple()
 {
