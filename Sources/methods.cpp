@@ -249,7 +249,7 @@ void emptyRampLaundry()
     ramp.setUnregulatedDPS();
     ramp.setAccelParams(2000, 800, 0);
     ramp.moveDegrees(600, 260, COAST);
-    timer::secDelay(0.2);
+    timer::secDelay(0.1);
     act_tsk(CLOSE_RAMP_TASK);
     tslp_tsk(1);
 }

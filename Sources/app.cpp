@@ -460,23 +460,59 @@ void main_task(intptr_t unused)
     //START, WATER
     while(true)
     {
-        act_tsk(INIT_TASK);
-        tslp_tsk(1);
+        // act_tsk(INIT_TASK);
+        // tslp_tsk(1);
 
-        robot.setMode(CONTROLLED);
-        robot.setLinearAccelParams(100, 0, 30);
-        robot.straight(50, 15, NONE);
+        startProcedure();
 
-        setLifo("SL", "SR");
-        lifoUnregExtreme.distance(30, 8, NONE);
-        lifoUnregNormal.lines(40, 1, NONE, 5);
+        S_W(NORTH);
 
-        pickWater();
+        pickWaterLast();
 
-        lifoUnregExtreme.distance(30, 10, NONE);
-        lifoUnregNormal.lines(40, 1, NONE, 10);
+        // lifoUnregExtreme.distance(30, 10, NONE);
+        // lifoUnregNormal.lines(40, 1, NONE, 10);
 
-        W_IR(EAST);
+        // W_IR(EAST);
+
+        // IR_G(EAST);
+
+        // rooms[GREEN].executeAllActions();
+
+        // G_R(NORTH);
+
+        // rooms[RED].executeAllActions();
+
+        // R_IR(SOUTH);
+
+        // act_tsk(CLOSE_RAMP_TASK);
+        // tslp_tsk(1);
+        // while(!rampQueue.empty()) rampQueue.pop();
+        // rampQueue.push(LAUNDRY_BLACK);
+        // rampQueue.push(LAUNDRY_RED);
+        // rampQueue.push(LAUNDRY_YELLOW);
+        // rooms[RED].setTask(GREEN);
+        // rooms[GREEN].setTask(WHITE);
+
+        // IR_IL(WEST);
+
+        // IL_B(WEST);
+
+        // rooms[BLUE].executeAllActions();
+
+        // B_Y(NORTH);
+
+        // rooms[YELLOW].executeAllActions();
+
+        // Y_IL(SOUTH);
+        // IL_L(EAST);
+
+        // scanLaundryBaskets();
+
+        // leaveLaundry();
+
+        // L_S(NORTH);
+
+        // finishProcedure();
 
         robot.stop(BRAKE);
         btnEnter.waitForClick();

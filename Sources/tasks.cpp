@@ -603,10 +603,6 @@ void room::exitRoom()
     currentState = COMPLETE;
 
     //Exiting code
-    // if(!(!doLaundry && task == WATER))
-    // {
-    //     grabber.stop(COAST);
-    // }
 }
 
 void room::executeAllActions()
@@ -655,6 +651,18 @@ tasks findTask(colors color)
         return BOTH;
     else // if(color == GREEN)
         return BALL;
+}
+
+void inferYellowRoomTask()
+{
+    int waterTasks = 0;
+    if(rooms[RED].getTask() == WATER)
+        waterTasks++;
+    if(rooms[GREEN].getTask() == WATER)
+        waterTasks++;  
+    if(rooms[BLUE].getTask() == WATER)
+        waterTasks++;
+    rooms[YELLOW].setTask(waterTasks == 2 ? GREEN : WHITE);
 }
 
 colors findColorOfItem(items item)
@@ -849,91 +857,51 @@ void pickWater()
         robot.straightUnlim(30);
     while(leftSensor.getReflected() > 80)
         robot.straightUnlim(30);
-
-    // lifo.setPIDparams(3, 3, 120);    //Extreme correction 30speed
-    // lifo.distance(30, 10, NONE);
-    // lifo.setPIDparams(4, 1.5, 80);   //About normal 40speed
-    // lifo.distance(40, 7, NONE);
-    // lifo.lines(40, 1, NONE);
-    // robot.setMode(CONTROLLED);
-    // robot.setLinearAccelParams(100, 40, 40);
-    // robot.straight(40, 0.5, COAST);
-
-//     lifo.initializeMotionMode(CONTROLLED);
-//     lifo.setDoubleFollowMode("SL", "SR");
-//     lifo.setPIDparams(5, 3, 150);
-//     lifo.setAccelParams(100, 30, 30);
-//     lifo.distance(30, 7, NONE);
-//     lifo.setPIDparams(2, 1, 60);
-//     lifo.distance(30, 7, NONE);
-//     lifo.lines(30, 1, NONE);
-//     robot.setLinearAccelParams(100, 30, 30);
-//     robot.straight(30, 2, NONE);
-
-    // lifo.initializeMotionMode(CONTROLLED);
-    // lifo.setAccelParams(100, 30, 30);
-    // lifo.setPIDparams(2, 3, 70);
-    // lifo.distance(30, 10, NONE);
-    // lifo.lines(30, 1, NONE);
-    // robot.setLinearAccelParams(100, 30, 30);
-    // robot.straight(30, 1, NONE);
 }
 void pickWaterTriple()
 {
     DEBUGPRINT("\nPicking all three water bottles (variations).\n");
         
     //Pick First Bottle
-    robot.setLinearAccelParams(100, 20, 25);
-    robot.straight(25, 5, NONE);
+    robot.setLinearAccelParams(100, 40, 30);
+    robot.straight(40, 5, NONE);
     act_tsk(WATER_GRABBER_TASK);
     tslp_tsk(1);
-    robot.setLinearAccelParams(100, 25, 0);
-    robot.straight(25, 2, BRAKE);
-    while(grabber.getTachoCount() < 200) 
-        tslp_tsk(10);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(30, 2, COAST);
     DEBUGPRINT("First bottle of water has been loaded.\n");
     rampQueue.push(BOTTLE);
 
     //Pick Second Bottle (left)
-    robot.setLinearAccelParams(100, -10, 0);
-    robot.arc(40, -40, 8.5, BRAKE);
-    while(grabberUsed)
-        tslp_tsk(10);
-
-    robot.setLinearAccelParams(100, 10, 30);
-    robot.straight(40, 10, COAST);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(50, -35, 8.5, COAST);
+    robot.setLinearAccelParams(100, 0, 30);
+    robot.straight(50, 10, NONE);
     act_tsk(WATER_GRABBER_TASK);
     tslp_tsk(1);
     robot.setLinearAccelParams(100, 30, 0);
-    robot.straight(30, 3, BRAKE);
-    while(grabber.getTachoCount() < 200) 
-        tslp_tsk(10);
+    robot.straight(30, 3, COAST);
     DEBUGPRINT("Second bottle of water has been loaded.\n");
     rampQueue.push(BOTTLE);
 
     //Pick Third Bottle (right)
     robot.setLinearAccelParams(100, 0, 0);
-    robot.straight(40, -2, COAST);
-    robot.setLinearAccelParams(100, -10, 0);
-    robot.arc(40, -80, -8.5, BRAKE);
-    while(grabberUsed)
-        tslp_tsk(10);
+    robot.arc(50, -82, -8.5, COAST);
 
-    robot.setLinearAccelParams(100, 10, 30);
-    robot.straight(40, 13, COAST);
+    robot.setLinearAccelParams(100, 0, 30);
+    robot.straight(50, 13, NONE);
     act_tsk(PICK_BLOCK_TASK);
     tslp_tsk(1);
     robot.setLinearAccelParams(100, 30, 0);
     robot.straight(30, 3, BRAKE);
-    while(grabber.getTachoCount() < 200) 
-        tslp_tsk(10);
     DEBUGPRINT("Third bottle of water has been loaded.\n");
     rampQueue.push(BOTTLE);
 
+    //Get to TR intersection
     robot.setLinearAccelParams(100, 20, 20);
     robot.arc(40, 90, 3, COAST);
 
-    robot.setLinearAccelParams(100, 0, 30);
+    robot.setLinearAccelParams(100, 20, 30);
     robot.straightUnlim(30, true);
     while(robot.getPosition() < 1) 
         robot.straightUnlim(30);
@@ -941,48 +909,32 @@ void pickWaterTriple()
         robot.straightUnlim(30);
     while(leftSensor.getReflected() > 80)
         robot.straightUnlim(30);
-
-    resetLifo();
-    lifo.setPIDparams(KP*1.2, KI * 0.7, KD*1.5);
-    lifo.distance(30, 8, NONE);
-    setLifoSlow();
-    lifo.setAccelParams(150, 30, 30);
-    lifo.distance(30, 6, NONE);
-    lifo.lines(30, 1, NONE);
-    lifo.distance(30, 2, NONE);
 }
 void pickWaterLast()
 {
     DEBUGPRINT("\nPicking last water bottle (remaining) at the end (variation).\n");
+
+    robot.setLinearAccelParams(100, 40, 0);
+    robot.straight(40, 5, COAST);
+
+    grabber.setMode(REGULATED);
+    grabber.moveDegrees(-700, 350, COAST, false);
     
-    robot.setLinearAccelParams(100, 20, 25);
-    robot.straight(25, 5, NONE);
-    robot.setLinearAccelParams(100, 25, 0);
-    robot.straight(25, 2, BRAKE);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(50, -35, 8.5, NONE);
     act_tsk(OPEN_GRABBER_TASK);
     tslp_tsk(1);
-
-    robot.setLinearAccelParams(100, -10, 0);
-    robot.arc(40, -40, 8.5, BRAKE);
-
-    robot.setLinearAccelParams(100, 10, 30);
-    robot.straight(40, 10, COAST);
+    robot.setLinearAccelParams(100, 0, 30);
+    robot.straight(50, 10, NONE);
     act_tsk(PICK_BLOCK_TASK);
     tslp_tsk(1);
     robot.setLinearAccelParams(100, 30, 0);
-    robot.straight(30, 3, BRAKE);
-    while(grabber.getTachoCount() < 200) 
-        tslp_tsk(10);
+    robot.straight(30, 3, COAST);
     rampQueue.push(BOTTLE);
 
-    robot.setLinearAccelParams(100, 0, 0);
-    robot.straight(45, -5, COAST);
-
-    robot.setLinearAccelParams(100, 10, 0);
-    robot.arc(40, 40, 8.5, BRAKE);
 
     robot.setLinearAccelParams(100, 0, 0);
-    robot.arc(40, 180, COAST);
+    robot.arc(50, -140, 3, COAST);
 
     currentDirection = SOUTH;
 }
@@ -991,18 +943,19 @@ void scanLaundryBaskets()
 {
     DEBUGPRINT("\nScanning laundry baskets.\n");
 
+    stopScanning = false;
     act_tsk(BASKET_SCAN_TASK);
     tslp_tsk(1);
 
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(100, 0, 0);
-    robot.arc(35, 30, -8.5, COAST);
-    robot.arc(35, -30, -8.5, COAST);
-    robot.arc(35, 30, 8.5, COAST);
-    robot.arc(35, -30, 8.5, COAST);
+    robot.arc(45, 30, -8.5, COAST);
+    robot.arc(45, -30, -8.5, COAST);
+    robot.arc(45, 30, 8.5, COAST);
+    robot.arc(45, -30, 8.5, COAST);
     stopScanning = true;
     tslp_tsk(1);
-    robot.arc(40, -182, 0, COAST);
+    robot.arc(45, -180, 0, COAST);
 
     //Calculating Colors
     colors temp[2];
