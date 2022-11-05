@@ -136,7 +136,7 @@ void room::scanLaundry()
     }
 
     robot.setLinearAccelParams(100, 30, 0);
-    robot.straight(30, (color == RED) ? 5.5 : 6.1, COAST);
+    robot.straight(30, (color == RED) ? 5.8 : 6.4, COAST);
     laundry = scannedValue;
 
     leftSensor.getReflected();
@@ -449,7 +449,7 @@ void room::taskBallLaundry()
 
         robot.setLinearAccelParams(100, 0, 0);
         robot.straight(40, -9, COAST);
-        robot.arc(40, -103, 0, COAST);
+        robot.arc(40, -100, 0, COAST);
         robot.setLinearAccelParams(100, 0, 30);
         robot.straight(40, 20, COAST);
     }
@@ -469,7 +469,7 @@ void room::taskBallLaundry()
         robot.straight(40, 9.5, COAST);
         
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(40, 98, 3, COAST);
+        robot.arc(40, 100, 3, COAST);
 
         robot.setLinearAccelParams(100, 0, 0);
         robot.straight(40, 7.5, BRAKE);
@@ -483,7 +483,7 @@ void room::taskBallLaundry()
 
         robot.setLinearAccelParams(100, 0, 0);
         robot.straight(40, -9, COAST);
-        robot.arc(40, 103, 0, COAST);
+        robot.arc(40, 107, 0, COAST);
         robot.setLinearAccelParams(100, 0, 30);
         robot.straight(40, 20, COAST);
     }
@@ -835,7 +835,7 @@ void pickWater()
 
     //Pick Second Block
     robot.setLinearAccelParams(100, 0, 0);
-    robot.arc(50, -40, -8.5, COAST);
+    robot.arc(50, -43, -8.5, COAST);
     robot.setLinearAccelParams(100, 0, 30);
     robot.straight(50, 10, NONE);
     act_tsk(PICK_BLOCK_TASK);

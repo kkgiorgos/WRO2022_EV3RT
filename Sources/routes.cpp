@@ -262,6 +262,11 @@ orientation W_IR(orientation dir)
 {
     DEBUGPRINT("\nW_IR\n");
 
+    setLifo("SL", "SR");
+
+    lifoUnregExtreme.distance(30, 10, NONE);
+    lifoUnregNormal.lines(40, 1, NONE, 10);
+
     //Special turn to go from TR to CR2(nearly) and scan red room task
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(100, 40, 45);
@@ -274,7 +279,7 @@ orientation W_IR(orientation dir)
     scanner = &leftScanner;
     act_tsk(ROOM_TASK_SCAN_TASK);
     tslp_tsk(1);
-    robot.arc(45, 45, 15, NONE);
+    robot.arc(45, 50, 15, NONE);
     stopScanning = true;
 
     robot.setLinearAccelParams(100, 35, 45);
@@ -641,8 +646,8 @@ orientation CL1_CL2(orientation dir)
 {
     DEBUGPRINT("\nCL1_CL2\n");
 
-    // standardTurn(currentDirection, WEST, CENTERED);
-    // lifo1LineDist(CENTERED, 20, 10, 5, 5);
+    standardTurn(currentDirection, WEST, CENTERED);
+    lifoRoute1Line(CENTERED, 17, 3, 5, 0, 40, NORMAL);
 
     return WEST;
 }
@@ -650,8 +655,8 @@ orientation CL2_CL1(orientation dir)
 {
     DEBUGPRINT("\nCL2_CL1\n");
 
-    // standardTurn(currentDirection, EAST, CENTERED);
-    // lifo1LineDist(CENTERED, 20, 10, 5, 5);
+    standardTurn(currentDirection, EAST, CENTERED);
+    lifoRoute1Line(CENTERED, 17, 3, 5, 0, 40, NORMAL);
 
     return EAST;
 }
@@ -661,8 +666,8 @@ orientation CL2_CL3(orientation dir)
 {
     DEBUGPRINT("\nCL2_CL3\n");
 
-    // standardTurn(currentDirection, WEST, CENTERED);
-    // lifo1LineDist(CENTERED, 10, 0, 5, 5);
+    standardTurn(currentDirection, WEST, CENTERED);
+    lifoRoute1Line(CENTERED, 8, 3, 5, 0, 30, NORMAL);
 
     return WEST;
 }
@@ -670,8 +675,8 @@ orientation CL3_CL2(orientation dir)
 {
     DEBUGPRINT("\nCL3_CL2\n");
 
-    // standardTurn(currentDirection, EAST, CENTERED);
-    // lifo1LineDist(CENTERED, 10, 0, 5, 5);
+    standardTurn(currentDirection, EAST, CENTERED);
+    lifoRoute1Line(CENTERED, 8, 3, 5, 0, 30, NORMAL);
 
     return EAST;
 }

@@ -127,7 +127,7 @@ void init()
 
     display.format("WAIT FOR SENSORS\n");
     btnEnter.waitForClick();
-    // act_tsk(INIT_TASK);
+    act_tsk(INIT_TASK);
     tslp_tsk(1);
 }
 
@@ -446,358 +446,358 @@ void main_task(intptr_t unused)
     lifoUnregExtreme.addPIDparams(30, 4, 2, 50);    //30 speed
     lifoUnregExtreme.addPIDparams(40, 4, 4, 60);    //40 speed
 
-    // while(true)
-    // {
-    //     setLifo("SL", "SR");
-    //     // lifoControlled.setPIDparams(2, 1, 30);
-    //     // lifoControlled.lines(30, 1, NONE, 20, 9, true);
-    //     // lifoControlled.distance(30, 20, COAST);
+//    // while(true)
+//     // {
+//     //     setLifo("SL", "SR");
+//     //     // lifoControlled.setPIDparams(2, 1, 30);
+//     //     // lifoControlled.lines(30, 1, NONE, 20, 9, true);
+//     //     // lifoControlled.distance(30, 20, COAST);
 
-    //     robot.stop(BRAKE);
-    //     btnEnter.waitForClick();
-    // }
+//     //     robot.stop(BRAKE);
+//     //     btnEnter.waitForClick();
+//     // }
 
-    while(true)
-    {
-        currentPos = CR1;
-        currentDirection = EAST;
-        currentAlignment = CENTERED;
+//     while(true)
+//     {
+//         currentPos = CR1;
+//         currentDirection = EAST;
+//         currentAlignment = CENTERED;
 
-        fullRouteStandard(GR1);
-        fullRouteStandard(RR1);
-        fullRouteStandard(RR2);
-        fullRouteStandard(GR2);
-        fullRouteStandard(RR2);
-        fullRouteStandard(RR1);
-        fullRouteStandard(GR1);
-        fullRouteStandard(CR1);
+//         fullRouteStandard(GR1);
+//         fullRouteStandard(RR1);
+//         fullRouteStandard(RR2);
+//         fullRouteStandard(GR2);
+//         fullRouteStandard(RR2);
+//         fullRouteStandard(RR1);
+//         fullRouteStandard(GR1);
+//         fullRouteStandard(CR1);
 
-        fullRouteStandard(RR2);
-        fullRouteStandard(CR1);
+//         fullRouteStandard(RR2);
+//         fullRouteStandard(CR1);
 
-        // fullRouteStandard(RR2);
-        // fullRouteStandard(GR1);
-        // fullRouteStandard(GR2);
-        // fullRouteStandard(RR1);
-        // fullRouteStandard(BR);
-        // fullRouteStandard(CR2);
-        // fullRouteStandard(TR);
-        // fullRouteStandard(BR);
-        // fullRouteStandard(TR);
-        // fullRouteStandard(CR3);
-        // fullRouteStandard(CR1);
-
-
-        robot.stop(BRAKE);
-        btnEnter.waitForClick();
-    }
-
-    //START, WATER
-    while(true)
-    {
-        // act_tsk(INIT_TASK);
-        // tslp_tsk(1);
-
-        startProcedure();
-
-        S_W(NORTH);
-
-        pickWaterLast();
-
-        // lifoUnregExtreme.distance(30, 10, NONE);
-        // lifoUnregNormal.lines(40, 1, NONE, 10);
-
-        // W_IR(EAST);
-
-        // IR_G(EAST);
-
-        // rooms[GREEN].executeAllActions();
-
-        // G_R(NORTH);
-
-        // rooms[RED].executeAllActions();
-
-        // R_IR(SOUTH);
-
-        // act_tsk(CLOSE_RAMP_TASK);
-        // tslp_tsk(1);
-        // while(!rampQueue.empty()) rampQueue.pop();
-        // rampQueue.push(LAUNDRY_BLACK);
-        // rampQueue.push(LAUNDRY_RED);
-        // rampQueue.push(LAUNDRY_YELLOW);
-        // rooms[RED].setTask(GREEN);
-        // rooms[GREEN].setTask(WHITE);
-
-        // IR_IL(WEST);
-
-        // IL_B(WEST);
-
-        // rooms[BLUE].executeAllActions();
-
-        // B_Y(NORTH);
-
-        // rooms[YELLOW].executeAllActions();
-
-        // Y_IL(SOUTH);
-        // IL_L(EAST);
-
-        // scanLaundryBaskets();
-
-        // leaveLaundry();
-
-        // L_S(NORTH);
-
-        // finishProcedure();
-
-        robot.stop(BRAKE);
-        btnEnter.waitForClick();
-    }
-
-    //GREEN, RED ROOM
-    while(true)
-    {
-        act_tsk(CLOSE_RAMP_TASK);
-        tslp_tsk(1);
-        rampQueue.push(BOTTLE);
-        rampQueue.push(BOTTLE);
-
-        setLifo("SL", "70");
-        lifoUnregExtreme.distance(30, 5, NONE);
-        lifoUnregExtreme.distance(40, 5, NONE);
-        lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
-        lifoUnregNormal.distance(30, 5, NONE);
-        lifoControlled.lines(30, 1, NONE, 5);
-
-        robot.setLinearAccelParams(100, 30, 0);
-        robot.straight(30, 8, COAST);
-
-        robot.setLinearAccelParams(100, 0, -25);
-        robot.arc(50, -85, -5, NONE);
-        robot.setLinearAccelParams(100, -25, -25);
-        robot.arcUnlim(25, -5, BACKWARD, true);
-        while(leftSensor.getReflected() > 80 && abs(robot.getAngle()) < 10)
-            robot.arcUnlim(25, -5, BACKWARD, false);
-        robot.stop(COAST);
-
-        setLifo("SL", "70");
-        lifoUnregNormal.distance(30, 12, NONE);
-
-        rooms[GREEN].setTask(GREEN);
-        rooms[GREEN].executeAllActions();
-
-        setLifo("70", "SR");
-        lifoUnregExtreme.distance(30, 5, NONE);
-        lifoUnregExtreme.distance(40, 5, NONE);
-        lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
-        lifoUnregNormal.distance(30, 12, NONE);
-
-        rooms[RED].setTask(GREEN);
-        rooms[RED].executeAllActions();
-
-        robot.stop(BRAKE);
-        btnEnter.waitForClick();
-    }
-
-    //BLUE, YELLOW ROOM
-    while(true)
-    {
-        act_tsk(CLOSE_RAMP_TASK);
-        tslp_tsk(1);
-        rampQueue.push(BOTTLE);
-        rampQueue.push(BOTTLE);
-
-        setLifo("70", "SR");
-        lifoUnregExtreme.distance(30, 5, NONE);
-        lifoUnregExtreme.distance(40, 5, NONE);
-        lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
-        lifoUnregNormal.distance(30, 5, NONE);
-        lifoControlled.lines(30, 1, NONE, 5);
-
-        robot.setLinearAccelParams(100, 30, 0);
-        robot.straight(30, 8, COAST);
-
-        robot.setLinearAccelParams(100, 0, -25);
-        robot.arc(50, -85, 5, NONE);
-        robot.setLinearAccelParams(100, -25, -25);
-        robot.arcUnlim(25, 5, BACKWARD, true);
-        while(rightSensor.getReflected() > 80 && abs(robot.getAngle()) < 10)
-            robot.arcUnlim(25, 5, BACKWARD, false);
-        robot.stop(COAST);
-
-        setLifo("70", "SR");
-        lifoUnregNormal.distance(30, 12, NONE);
-        // lifoControlled.distance(30, 10, NONE);
-
-        rooms[BLUE].setTask(WHITE);
-        rooms[BLUE].executeAllActions();
-
-        setLifo("SL", "70");
-        lifoUnregExtreme.distance(30, 5, NONE);
-        lifoUnregExtreme.distance(40, 5, NONE);
-        lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
-        lifoUnregNormal.distance(30, 12, NONE);
-
-        // robot.stop(BRAKE);
-        // btnEnter.waitForClick();
+//         // fullRouteStandard(RR2);
+//         // fullRouteStandard(GR1);
+//         // fullRouteStandard(GR2);
+//         // fullRouteStandard(RR1);
+//         // fullRouteStandard(BR);
+//         // fullRouteStandard(CR2);
+//         // fullRouteStandard(TR);
+//         // fullRouteStandard(BR);
+//         // fullRouteStandard(TR);
+//         // fullRouteStandard(CR3);
+//         // fullRouteStandard(CR1);
 
 
-        // setLifo("SL", "70");
-        // lifoUnregExtreme.distance(30, 5, NONE);
-        // lifoUnregExtreme.distance(40, 5, NONE);
-        // lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
-        // lifoUnregNormal.distance(30, 5, NONE);
-        // lifoControlled.lines(30, 1, NONE, 5);
+//         robot.stop(BRAKE);
+//         btnEnter.waitForClick();
+//     }
 
-        // robot.setLinearAccelParams(100, 30, 0);
-        // robot.straight(30, 8, COAST);
+//     //START, WATER
+//     while(true)
+//     {
+//         // act_tsk(INIT_TASK);
+//         // tslp_tsk(1);
 
-        // robot.setLinearAccelParams(100, 0, -25);
-        // robot.arc(50, -85, -5, NONE);
-        // robot.setLinearAccelParams(100, -25, -25);
-        // robot.arcUnlim(25, -5, BACKWARD, true);
-        // while(leftSensor.getReflected() > 80 && abs(robot.getAngle()) < 10)
-        //     robot.arcUnlim(25, -5, BACKWARD, false);
-        // robot.stop(COAST);
+//         startProcedure();
 
-        // setLifo("SL", "70");
-        // lifoUnregNormal.distance(30, 12, NONE);
-        // // lifoControlled.distance(30, 10, NONE);
+//         S_W(NORTH);
 
-        rooms[YELLOW].setTask(WHITE);
-        rooms[YELLOW].executeAllActions();
+//         pickWaterLast();
 
-        robot.stop(BRAKE);
-        btnEnter.waitForClick();
-    }
+//         // lifoUnregExtreme.distance(30, 10, NONE);
+//         // lifoUnregNormal.lines(40, 1, NONE, 10);
 
-    //RANDOM ROUTES (will be used for auxiliary network)
-    while(true)
-    {
-        currentDirection = NORTH;    
-        currentAlignment = CENTERED;
+//         // W_IR(EAST);
 
-        setLifo("SL", "SR");
-        lifoUnregExtreme.distance(30, 5, NONE);
-        lifoUnregNormal.distance(40, 50, NONE);
-        lifoUnregNormal.distance(30, 5, NONE);
-        lifoControlled.lines(30, 1, NONE, 5);
+//         // IR_G(EAST);
 
-        standardTurn(currentDirection, WEST, CENTERED);
-        lifoUnregExtreme.distance(30, 5, NONE);
-        lifoControlled.lines(30, 1, NONE, 5);
+//         // rooms[GREEN].executeAllActions();
 
-        standardTurn(currentDirection, SOUTH, CENTERED);
-        setLifo("SL", "50");
-        lifoUnregExtreme.distance(30, 5, NONE);
-        lifoUnregNormal.lines(40, 3, NONE, 5, 2, true);
-        lifoUnregNormal.distance(40, 10, NONE);
-        lifoUnregNormal.distance(30, 5, NONE);
-        lifoControlled.lines(30, 1, NONE, 5);
+//         // G_R(NORTH);
 
-        standardTurn(currentDirection, WEST, CENTERED);
-        setLifo("SL", "SR");
-        lifoUnregExtreme.distance(30, 5, NONE);
-        lifoUnregNormal.distance(40, 10, NONE);
-        lifoUnregNormal.distance(30, 5, NONE);
-        lifoControlled.lines(30, 1, NONE, 5);
+//         // rooms[RED].executeAllActions();
+
+//         // R_IR(SOUTH);
+
+//         // act_tsk(CLOSE_RAMP_TASK);
+//         // tslp_tsk(1);
+//         // while(!rampQueue.empty()) rampQueue.pop();
+//         // rampQueue.push(LAUNDRY_BLACK);
+//         // rampQueue.push(LAUNDRY_RED);
+//         // rampQueue.push(LAUNDRY_YELLOW);
+//         // rooms[RED].setTask(GREEN);
+//         // rooms[GREEN].setTask(WHITE);
+
+//         // IR_IL(WEST);
+
+//         // IL_B(WEST);
+
+//         // rooms[BLUE].executeAllActions();
+
+//         // B_Y(NORTH);
+
+//         // rooms[YELLOW].executeAllActions();
+
+//         // Y_IL(SOUTH);
+//         // IL_L(EAST);
+
+//         // scanLaundryBaskets();
+
+//         // leaveLaundry();
+
+//         // L_S(NORTH);
+
+//         // finishProcedure();
+
+//         robot.stop(BRAKE);
+//         btnEnter.waitForClick();
+//     }
+
+//     //GREEN, RED ROOM
+//     while(true)
+//     {
+//         act_tsk(CLOSE_RAMP_TASK);
+//         tslp_tsk(1);
+//         rampQueue.push(BOTTLE);
+//         rampQueue.push(BOTTLE);
+
+//         setLifo("SL", "70");
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         lifoUnregExtreme.distance(40, 5, NONE);
+//         lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
+//         lifoUnregNormal.distance(30, 5, NONE);
+//         lifoControlled.lines(30, 1, NONE, 5);
+
+//         robot.setLinearAccelParams(100, 30, 0);
+//         robot.straight(30, 8, COAST);
+
+//         robot.setLinearAccelParams(100, 0, -25);
+//         robot.arc(50, -85, -5, NONE);
+//         robot.setLinearAccelParams(100, -25, -25);
+//         robot.arcUnlim(25, -5, BACKWARD, true);
+//         while(leftSensor.getReflected() > 80 && abs(robot.getAngle()) < 10)
+//             robot.arcUnlim(25, -5, BACKWARD, false);
+//         robot.stop(COAST);
+
+//         setLifo("SL", "70");
+//         lifoUnregNormal.distance(30, 12, NONE);
+
+//         rooms[GREEN].setTask(GREEN);
+//         rooms[GREEN].executeAllActions();
+
+//         setLifo("70", "SR");
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         lifoUnregExtreme.distance(40, 5, NONE);
+//         lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
+//         lifoUnregNormal.distance(30, 12, NONE);
+
+//         rooms[RED].setTask(GREEN);
+//         rooms[RED].executeAllActions();
+
+//         robot.stop(BRAKE);
+//         btnEnter.waitForClick();
+//     }
+
+//     //BLUE, YELLOW ROOM
+//     while(true)
+//     {
+//         act_tsk(CLOSE_RAMP_TASK);
+//         tslp_tsk(1);
+//         rampQueue.push(BOTTLE);
+//         rampQueue.push(BOTTLE);
+
+//         setLifo("70", "SR");
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         lifoUnregExtreme.distance(40, 5, NONE);
+//         lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
+//         lifoUnregNormal.distance(30, 5, NONE);
+//         lifoControlled.lines(30, 1, NONE, 5);
+
+//         robot.setLinearAccelParams(100, 30, 0);
+//         robot.straight(30, 8, COAST);
+
+//         robot.setLinearAccelParams(100, 0, -25);
+//         robot.arc(50, -85, 5, NONE);
+//         robot.setLinearAccelParams(100, -25, -25);
+//         robot.arcUnlim(25, 5, BACKWARD, true);
+//         while(rightSensor.getReflected() > 80 && abs(robot.getAngle()) < 10)
+//             robot.arcUnlim(25, 5, BACKWARD, false);
+//         robot.stop(COAST);
+
+//         setLifo("70", "SR");
+//         lifoUnregNormal.distance(30, 12, NONE);
+//         // lifoControlled.distance(30, 10, NONE);
+
+//         rooms[BLUE].setTask(WHITE);
+//         rooms[BLUE].executeAllActions();
+
+//         setLifo("SL", "70");
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         lifoUnregExtreme.distance(40, 5, NONE);
+//         lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
+//         lifoUnregNormal.distance(30, 12, NONE);
+
+//         // robot.stop(BRAKE);
+//         // btnEnter.waitForClick();
+
+
+//         // setLifo("SL", "70");
+//         // lifoUnregExtreme.distance(30, 5, NONE);
+//         // lifoUnregExtreme.distance(40, 5, NONE);
+//         // lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
+//         // lifoUnregNormal.distance(30, 5, NONE);
+//         // lifoControlled.lines(30, 1, NONE, 5);
+
+//         // robot.setLinearAccelParams(100, 30, 0);
+//         // robot.straight(30, 8, COAST);
+
+//         // robot.setLinearAccelParams(100, 0, -25);
+//         // robot.arc(50, -85, -5, NONE);
+//         // robot.setLinearAccelParams(100, -25, -25);
+//         // robot.arcUnlim(25, -5, BACKWARD, true);
+//         // while(leftSensor.getReflected() > 80 && abs(robot.getAngle()) < 10)
+//         //     robot.arcUnlim(25, -5, BACKWARD, false);
+//         // robot.stop(COAST);
+
+//         // setLifo("SL", "70");
+//         // lifoUnregNormal.distance(30, 12, NONE);
+//         // // lifoControlled.distance(30, 10, NONE);
+
+//         rooms[YELLOW].setTask(WHITE);
+//         rooms[YELLOW].executeAllActions();
+
+//         robot.stop(BRAKE);
+//         btnEnter.waitForClick();
+//     }
+
+//     //RANDOM ROUTES (will be used for auxiliary network)
+//     while(true)
+//     {
+//         currentDirection = NORTH;    
+//         currentAlignment = CENTERED;
+
+//         setLifo("SL", "SR");
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         lifoUnregNormal.distance(40, 50, NONE);
+//         lifoUnregNormal.distance(30, 5, NONE);
+//         lifoControlled.lines(30, 1, NONE, 5);
+
+//         standardTurn(currentDirection, WEST, CENTERED);
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         lifoControlled.lines(30, 1, NONE, 5);
+
+//         standardTurn(currentDirection, SOUTH, CENTERED);
+//         setLifo("SL", "50");
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         lifoUnregNormal.lines(40, 3, NONE, 5, 2, true);
+//         lifoUnregNormal.distance(40, 10, NONE);
+//         lifoUnregNormal.distance(30, 5, NONE);
+//         lifoControlled.lines(30, 1, NONE, 5);
+
+//         standardTurn(currentDirection, WEST, CENTERED);
+//         setLifo("SL", "SR");
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         lifoUnregNormal.distance(40, 10, NONE);
+//         lifoUnregNormal.distance(30, 5, NONE);
+//         lifoControlled.lines(30, 1, NONE, 5);
         
-        standardTurn(currentDirection, EAST, RIGHT_OF_LINE);
-        setLifo("50", "SL");
-        lifoUnregExtreme.distance(30, 10, NONE);
-        lifoUnregNormal.distance(40, 20, NONE);
-        lifoUnregNormal.distance(30, 5, NONE);
-        lifoControlled.lines(30, 1, NONE, 5);
+//         standardTurn(currentDirection, EAST, RIGHT_OF_LINE);
+//         setLifo("50", "SL");
+//         lifoUnregExtreme.distance(30, 10, NONE);
+//         lifoUnregNormal.distance(40, 20, NONE);
+//         lifoUnregNormal.distance(30, 5, NONE);
+//         lifoControlled.lines(30, 1, NONE, 5);
 
-        robot.setLinearAccelParams(100, 30, 0);
-        robot.straight(30, 5, COAST);
-        standardTurn(currentDirection, WEST, RIGHT_OF_LINE);
-        lifoControlled.lines(30, 1, NONE, 1);
+//         robot.setLinearAccelParams(100, 30, 0);
+//         robot.straight(30, 5, COAST);
+//         standardTurn(currentDirection, WEST, RIGHT_OF_LINE);
+//         lifoControlled.lines(30, 1, NONE, 1);
 
-        standardTurn(currentDirection, NORTH, RIGHT_OF_LINE);
-        setLifo("50", "SL");
-        lifoUnregExtreme.distance(30, 5, NONE);
-        lifoUnregExtreme.distance(40, 5, NONE);
-        lifoUnregNormal.distance(40, 60, NONE);
-        lifoControlled.lines(30, 1, NONE, 5);
+//         standardTurn(currentDirection, NORTH, RIGHT_OF_LINE);
+//         setLifo("50", "SL");
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         lifoUnregExtreme.distance(40, 5, NONE);
+//         lifoUnregNormal.distance(40, 60, NONE);
+//         lifoControlled.lines(30, 1, NONE, 5);
 
-        standardTurn(currentDirection, SOUTH, CENTERED);
-        setLifo("SL", "SR");
-        lifoUnregExtreme.distance(30, 5, NONE);
-        lifoUnregNormal.lines(40, 1, NONE, 5, 2, true);
-        lifoUnregNormal.distance(40, 5, NONE);
-        lifoUnregNormal.distance(30, 5, NONE);
-        lifoControlled.lines(30, 1, NONE, 5);
+//         standardTurn(currentDirection, SOUTH, CENTERED);
+//         setLifo("SL", "SR");
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         lifoUnregNormal.lines(40, 1, NONE, 5, 2, true);
+//         lifoUnregNormal.distance(40, 5, NONE);
+//         lifoUnregNormal.distance(30, 5, NONE);
+//         lifoControlled.lines(30, 1, NONE, 5);
 
-        standardTurn(currentDirection, WEST, CENTERED);
-        lifoControlled.setSensorMode(WHITE_RGB);
-        lifoUnregExtreme.distance(30, 5, NONE);
-        // lifoUnregNormal.distance(40, 5, NONE);
-        lifoUnregNormal.distance(30, 5, NONE);
-        lifoControlled.lines(30, 1, NONE, 5);
-        lifoControlled.setSensorMode(REFLECTED);
+//         standardTurn(currentDirection, WEST, CENTERED);
+//         lifoControlled.setSensorMode(WHITE_RGB);
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         // lifoUnregNormal.distance(40, 5, NONE);
+//         lifoUnregNormal.distance(30, 5, NONE);
+//         lifoControlled.lines(30, 1, NONE, 5);
+//         lifoControlled.setSensorMode(REFLECTED);
 
-        standardTurn(currentDirection, EAST, LEFT_OF_LINE);
-        setLifo("SR", "50");
-        lifoUnregExtreme.distance(30, 5, NONE);
-        // lifoUnregNormal.distance(40, 5, NONE);
-        lifoUnregNormal.distance(30, 5, NONE);
-        lifoControlled.lines(30, 1, NONE, 5);
+//         standardTurn(currentDirection, EAST, LEFT_OF_LINE);
+//         setLifo("SR", "50");
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         // lifoUnregNormal.distance(40, 5, NONE);
+//         lifoUnregNormal.distance(30, 5, NONE);
+//         lifoControlled.lines(30, 1, NONE, 5);
 
-        standardTurn(currentDirection, SOUTH, RIGHT_OF_LINE);
-        setLifo("50", "SL");
-        lifoUnregExtreme.distance(30, 5, NONE);
-        lifoControlled.lines(30, 1, NONE, 5);
+//         standardTurn(currentDirection, SOUTH, RIGHT_OF_LINE);
+//         setLifo("50", "SL");
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         lifoControlled.lines(30, 1, NONE, 5);
         
-        standardTurn(currentDirection, WEST, LEFT_OF_LINE);
-        lifoControlled.setSensorMode(WHITE_RGB);
-        setLifo("SR", "50");
-        lifoUnregExtreme.distance(30, 5, NONE);
-        // lifoUnregNormal.distance(40, 5, NONE);
-        lifoUnregNormal.distance(30, 5, NONE);
-        lifoControlled.lines(30, 1, NONE, 5);
-        lifoControlled.setSensorMode(REFLECTED);
+//         standardTurn(currentDirection, WEST, LEFT_OF_LINE);
+//         lifoControlled.setSensorMode(WHITE_RGB);
+//         setLifo("SR", "50");
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         // lifoUnregNormal.distance(40, 5, NONE);
+//         lifoUnregNormal.distance(30, 5, NONE);
+//         lifoControlled.lines(30, 1, NONE, 5);
+//         lifoControlled.setSensorMode(REFLECTED);
 
-        standardTurn(currentDirection, EAST, CENTERED);
-        setLifo("SL", "SR");
-        lifoUnregExtreme.distance(30, 5, NONE);
-        // lifoUnregNormal.distance(40, 5, NONE);
-        lifoUnregNormal.distance(30, 5, NONE);
-        lifoControlled.lines(30, 1, NONE, 5);
+//         standardTurn(currentDirection, EAST, CENTERED);
+//         setLifo("SL", "SR");
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         // lifoUnregNormal.distance(40, 5, NONE);
+//         lifoUnregNormal.distance(30, 5, NONE);
+//         lifoControlled.lines(30, 1, NONE, 5);
 
-        standardTurn(currentDirection, NORTH, CENTERED);
-        setLifo("50", "SR");
-        lifoUnregExtreme.distance(30, 5, NONE);
-        lifoUnregNormal.lines(40, 2, NONE, 5, 2, true);
-        lifoUnregNormal.distance(40, 10, NONE);
-        lifoUnregNormal.distance(30, 5, NONE);
-        lifoControlled.lines(30, 1, NONE, 5);
-
-
-        robot.stop(BRAKE);
-        btnEnter.waitForClick();
-    }
+//         standardTurn(currentDirection, NORTH, CENTERED);
+//         setLifo("50", "SR");
+//         lifoUnregExtreme.distance(30, 5, NONE);
+//         lifoUnregNormal.lines(40, 2, NONE, 5, 2, true);
+//         lifoUnregNormal.distance(40, 10, NONE);
+//         lifoUnregNormal.distance(30, 5, NONE);
+//         lifoControlled.lines(30, 1, NONE, 5);
 
 
-    // startProcedure();
+//         robot.stop(BRAKE);
+//         btnEnter.waitForClick();
+//     }
+
+
+    startProcedure();
     
-    // fullRouteStandard(W);
-    // pickWater();
+    fullRouteStandard(W);
+    pickWater();
     
-    // fullRouteStandard(G);
-    // rooms[GREEN].executeAllActions();
-    // fullRouteStandard(R);
-    // rooms[RED].executeAllActions();
-    // fullRouteStandard(B);
-    // rooms[BLUE].executeAllActions();
-    // fullRouteStandard(Y);
-    // rooms[YELLOW].executeAllActions();
-    // fullRouteStandard(L);
+    fullRouteStandard(G);
+    rooms[GREEN].executeAllActions();
+    fullRouteStandard(R);
+    rooms[RED].executeAllActions();
+    fullRouteStandard(B);
+    rooms[BLUE].executeAllActions();
+    fullRouteStandard(Y);
+    rooms[YELLOW].executeAllActions();
+    fullRouteStandard(L);
 
-    // scanLaundryBaskets();
-    // leaveLaundry();
+    scanLaundryBaskets();
+    leaveLaundry();
 
-    // fullRouteStandard(S);
-    // finishProcedure();
+    fullRouteStandard(S);
+    finishProcedure();
 
     robot.stop(BRAKE);
 
