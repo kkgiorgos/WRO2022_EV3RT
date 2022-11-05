@@ -2,6 +2,8 @@
 
 #define V 38
 
+#define ADD_EDGE(X,Y) addEdge(X,Y);routeMapping[make_pair(X,Y)]=X##_##Y;routeMapping[make_pair(Y,X)]=Y##_##X;
+
 #include <vector>
 #include <queue>
 #include <map>
@@ -60,6 +62,10 @@ void fullRouteStandard(int target);
 //Turn functions
 void standardTurn(orientation start, orientation finish, lifoRobotPosition endAlignment);
 void centralTurn(orientation start, orientation finish);
+
+//Same route simplification
+void rooms_vertical(orientation target, int length, bool isTargetRed = false); 
+
 
 //Actual route implementations
 //Main network

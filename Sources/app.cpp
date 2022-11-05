@@ -457,6 +457,41 @@ void main_task(intptr_t unused)
     //     btnEnter.waitForClick();
     // }
 
+    while(true)
+    {
+        currentPos = CR1;
+        currentDirection = EAST;
+        currentAlignment = CENTERED;
+
+        fullRouteStandard(GR1);
+        fullRouteStandard(RR1);
+        fullRouteStandard(RR2);
+        fullRouteStandard(GR2);
+        fullRouteStandard(RR2);
+        fullRouteStandard(RR1);
+        fullRouteStandard(GR1);
+        fullRouteStandard(CR1);
+
+        fullRouteStandard(RR2);
+        fullRouteStandard(CR1);
+
+        // fullRouteStandard(RR2);
+        // fullRouteStandard(GR1);
+        // fullRouteStandard(GR2);
+        // fullRouteStandard(RR1);
+        // fullRouteStandard(BR);
+        // fullRouteStandard(CR2);
+        // fullRouteStandard(TR);
+        // fullRouteStandard(BR);
+        // fullRouteStandard(TR);
+        // fullRouteStandard(CR3);
+        // fullRouteStandard(CR1);
+
+
+        robot.stop(BRAKE);
+        btnEnter.waitForClick();
+    }
+
     //START, WATER
     while(true)
     {

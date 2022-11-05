@@ -310,6 +310,54 @@ void rightTurn(lifoRobotPosition endAlignment, ev3ys::breakMode stopMode)
     robot.arc(45, 90, arcCenter, stopMode);
 }
 
+void lifoRoute1Line(lifoRobotPosition alignment, double totalDistance, double extremePhase, double slowPhase, double controlledPhase, double maxSpeed, lineDetectionMode detectLine, ev3ys::breakMode stopMode)
+{
+    //Set Lifo Params
+    double normalPhase = totalDistance - extremePhase - slowPhase - controlledPhase;
+
+    if(alignment == LEFT_OF_LINE)
+        setLifo("SR", "50");
+    else if(alignment == RIGHT_OF_LINE)
+        setLifo("50", "SL");
+    else
+        setLifo("SL", "SR");
+    //Follow Extreme 30 speed
+    lifoUnregExtreme.distance(30, extremePhase, NONE);
+    //Follow Normal at given speed
+    lifoUnregNormal.distance(maxSpeed, normalPhase, NONE);
+    
+    if(controlledPhase == 0)
+    {
+        //Follow Normal slow (30) until line
+        if(detectLine == NO_DETECT)
+            lifoUnregNormal.distance(30, slowPhase, stopMode);
+        else if(detectLine == NORMAL)
+            lifoUnregNormal.lines(30, 1, stopMode, slowPhase);
+        else //COLOR
+        {
+            lifoUnregNormal.setSensorMode(WHITE_RGB);
+            lifoUnregNormal.lines(30, 1, stopMode, slowPhase);
+            lifoUnregNormal.setSensorMode(REFLECTED);
+        }
+    }   
+    else
+    {
+        //Follow Normal slow (30)
+        lifoUnregNormal.distance(30, slowPhase, NONE);
+        //Switch to CONTROLLED 30 speed until line
+        if(detectLine == NO_DETECT)
+            lifoControlled.distance(30, controlledPhase, stopMode);
+        else if(detectLine == NORMAL)
+            lifoControlled.lines(30, 1, stopMode, controlledPhase);
+        else //COLOR
+        {
+            lifoControlled.setSensorMode(WHITE_RGB);
+            lifoControlled.lines(30, 1, stopMode, controlledPhase);
+            lifoControlled.setSensorMode(REFLECTED);
+        }
+    }
+}
+
 void lifo1LineDist(lifoRobotPosition alignment, double totalDistance, double startPhaseDist, double endPhaseDist, double slowDist, lineDetectionMode detectLine, ev3ys::breakMode stopMode)
 {
     timer t;
