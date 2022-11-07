@@ -18,22 +18,22 @@ room::room(colors col)
     switch(color)
     {
         case RED:
-            position = R;
+            position = RR2;
             roomOrientation = RED_BLUE;
             sprintf(name, "red");
             break;
         case BLUE:
-            position = B;
+            position = BR2;
             roomOrientation = RED_BLUE;
             sprintf(name, "blue");
             break;
         case GREEN:
-            position = G;
+            position = GR2;
             roomOrientation = GREEN_YELLOW;
             sprintf(name, "green");
             break;
         case YELLOW:
-            position = Y;
+            position = YR2;
             roomOrientation = GREEN_YELLOW;
             sprintf(name, "yellow");
             break;
@@ -829,7 +829,7 @@ void pickWater()
     act_tsk(WATER_GRABBER_TASK);
     tslp_tsk(1);
     robot.setLinearAccelParams(100, 30, 0);
-    robot.straight(30, 2, COAST);
+    robot.straight(30, 3, COAST);
     DEBUGPRINT("First bottle of water has been loaded.\n");
     rampQueue.push(BOTTLE);
 

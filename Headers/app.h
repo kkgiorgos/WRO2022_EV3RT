@@ -52,6 +52,7 @@ extern void empty_water_ramp_task(intptr_t);
 extern void basket_scan_task(intptr_t);
 extern void room_task_scan_task(intptr_t);
 extern void room_entrance_task(intptr_t);
+extern void human_scan_task(intptr_t);
 extern void end_task(intptr_t);
 
 #endif /* TOPPERS_MACRO_ONLY */

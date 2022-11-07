@@ -199,7 +199,7 @@ void standardTurn(orientation start, orientation finish, lifoRobotPosition endAl
     else if(endAlignment != currentAlignment)
     {
         DEBUGPRINT("Changing Lifo Alignment\n");
-        switchLifoRobotPosition(20, currentAlignment, endAlignment);
+        switchLifoRobotPosition(30, currentAlignment, endAlignment);
     }
     currentAlignment = endAlignment;
 }
@@ -213,12 +213,12 @@ void centralTurn(orientation start, orientation finish)
     if(turnDifference == -1 || turnDifference == 3)
     {
         DEBUGPRINT("Turning left 90 (Central)\n");
-        robot.arc(45, -90, 0, COAST);
+        robot.arc(45, -92, 0, COAST);
     }
     else if(turnDifference == 1 || turnDifference == -3)
     {
         DEBUGPRINT("Turning right 90 (Central)\n");
-        robot.arc(45, 90, 0, COAST);
+        robot.arc(45, 92, 0, COAST);
     }
     else if(turnDifference == -2 || turnDifference == 2)
     {
@@ -512,11 +512,11 @@ orientation M_CL1(orientation dir)
 {
     DEBUGPRINT("\nM_CL1\n");
 
-    // centralTurn(currentDirection, WEST);
-    // robot.setLinearAccelParams(100, 0, 20);
-    // robot.straight(45, 15, NONE);
-    // switchLifoRobotPosition(20, currentAlignment, CENTERED);
-    // lifo1LineDist(CENTERED, 20, 7, 8);
+    centralTurn(currentDirection, WEST);
+    robot.setLinearAccelParams(100, 0, 30);
+    robot.straight(45, 15, NONE);
+    switchLifoRobotPosition(20, currentAlignment, CENTERED);
+    lifoRoute1Line(CENTERED, 18, 7, 5, 0, 40, NORMAL);
 
     return WEST;
 }
@@ -524,11 +524,11 @@ orientation CL1_M(orientation dir)
 {
     DEBUGPRINT("\nCL1_M\n");
 
-    // standardTurn(currentDirection, EAST, CENTERED);
-    // lifo1LineDist(CENTERED, 15, 5, 5, 5, SPECIAL_REF, NONE);
-    // robot.setMode(CONTROLLED);
-    // robot.setLinearAccelParams(100, 20, 0);
-    // robot.straight(45, 21, COAST);
+    standardTurn(currentDirection, EAST, CENTERED);
+    lifoRoute1Line(CENTERED, 10, 5, 0, 3, 30, NORMAL);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(45, 21, COAST);
     
     return EAST;
 }
@@ -536,13 +536,13 @@ orientation M_CR1(orientation dir)
 {
     DEBUGPRINT("\nM_CR1\n");
 
-    // centralTurn(currentDirection, EAST);
-    // robot.setLinearAccelParams(100, 0, 20);
-    // robot.arc(20, 15, 20, NONE);
-    // robot.setLinearAccelParams(100, 20, 20);
-    // robot.straight(45, 12, NONE);
-    // currentAlignment = RIGHT_OF_LINE;
-    // lifo1LineDist(RIGHT_OF_LINE, 20, 7, 8);
+    centralTurn(currentDirection, EAST);
+    robot.setLinearAccelParams(100, 0, 30);
+    robot.arc(30, 15, 20, NONE);
+    robot.setLinearAccelParams(100, 30, 30);
+    robot.straight(45, 12, NONE);
+    currentAlignment = RIGHT_OF_LINE;
+    lifoRoute1Line(RIGHT_OF_LINE, 18, 7, 5, 0, 40, NORMAL);
 
     return EAST;
 }
@@ -550,11 +550,11 @@ orientation CR1_M(orientation dir)
 {
     DEBUGPRINT("\nCR1_M\n");
 
-    // standardTurn(currentDirection, WEST, LEFT_OF_LINE);
-    // lifo1LineDist(LEFT_OF_LINE, 12, 2, 5, 5, SPECIAL_REF, NONE);
-    // robot.setMode(CONTROLLED);
-    // robot.setLinearAccelParams(100, 20, 0);
-    // robot.straight(45, 21, COAST);
+    standardTurn(currentDirection, WEST, LEFT_OF_LINE);
+    lifoRoute1Line(LEFT_OF_LINE, 10, 5, 0, 3, 30, NORMAL);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 20, 0);
+    robot.straight(45, 20, COAST);
 
     return WEST;
 }
@@ -562,10 +562,10 @@ orientation M_TM(orientation dir)
 {
     DEBUGPRINT("\nM_TM\n");
 
-    // centralTurn(currentDirection, NORTH);
-    // robot.setLinearAccelParams(100, 0, 20);
-    // robot.straight(45, 17, NONE);
-    // lifo1LineDist(CENTERED, 15, 5, 5);
+    centralTurn(currentDirection, NORTH);
+    robot.setLinearAccelParams(100, 0, 30);
+    robot.straight(45, 17, NONE);
+    lifoRoute1Line(CENTERED, 13, 7, 5, 0, 30, NORMAL);
 
     return NORTH;
 }
@@ -573,11 +573,11 @@ orientation TM_M(orientation dir)
 {
     DEBUGPRINT("\nTM_M\n");
 
-    // standardTurn(currentDirection, SOUTH, CENTERED);
-    // lifo1LineDist(CENTERED, 7, 2, 2, 3, SPECIAL_REF, NONE);
-    // robot.setMode(CONTROLLED);
-    // robot.setLinearAccelParams(100, 20, 0);
-    // robot.straight(45, 21, COAST);
+    standardTurn(currentDirection, SOUTH, CENTERED);
+    lifoRoute1Line(CENTERED, 7, 5, 0, 2, 30, NORMAL);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(45, 21, COAST);
 
     return SOUTH;
 }
@@ -585,10 +585,10 @@ orientation M_BM(orientation dir)
 {
     DEBUGPRINT("\nM_BM\n");
 
-    // centralTurn(currentDirection, SOUTH);
-    // robot.setLinearAccelParams(100, 0, 20);
-    // robot.straight(45, 15, NONE);
-    // lifo1LineDist(CENTERED, 15, 5, 5);
+    centralTurn(currentDirection, SOUTH);
+    robot.setLinearAccelParams(100, 0, 30);
+    robot.straight(45, 17, NONE);
+    lifoRoute1Line(CENTERED, 13, 7, 5, 0, 30, NORMAL);
 
     return SOUTH;
 }
@@ -596,11 +596,11 @@ orientation BM_M(orientation dir)
 {
     DEBUGPRINT("\nBM_M\n");
 
-    // standardTurn(currentDirection, NORTH, CENTERED);
-    // lifo1LineDist(CENTERED, 7, 2, 2, 3, SPECIAL_REF, NONE);
-    // robot.setMode(CONTROLLED);
-    // robot.setLinearAccelParams(100, 20, 0);
-    // robot.straight(45, 21, COAST);
+    standardTurn(currentDirection, NORTH, CENTERED);
+    lifoRoute1Line(CENTERED, 7, 5, 0, 2, 30, NORMAL);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(45, 21, COAST);
 
     return NORTH;
 }
@@ -610,8 +610,25 @@ orientation CL1_TL(orientation dir)
 {
     DEBUGPRINT("\nCL1_TL\n");
 
-    // standardTurn(currentDirection, NORTH, CENTERED);
-    // lifo1LineDist(CENTERED, 25);
+    standardTurn(currentDirection, NORTH, RIGHT_OF_LINE);
+    lifoRoute1Line(RIGHT_OF_LINE, 15, 3, 5, 0, 40, SCANNER, NONE);
+
+    display.resetScreen();
+    display.format("%  \n")%static_cast<int>(scannedValue);
+
+    robot.setLinearAccelParams(100, 30, 30);
+    robot.arc(45, 45, -3, COAST);
+    robot.arc(45, 20, 25, COAST);
+    setLifo("70", "SR");
+    stopScanning = false;
+    act_tsk(HUMAN_SCAN_TASK);
+    tslp_tsk(1);
+    lifoUnregExtreme.distance(30, 13, COAST);
+    stopScanning = true;
+
+    display.format("%  \n")%static_cast<int>(scannedValue);
+
+    lifoUnregNormal.seconds(30, 0.5, COAST);
 
     return NORTH;
 }
@@ -619,8 +636,8 @@ orientation TL_CL1(orientation dir)
 {
     DEBUGPRINT("\nTL_CL1\n");
 
-    // standardTurn(currentDirection, SOUTH, CENTERED);
-    // lifo1LineDist(CENTERED, 25);
+    standardTurn(currentDirection, SOUTH, CENTERED);
+    lifoRoute1Line(CENTERED, 23, 5, 5, 0, 40, NORMAL);
 
     return SOUTH;
 }
@@ -628,8 +645,8 @@ orientation CL1_BL(orientation dir)
 {
     DEBUGPRINT("\nCL1_BL\n");
 
-    // standardTurn(currentDirection, SOUTH, CENTERED);
-    // lifo1LineDist(CENTERED, 25);
+    standardTurn(currentDirection, SOUTH, CENTERED);
+    lifoRoute1Line(CENTERED, 23, 3, 5, 0, 40, NORMAL);
 
     return SOUTH;
 }
@@ -637,8 +654,8 @@ orientation BL_CL1(orientation dir)
 {
     DEBUGPRINT("\nBL_CL1\n");
 
-    // standardTurn(currentDirection, NORTH, CENTERED);
-    // lifo1LineDist(CENTERED, 25);
+    standardTurn(currentDirection, NORTH, CENTERED);
+    lifoRoute1Line(CENTERED, 23, 3, 5, 0, 40, NORMAL);
 
     return NORTH;
 }
@@ -752,8 +769,8 @@ orientation CR1_TR(orientation dir)
 {
     DEBUGPRINT("\nCR1_TR\n");
 
-    // standardTurn(currentDirection, NORTH, CENTERED);
-    // lifo1LineDist(CENTERED, 25);
+    standardTurn(currentDirection, NORTH, CENTERED);
+    lifoRoute1Line(CENTERED, 23, 3, 5, 0, 40, NORMAL);
 
     return NORTH;
 }
@@ -761,8 +778,8 @@ orientation TR_CR1(orientation dir)
 {
     DEBUGPRINT("\nTR_CR1\n");
 
-    // standardTurn(currentDirection, SOUTH, CENTERED);
-    // lifo1LineDist(CENTERED, 25);
+    standardTurn(currentDirection, SOUTH, CENTERED);
+    lifoRoute1Line(CENTERED, 23, 3, 5, 0, 40, NORMAL);
 
     return SOUTH;
 }
@@ -770,8 +787,8 @@ orientation CR1_BR(orientation dir)
 {
     DEBUGPRINT("\nCR1_BR\n");
 
-    // standardTurn(currentDirection, SOUTH, LEFT_OF_LINE);
-    // lifo1LineDist(LEFT_OF_LINE, 40, 10, 10, 5, NO_DETECT);
+    standardTurn(currentDirection, SOUTH, LEFT_OF_LINE);
+    lifoRoute1Line(LEFT_OF_LINE, 35, 5, 5, 0, 40, NO_DETECT);
 
     return SOUTH;
 }
@@ -779,8 +796,8 @@ orientation BR_CR1(orientation dir)
 {
     DEBUGPRINT("\nBR_CR1\n");
 
-    // standardTurn(currentDirection, NORTH, RIGHT_OF_LINE);
-    // lifo1LineDist(RIGHT_OF_LINE, 25);
+    standardTurn(currentDirection, NORTH, RIGHT_OF_LINE);
+    lifoRoute1Line(RIGHT_OF_LINE, 23, 5, 5, 0, 40, NORMAL);
 
     return NORTH;
 }
@@ -894,11 +911,22 @@ orientation M_TLH(orientation dir)
 {
     DEBUGPRINT("\nM_TLH\n");
 
+    centralTurn(dir, NORTH);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, -23, 0, COAST);
+    robot.straight(45, 27, COAST);
+
     return NO;
 }
 orientation TLH_M(orientation dir)
 {
     DEBUGPRINT("\nTLH_M\n");
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(45, -27, COAST);
+    robot.arc(45, 23, 0, COAST);
 
     return NORTH;
 }

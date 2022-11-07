@@ -127,7 +127,7 @@ void init()
 
     display.format("WAIT FOR SENSORS\n");
     btnEnter.waitForClick();
-    act_tsk(INIT_TASK);
+    // act_tsk(INIT_TASK);
     tslp_tsk(1);
 }
 
@@ -352,6 +352,21 @@ void room_entrance_task(intptr_t unused)
     roomScanStage = 4;  //final distance based on room 
 }
 
+void human_scan_task(intptr_t unused)
+{
+    colors current = NO_COLOR;
+    map<colors, int> appearances;
+    while(!stopScanning)
+    {
+        if((current = leftScanner.getColor()) != NO_COLOR)
+            appearances[current]++;
+        if((current = rightScanner.getColor()) != NO_COLOR)
+            appearances[current]++;
+        tslp_tsk(1);
+        scannedValue = analyzeFrequency(appearances, NO_COLOR);
+    }
+}
+
 void end_task(intptr_t unused)
 {
     //CLOSES EVERYTHING
@@ -387,8 +402,8 @@ void main_task(intptr_t unused)
     // // double min[4] = {1,2,1,2};
     // // double max[4] = {68,73,55,196};
     // // leftScanner.setRgbCalParams(min, max);
-    // leftScanner.setNormalisation(false);
-    // rightScanner.setNormalisation(false);
+    // // leftScanner.setNormalisation(false);
+    // // rightScanner.setNormalisation(false);
     // display.resetScreen();
     // while(true)
     // {
@@ -398,7 +413,7 @@ void main_task(intptr_t unused)
     //     // colorspaceHSV l2 = leftScanner.getHSV();
     //     // colorspaceHSV r2 = rightScanner.getHSV();
     //     // format(bt, "L: H: %  S: %  V: %  \nR: H: %  S: %  V: %  \n\n") %l2.hue %l2.saturation %l2.value %r2.hue %r2.saturation %r2.value;
-    //     display.format("L: %  \nR: %  \n\n\n") %static_cast<int>(scanCodeBlock(leftScanner)) %static_cast<int>(scanCodeBlock(rightScanner));
+    //     display.format("L: %  \nR: %  \n\n\n") %static_cast<int>(leftScanner.getColor()) %static_cast<int>(rightScanner.getColor());
     //     tslp_tsk(10);
     // }
 
@@ -457,40 +472,159 @@ void main_task(intptr_t unused)
 //     //     btnEnter.waitForClick();
 //     // }
 
-//     while(true)
-//     {
-//         currentPos = CR1;
-//         currentDirection = EAST;
-//         currentAlignment = CENTERED;
+    while(true)
+    {
+        startProcedure();
+        currentPos = S;
+        fullRouteStandard(W);
 
-//         fullRouteStandard(GR1);
-//         fullRouteStandard(RR1);
-//         fullRouteStandard(RR2);
-//         fullRouteStandard(GR2);
-//         fullRouteStandard(RR2);
-//         fullRouteStandard(RR1);
-//         fullRouteStandard(GR1);
-//         fullRouteStandard(CR1);
+        robot.setLinearAccelParams(100, 40, 30);
+        robot.straight(40, 5, NONE);
+        robot.setLinearAccelParams(100, 30, 0);
+        robot.straight(30, 3, COAST);
 
-//         fullRouteStandard(RR2);
-//         fullRouteStandard(CR1);
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.straight(30, -2, COAST);
+        robot.arc(45, -125, 4, COAST);
+        robot.arc(45, -35, -8.5, COAST);
+        robot.straight(45, -9, COAST);
 
-//         // fullRouteStandard(RR2);
-//         // fullRouteStandard(GR1);
-//         // fullRouteStandard(GR2);
-//         // fullRouteStandard(RR1);
-//         // fullRouteStandard(BR);
-//         // fullRouteStandard(CR2);
-//         // fullRouteStandard(TR);
-//         // fullRouteStandard(BR);
-//         // fullRouteStandard(TR);
-//         // fullRouteStandard(CR3);
-//         // fullRouteStandard(CR1);
+        colors waters[3];
+        int idx=0;
+
+        rightScanner.setColorDataSat(rightScanner.getColorDataSat() / 2.0);
+
+        setLifo("SR", "50");
+        stopScanning = false;
+        act_tsk(HUMAN_SCAN_TASK);
+        tslp_tsk(1);
+        lifoUnregExtreme.distance(30, 5, NONE);
+        stopScanning = true;
+        waters[idx++] = scannedValue; 
+        stopScanning = false;
+        ter_tsk(HUMAN_SCAN_TASK);
+        tslp_tsk(1);
+        act_tsk(HUMAN_SCAN_TASK);
+        tslp_tsk(1);
+        lifoUnregNormal.lines(30, 1, NONE, 3, 2, true);
+        lifoUnregNormal.distance(30, 2.5, NONE);
+        stopScanning = true;
+        waters[idx++] = scannedValue; 
+        stopScanning = false;
+        ter_tsk(HUMAN_SCAN_TASK);
+        tslp_tsk(1);
+        act_tsk(HUMAN_SCAN_TASK);
+        tslp_tsk(1);
+        lifoUnregNormal.distance(30, 10, COAST);
+        stopScanning = true;
+        waters[idx++] = scannedValue; 
+        stopScanning = false;
+        ter_tsk(HUMAN_SCAN_TASK);
+        tslp_tsk(1);
+        act_tsk(INIT_TASK);
+        tslp_tsk(1);
+        robot.arc(45, -90, -8.5, COAST);
+
+        setLifo("SL", "SR");  
+        lifoUnregExtreme.lines(30, 1, NONE, 5);
+
+        display.resetScreen();
+        for(auto x : waters)
+        {
+            display.format("%  \n")%static_cast<int>(x);
+        }
+
+        pickWater();
+
+        robot.stop(BRAKE);
+        btnEnter.waitForClick();
+    }
+
+    // while(true)
+    // {
+    //     currentPos = M;
+    //     currentDirection = NORTH;
+    //     currentAlignment = CENTERED;
+
+    //     fullRouteStandard(TL);
+
+    //     //TL -> TLLH
+    //     robot.setMode(CONTROLLED);
+    //     robot.setLinearAccelParams(100, 0, -40);
+    //     robot.arc(40, -48, 8.5, NONE);
+    //     act_tsk(OPEN_GRABBER_TASK);
+    //     tslp_tsk(1);
+    //     robot.setLinearAccelParams(100, -40, 0);
+    //     robot.arc(40, -48, 8.5, COAST);
+
+    //     robot.setLinearAccelParams(100, 0, 0);
+    //     robot.straight(45, 15, COAST);
+
+    //     grabber.moveUnlimited(600, true);
+    //     while(grabber.getCurrentSpeed() < 570)
+    //     {
+    //         grabber.moveUnlimited(600);
+    //         tslp_tsk(1);
+    //     }
+    //     while(grabber.getCurrentSpeed() > 550)
+    //     {
+    //         grabber.moveUnlimited(600);
+    //         tslp_tsk(1);
+    //     }
+    //     grabber.stop(BRAKE);
+
+    //     robot.straight(45, -12,  COAST);
+    //     robot.arc(45, -90, 0, COAST);
+    //     robot.setLinearAccelParams(100, 0, 30);
+    //     robot.straight(30, 3, NONE);
+
+    //     currentDirection = SOUTH;
+    //     fullRouteStandard(M);
+
+    //     finishProcedure();
 
 
-//         robot.stop(BRAKE);
-//         btnEnter.waitForClick();
-//     }
+    //     // fullRouteStandard(TLH);
+
+    //     // stopScanning = false;
+    //     // scanner = &leftScanner;
+    //     // act_tsk(HUMAN_SCAN_TASK);
+    //     // tslp_tsk(1);
+    //     // robot.arc(45, 20, 20, COAST);
+    //     // robot.arc(45, -20, 20, COAST);
+    //     // stopScanning = true;
+
+    //     // fullRouteStandard(M);        
+    //     // display.resetScreen();
+    //     // display.format("%  \n")%static_cast<int>(scannedValue);
+
+
+    //     // fullRouteStandard(CL1);
+    //     // fullRouteStandard(TLH);
+    //     // fullRouteStandard(CL1);
+
+
+    //     // fullRouteStandard(BR);
+    //     // fullRouteStandard(CR2);
+    //     // fullRouteStandard(BR);
+    //     // fullRouteStandard(TR);
+
+    //     // fullRouteStandard(RR2);
+    //     // fullRouteStandard(GR1);
+    //     // fullRouteStandard(GR2);
+    //     // fullRouteStandard(RR1);
+    //     // fullRouteStandard(BR);
+    //     // fullRouteStandard(CR2);
+    //     // fullRouteStandard(TR);
+    //     // fullRouteStandard(BR);
+    //     // fullRouteStandard(TR);
+    //     // fullRouteStandard(CR3);
+    //     // fullRouteStandard(CR1);
+
+
+    //     robot.stop(BRAKE);
+    //     btnEnter.waitForClick();
+    // }
 
 //     //START, WATER
 //     while(true)

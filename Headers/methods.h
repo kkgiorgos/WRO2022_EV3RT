@@ -51,6 +51,7 @@ enum lineDetectionMode
     NO_DETECT,
     COLORED,
     NORMAL,
+    SCANNER,
     SPECIAL_REF //DERPECEATED
 };
 
@@ -60,6 +61,6 @@ void rightTurn(lifoRobotPosition endAlignment, ev3ys::breakMode stopMode = ev3ys
 
 void switchLifoRobotPosition(double speed, lifoRobotPosition startAlignment, lifoRobotPosition endAlignment);
 
-void lifoRoute1Line(lifoRobotPosition alignment, double totalDistance, double extremePhase, double slowPhase, double controlledPhase, double maxSpeed, lineDetectionMode detectLine, ev3ys::breakMode stopMode = ev3ys::breakMode::COAST);
+ev3ys::colors lifoRoute1Line(lifoRobotPosition alignment, double totalDistance, double extremePhase, double slowPhase, double controlledPhase, double maxSpeed, lineDetectionMode detectLine, int lifoTarget = 50, ev3ys::breakMode stopMode = ev3ys::breakMode::COAST);
 
 void lifo1LineDist(lifoRobotPosition alignment, double totalDistance, double startPhaseDist = 10, double endPhaseDist = 10, double slowDist = 5, lineDetectionMode detectLine = NORMAL, ev3ys::breakMode stopMode = ev3ys::breakMode::COAST);
