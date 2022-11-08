@@ -11,6 +11,7 @@
 #include "routes.h"
 #include "tasks.h"
 #include "methods.h"
+#include "extras.h"
 
 #include "ev3ys.h"
 #include "globalRobot.h"
@@ -75,6 +76,8 @@ colors scannedValue;
 colorSensor *lineDetector;
 colors roomColor;
 
+map<matPos, human> humans;
+
 void startData()
 {
     rooms.insert(pair<colors, room>(RED, room(RED)));
@@ -84,6 +87,8 @@ void startData()
 
     currentPos = S;
     currentDirection = NORTH;
+
+    initializeHumans();
 }
 
 void init()
@@ -134,6 +139,7 @@ void init()
 void open_grabber_task(intptr_t unused)
 {
     //OPENS GRABBER FULLY
+    grabberUsed = true;
     grabber.setMode(REGULATED);
     grabber.moveUnlimited(-1200, true);
     tslp_tsk(50);
@@ -148,6 +154,7 @@ void open_grabber_task(intptr_t unused)
         tslp_tsk(1);
     }
     grabber.stop(BRAKE);
+    grabberUsed = false;
 }
 
 void init_task(intptr_t unused)
@@ -472,69 +479,119 @@ void main_task(intptr_t unused)
 //     //     btnEnter.waitForClick();
 //     // }
 
+    // while(true)
+    // {
+    //     startProcedure();
+    //     currentPos = S;
+    //     fullRouteStandard(W);
+
+    //     robot.setLinearAccelParams(100, 40, 30);
+    //     robot.straight(40, 5, NONE);
+    //     robot.setLinearAccelParams(100, 30, 0);
+    //     robot.straight(30, 3, COAST);
+
+    //     robot.setLinearAccelParams(100, 0, 0);
+    //     robot.straight(30, -2, COAST);
+    //     robot.arc(45, -125, 4, COAST);
+    //     robot.arc(45, -35, -8.5, COAST);
+    //     robot.straight(45, -9, COAST);
+
+    //     colors waters[3];
+    //     int idx=0;
+
+    //     rightScanner.setColorDataSat(rightScanner.getColorDataSat() / 2.0);
+
+    //     setLifo("SR", "50");
+    //     stopScanning = false;
+    //     act_tsk(HUMAN_SCAN_TASK);
+    //     tslp_tsk(1);
+    //     lifoUnregExtreme.distance(30, 5, NONE);
+    //     stopScanning = true;
+    //     waters[idx++] = scannedValue; 
+    //     stopScanning = false;
+    //     ter_tsk(HUMAN_SCAN_TASK);
+    //     tslp_tsk(1);
+    //     act_tsk(HUMAN_SCAN_TASK);
+    //     tslp_tsk(1);
+    //     lifoUnregNormal.lines(30, 1, NONE, 3, 2, true);
+    //     lifoUnregNormal.distance(30, 2.5, NONE);
+    //     stopScanning = true;
+    //     waters[idx++] = scannedValue; 
+    //     stopScanning = false;
+    //     ter_tsk(HUMAN_SCAN_TASK);
+    //     tslp_tsk(1);
+    //     act_tsk(HUMAN_SCAN_TASK);
+    //     tslp_tsk(1);
+    //     lifoUnregNormal.distance(30, 10, COAST);
+    //     stopScanning = true;
+    //     waters[idx++] = scannedValue; 
+    //     stopScanning = false;
+    //     ter_tsk(HUMAN_SCAN_TASK);
+    //     tslp_tsk(1);
+    //     act_tsk(INIT_TASK);
+    //     tslp_tsk(1);
+    //     robot.arc(45, -90, -8.5, COAST);
+
+    //     setLifo("SL", "SR");  
+    //     lifoUnregExtreme.lines(30, 1, NONE, 5);
+
+    //     display.resetScreen();
+    //     for(auto x : waters)
+    //     {
+    //         display.format("%  \n")%static_cast<int>(x);
+    //     }
+
+    //     pickWater();
+
+    //     robot.stop(BRAKE);
+    //     btnEnter.waitForClick();
+    // }
+
     while(true)
     {
-        startProcedure();
-        currentPos = S;
-        fullRouteStandard(W);
+        currentPos = M;
+        currentDirection = NORTH;
+        currentAlignment = CENTERED;
 
-        robot.setLinearAccelParams(100, 40, 30);
-        robot.straight(40, 5, NONE);
-        robot.setLinearAccelParams(100, 30, 0);
-        robot.straight(30, 3, COAST);
+        int count = 0;
 
-        robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(30, -2, COAST);
-        robot.arc(45, -125, 4, COAST);
-        robot.arc(45, -35, -8.5, COAST);
-        robot.straight(45, -9, COAST);
-
-        colors waters[3];
-        int idx=0;
-
-        rightScanner.setColorDataSat(rightScanner.getColorDataSat() / 2.0);
-
-        setLifo("SR", "50");
-        stopScanning = false;
-        act_tsk(HUMAN_SCAN_TASK);
-        tslp_tsk(1);
-        lifoUnregExtreme.distance(30, 5, NONE);
-        stopScanning = true;
-        waters[idx++] = scannedValue; 
-        stopScanning = false;
-        ter_tsk(HUMAN_SCAN_TASK);
-        tslp_tsk(1);
-        act_tsk(HUMAN_SCAN_TASK);
-        tslp_tsk(1);
-        lifoUnregNormal.lines(30, 1, NONE, 3, 2, true);
-        lifoUnregNormal.distance(30, 2.5, NONE);
-        stopScanning = true;
-        waters[idx++] = scannedValue; 
-        stopScanning = false;
-        ter_tsk(HUMAN_SCAN_TASK);
-        tslp_tsk(1);
-        act_tsk(HUMAN_SCAN_TASK);
-        tslp_tsk(1);
-        lifoUnregNormal.distance(30, 10, COAST);
-        stopScanning = true;
-        waters[idx++] = scannedValue; 
-        stopScanning = false;
-        ter_tsk(HUMAN_SCAN_TASK);
-        tslp_tsk(1);
-        act_tsk(INIT_TASK);
-        tslp_tsk(1);
-        robot.arc(45, -90, -8.5, COAST);
-
-        setLifo("SL", "SR");  
-        lifoUnregExtreme.lines(30, 1, NONE, 5);
-
-        display.resetScreen();
-        for(auto x : waters)
+        fullRouteStandard(CR1);
+        if(humans[TRH].getColor() == RED || humans[TRH].getColor() == GREEN)
         {
-            display.format("%  \n")%static_cast<int>(x);
+            fullRouteStandard(TRH);
+            fullRouteStandard(rooms[humans[TRH].getColor()].getPosition());
+            releaseHuman();
+            count++;
+        }
+        fullRouteStandard(BR);
+        if(humans[BRH].getColor() == RED || humans[BRH].getColor() == GREEN)
+        {
+            fullRouteStandard(BRH);
+            fullRouteStandard(rooms[humans[BRH].getColor()].getPosition());    
+            releaseHuman();
+            count++;
+        }
+        if(humans[BRRH].getColor() == RED || humans[BRRH].getColor() == GREEN)
+        {
+            fullRouteStandard(BRRH);
+            fullRouteStandard(rooms[humans[BRRH].getColor()].getPosition());    
+            releaseHuman();
+            count++;
         }
 
-        pickWater();
+        if(count < 2)
+        {
+            fullRouteStandard(TR);
+            if(humans[TRRH].getColor() == RED || humans[TRRH].getColor() == GREEN)
+            {
+                fullRouteStandard(TRRH);
+                fullRouteStandard(rooms[humans[TRRH].getColor()].getPosition());
+                releaseHuman();
+                count++;
+            }
+        }
+
+        fullRouteStandard(M);
 
         robot.stop(BRAKE);
         btnEnter.waitForClick();

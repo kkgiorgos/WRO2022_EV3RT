@@ -64,7 +64,7 @@ void standardTurn(orientation start, orientation finish, lifoRobotPosition endAl
 void centralTurn(orientation start, orientation finish);
 
 //Same route simplification
-void rooms_vertical(orientation target, int length, bool isTargetRed = false); 
+void rooms_vertical(orientation start, orientation target, int length, bool isTargetRed = false); 
 
 
 //Actual route implementations
@@ -143,10 +143,12 @@ orientation M_TLH(orientation dir);
 orientation TLH_M(orientation dir);
 orientation M_TRH(orientation dir);
 orientation TRH_M(orientation dir);
+orientation TRH_CR1(orientation dir);
+orientation CR1_TRH(orientation dir);
 orientation M_BLH(orientation dir);
 orientation BLH_M(orientation dir);
-orientation M_BRH(orientation dir);
-orientation BRH_M(orientation dir);
+orientation BR_BRH(orientation dir);
+orientation BRH_BR(orientation dir);
 orientation TL_TLLH(orientation dir);
 orientation TLLH_TL(orientation dir);
 orientation TR_TRRH(orientation dir);

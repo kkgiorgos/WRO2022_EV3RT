@@ -43,7 +43,8 @@ enum lifoRobotPosition
 {
     LEFT_OF_LINE,
     CENTERED,
-    RIGHT_OF_LINE
+    RIGHT_OF_LINE,
+    OTHER
 };
 
 enum lineDetectionMode
@@ -61,6 +62,6 @@ void rightTurn(lifoRobotPosition endAlignment, ev3ys::breakMode stopMode = ev3ys
 
 void switchLifoRobotPosition(double speed, lifoRobotPosition startAlignment, lifoRobotPosition endAlignment);
 
-ev3ys::colors lifoRoute1Line(lifoRobotPosition alignment, double totalDistance, double extremePhase, double slowPhase, double controlledPhase, double maxSpeed, lineDetectionMode detectLine, int lifoTarget = 50, ev3ys::breakMode stopMode = ev3ys::breakMode::COAST);
+ev3ys::colors lifoRoute1Line(lifoRobotPosition alignment, double totalDistance, double extremePhase, double slowPhase, double controlledPhase, double maxSpeed, lineDetectionMode detectLine, const char *lifoTarget = "50", ev3ys::breakMode stopMode = ev3ys::breakMode::COAST);
 
 void lifo1LineDist(lifoRobotPosition alignment, double totalDistance, double startPhaseDist = 10, double endPhaseDist = 10, double slowDist = 5, lineDetectionMode detectLine = NORMAL, ev3ys::breakMode stopMode = ev3ys::breakMode::COAST);

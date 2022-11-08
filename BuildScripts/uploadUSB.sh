@@ -1,7 +1,7 @@
 #!/bin/bash
 
 compDir=YS-ev3rt-hrp2
-appName=RUN2022
+appName=runWRO
 
 rm ~/EV3RT/$compDir/sdk/workspace/app
 rm -rf ~/EV3RT/$compDir/sdk/workspace/project

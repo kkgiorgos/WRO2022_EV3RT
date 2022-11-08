@@ -18,22 +18,22 @@ room::room(colors col)
     switch(color)
     {
         case RED:
-            position = RR2;
+            position = RR1;
             roomOrientation = RED_BLUE;
             sprintf(name, "red");
             break;
         case BLUE:
-            position = BR2;
+            position = BR1;
             roomOrientation = RED_BLUE;
             sprintf(name, "blue");
             break;
         case GREEN:
-            position = GR2;
+            position = GR1;
             roomOrientation = GREEN_YELLOW;
             sprintf(name, "green");
             break;
         case YELLOW:
-            position = YR2;
+            position = YR1;
             roomOrientation = GREEN_YELLOW;
             sprintf(name, "yellow");
             break;

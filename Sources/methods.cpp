@@ -310,18 +310,19 @@ void rightTurn(lifoRobotPosition endAlignment, ev3ys::breakMode stopMode)
     robot.arc(45, 90, arcCenter, stopMode);
 }
 
-colors lifoRoute1Line(lifoRobotPosition alignment, double totalDistance, double extremePhase, double slowPhase, double controlledPhase, double maxSpeed, lineDetectionMode detectLine, int lifoTarget, ev3ys::breakMode stopMode)
+colors lifoRoute1Line(lifoRobotPosition alignment, double totalDistance, double extremePhase, double slowPhase, double controlledPhase, double maxSpeed, lineDetectionMode detectLine, const char* lifoTarget, ev3ys::breakMode stopMode)
 {
     //Set Lifo Params
     double normalPhase = totalDistance - extremePhase - slowPhase - controlledPhase;
 
-    currentAlignment = alignment;
+    if(alignment != OTHER)
+        currentAlignment = alignment;
 
     if(alignment == LEFT_OF_LINE)
-        setLifo("SR", "50");
+        setLifo("SR", lifoTarget);
     else if(alignment == RIGHT_OF_LINE)
-        setLifo("50", "SL");
-    else
+        setLifo(lifoTarget, "SL");
+    else if(alignment == CENTERED)
         setLifo("SL", "SR");
     //Follow Extreme 30 speed
     if(extremePhase != 0)
@@ -373,7 +374,7 @@ colors lifoRoute1Line(lifoRobotPosition alignment, double totalDistance, double 
             leftSensor.resetFiltering();
             rightSensor.resetFiltering();
             lifoControlled.unlimited(30, true);
-            while(scannedValue == NO_COLOR && !lifoControlled.getLineDetected())            
+            while(scannedValue == NO_COLOR && !lifoControlled.getLineDetected() && robot.getPosition () < 5)            
             {
                 lifoControlled.unlimited(30, false);
             }
@@ -395,7 +396,7 @@ colors lifoRoute1Line(lifoRobotPosition alignment, double totalDistance, double 
             leftSensor.resetFiltering();
             rightSensor.resetFiltering();
             lifoUnregNormal.unlimited(30, true);
-            while(scannedValue == NO_COLOR && !lifoUnregNormal.getLineDetected())            
+            while(scannedValue == NO_COLOR && !lifoUnregNormal.getLineDetected() && robot.getPosition () < 5)            
             {
                 lifoUnregNormal.unlimited(30, false);
             }
