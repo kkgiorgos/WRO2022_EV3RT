@@ -52,10 +52,10 @@ void graphInit()
     ADD_EDGE(CL3, BR2);
     ADD_EDGE(CR3, GR2);
     ADD_EDGE(CR3, RR2);
-    ADD_EDGE(M, TLH);
+    ADD_EDGE(TL, TLH);
     ADD_EDGE(M, TRH);
     ADD_EDGE(CR1, TRH);
-    ADD_EDGE(M, BLH);
+    ADD_EDGE(BL, BLH);
     ADD_EDGE(BR, BRH);
     ADD_EDGE(TL, TLLH);
     ADD_EDGE(TR, TRRH);
@@ -639,24 +639,21 @@ orientation CL1_TL(orientation dir)
     DEBUGPRINT("\nCL1_TL\n");
 
     standardTurn(dir, NORTH, RIGHT_OF_LINE);
-    lifoRoute1Line(RIGHT_OF_LINE, 15, 3, 5, 0, 40, SCANNER, "50", NONE);
+    lifoRoute1Line(RIGHT_OF_LINE, 15, 3, 5, 0, 40, SCANNER);
 
-    display.resetScreen();
+    humans[TLH].setColor(scannedValue);
     display.format("%  \n")%static_cast<int>(scannedValue);
 
     robot.setLinearAccelParams(100, 30, 30);
     robot.arc(45, 45, -3, COAST);
     robot.arc(45, 20, 25, COAST);
+
     setLifo("70", "SR");
-    stopScanning = false;
-    act_tsk(HUMAN_SCAN_TASK);
-    tslp_tsk(1);
-    lifoUnregExtreme.distance(30, 13, COAST);
-    stopScanning = true;
+    lifoRoute1Line(OTHER, 8, 8, 0, 0, 30, SCANNER, "70", NONE);
+    lifoRoute1Line(OTHER, 7, 0, 0, 0, 30, NO_DETECT);
 
+    humans[TLLH].setColor(scannedValue);
     display.format("%  \n")%static_cast<int>(scannedValue);
-
-    lifoUnregNormal.seconds(30, 0.5, COAST);
 
     return NORTH;
 }
@@ -664,8 +661,16 @@ orientation TL_CL1(orientation dir)
 {
     DEBUGPRINT("\nTL_CL1\n");
 
-    standardTurn(dir, SOUTH, CENTERED);
-    lifoRoute1Line(CENTERED, 23, 5, 5, 0, 40, NORMAL);
+    if(dir == NORTH)
+    {
+        robot.setMode(CONTROLLED);
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.straight(40, -5, COAST);
+        robot.arc(45, -180, 2.5, COAST);        
+    }
+    else
+        standardTurn(dir, SOUTH, CENTERED);
+    lifoRoute1Line(CENTERED, 20, 0, 5, 0, 40, NORMAL);
 
     return SOUTH;
 }
@@ -673,8 +678,15 @@ orientation CL1_BL(orientation dir)
 {
     DEBUGPRINT("\nCL1_BL\n");
 
-    standardTurn(dir, SOUTH, CENTERED);
-    lifoRoute1Line(CENTERED, 23, 3, 5, 0, 40, NORMAL);
+    standardTurn(dir, SOUTH, RIGHT_OF_LINE);
+
+    setLifo("SR", "70");
+    lifoRoute1Line(OTHER, 15, 7, 5, 0, 40, SCANNER, "70", NONE);
+
+    humans[BLLH].setColor(scannedValue);
+    display.format("%  \n")%static_cast<int>(scannedValue);
+
+    lifoRoute1Line(OTHER, 10, 0, 5, 0, 30, NO_DETECT);
 
     return SOUTH;
 }
@@ -683,7 +695,7 @@ orientation BL_CL1(orientation dir)
     DEBUGPRINT("\nBL_CL1\n");
 
     standardTurn(dir, NORTH, CENTERED);
-    lifoRoute1Line(CENTERED, 23, 3, 5, 0, 40, NORMAL);
+    lifoRoute1Line(CENTERED, 16, 3, 5, 0, 40, NORMAL);
 
     return NORTH;
 }
@@ -967,29 +979,36 @@ orientation RR2_CR3(orientation dir)
 }
 
 //Human Routes
-orientation M_TLH(orientation dir)
+orientation TL_TLH(orientation dir)
 {
-    DEBUGPRINT("\nM_TLH\n");
+    DEBUGPRINT("\nTL_TLH\n");
 
-    centralTurn(dir, NORTH);
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(100, 0, 0);
-    robot.arc(45, -23, 0, COAST);
-    robot.straight(45, 27, COAST);
+    if(!humans[TLLH].getIsPicked())
+        robot.straight(40, -17, COAST);
+    else
+        robot.straight(40, -22, COAST);
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.arc(45, 90, 0, COAST);
+    robot.straight(40, 11, COAST);
+
+    humans[TLH].grabHuman();
 
     return NO;
 }
-orientation TLH_M(orientation dir)
+orientation TLH_TL(orientation dir)
 {
-    DEBUGPRINT("\nTLH_M\n");
+    DEBUGPRINT("\nTLH_TL\n");
 
-    robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 0, 0);
-    robot.straight(45, -27, COAST);
-    robot.arc(45, 23, 0, COAST);
+    robot.straight(40, -7, COAST);
+    robot.arc(45, 90, 0, COAST);
+    currentAlignment = CENTERED;
 
-    return NORTH;
+    return SOUTH;
 }
+
 orientation M_TRH(orientation dir)
 {
     DEBUGPRINT("\nM_TRH\n");
@@ -1004,7 +1023,7 @@ orientation M_TRH(orientation dir)
     robot.arc(45, -90, 10, COAST);
     robot.straight(45, 15, COAST);
 
-    grabHuman();
+    humans[TRH].grabHuman();
 
     return NO;
 }
@@ -1037,7 +1056,7 @@ orientation CR1_TRH(orientation dir)
         robot.arc(45, -90, 10, COAST);
         robot.straight(45, 15, COAST);
 
-        grabHuman();
+        humans[TRH].grabHuman();
         return NO;
     } 
     else
@@ -1046,18 +1065,39 @@ orientation CR1_TRH(orientation dir)
         return M_TRH(dir);
     }
 }
-orientation M_BLH(orientation dir)
+
+orientation BL_BLH(orientation dir)
 {
-    DEBUGPRINT("\nM_BLH\n");
+    DEBUGPRINT("\nBL_BLH\n");
+
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    if(!humans[BLLH].getIsPicked())
+        robot.straight(40, -14, COAST);
+    else
+        robot.straight(40, -16.5, COAST);
+    robot.arc(45, -90, 0, COAST);
+    robot.straight(40, 13, COAST);
+
+    humans[BLH].grabHuman();
 
     return NO;
 }
-orientation BLH_M(orientation dir)
+orientation BLH_BL(orientation dir)
 {
-    DEBUGPRINT("\nBLH_M\n");
+    DEBUGPRINT("\nBLH_BL\n");
 
-    return SOUTH;
+    robot.straight(40, -11, COAST);
+
+    robot.arc(45, -90, 0, COAST);
+
+    currentAlignment = CENTERED;
+
+    return NORTH;
 }
+
 orientation BR_BRH(orientation dir)
 {
     DEBUGPRINT("\nBR_BRH\n");
@@ -1072,7 +1112,7 @@ orientation BR_BRH(orientation dir)
 
     robot.straight(40, 5, COAST);
 
-    grabHuman();
+    humans[BRH].grabHuman();
 
     return NO;
 }
@@ -1087,9 +1127,22 @@ orientation BRH_BR(orientation dir)
 
     return NORTH;
 }
+
 orientation TL_TLLH(orientation dir)
 {
     DEBUGPRINT("\nTL_TLLH\n");
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, -30);
+    robot.arc(30, -35, 4, NONE);
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, -30, 0);
+    robot.arc(45, -60, 4, COAST);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(40, 8, COAST);
+
+    humans[TLLH].grabHuman();
 
     return NO;
 }
@@ -1097,8 +1150,15 @@ orientation TLLH_TL(orientation dir)
 {
     DEBUGPRINT("\nTLLH_TL\n");
 
+    robot.straight(40, -10, COAST);
+    robot.arc(45, -90, 0, COAST);
+
+    currentDirection = SOUTH;
+    currentAlignment = CENTERED;
+
     return SOUTH;
 }
+
 orientation TR_TRRH(orientation dir)
 {
     DEBUGPRINT("\nTR_TRRH\n");
@@ -1119,7 +1179,7 @@ orientation TR_TRRH(orientation dir)
     robot.setLinearAccelParams(100, 0, 0);
     robot.straight(45, 7, COAST);
 
-    grabHuman();
+    humans[TRRH].grabHuman();
 
     return NO;
 }
@@ -1134,9 +1194,19 @@ orientation TRRH_TR(orientation dir)
 
     return SOUTH;
 }
+
 orientation BL_BLLH(orientation dir)
 {
     DEBUGPRINT("\nBL_BLLH\n");
+
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, -90, -4, COAST);
+    robot.straight(40, 9, COAST);
+    
+    humans[BLLH].grabHuman();
 
     return NO;
 }
@@ -1144,8 +1214,14 @@ orientation BLLH_BL(orientation dir)
 {
     DEBUGPRINT("\nBLLH_BL\n");
 
+     robot.straight(40, -8, COAST);
+    robot.arc(45, 90, 0, COAST);
+
+    currentAlignment = CENTERED;
+
     return NORTH;
 }
+
 orientation BR_BRRH(orientation dir)
 {
     DEBUGPRINT("\nBR_BRRH\n");
@@ -1158,7 +1234,7 @@ orientation BR_BRRH(orientation dir)
     robot.arc(45, -90, 4, COAST);
     robot.straight(45, 10, COAST);
 
-    grabHuman();
+    humans[BRRH].grabHuman();
 
     return NO;
 }

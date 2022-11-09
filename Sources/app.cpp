@@ -553,49 +553,83 @@ void main_task(intptr_t unused)
         currentDirection = NORTH;
         currentAlignment = CENTERED;
 
-        int count = 0;
+        fullRouteStandard(BL);
 
-        fullRouteStandard(CR1);
-        if(humans[TRH].getColor() == RED || humans[TRH].getColor() == GREEN)
-        {
-            fullRouteStandard(TRH);
-            fullRouteStandard(rooms[humans[TRH].getColor()].getPosition());
-            releaseHuman();
-            count++;
-        }
-        fullRouteStandard(BR);
-        if(humans[BRH].getColor() == RED || humans[BRH].getColor() == GREEN)
-        {
-            fullRouteStandard(BRH);
-            fullRouteStandard(rooms[humans[BRH].getColor()].getPosition());    
-            releaseHuman();
-            count++;
-        }
-        if(humans[BRRH].getColor() == RED || humans[BRRH].getColor() == GREEN)
-        {
-            fullRouteStandard(BRRH);
-            fullRouteStandard(rooms[humans[BRRH].getColor()].getPosition());    
-            releaseHuman();
-            count++;
-        }
+        act_tsk(OPEN_GRABBER_TASK);
+        tslp_tsk(1);
+        robot.setMode(CONTROLLED);
+        robot.setLinearAccelParams(100, 0, 0);
+        if(!humans[BLLH].getIsPicked())
+            robot.straight(40, -14, COAST);
+        else
+            robot.straight(40, -16.5, COAST);
+        robot.arc(45, -90, 0, COAST);
+        robot.straight(40, 13, COAST);
 
-        if(count < 2)
-        {
-            fullRouteStandard(TR);
-            if(humans[TRRH].getColor() == RED || humans[TRRH].getColor() == GREEN)
-            {
-                fullRouteStandard(TRRH);
-                fullRouteStandard(rooms[humans[TRRH].getColor()].getPosition());
-                releaseHuman();
-                count++;
-            }
-        }
+        humans[BLH].grabHuman();
+
+        robot.straight(40, -11, COAST);
+
+        robot.arc(45, -90, 0, COAST);
+
+        currentDirection = NORTH;
+        currentAlignment = CENTERED;
 
         fullRouteStandard(M);
 
         robot.stop(BRAKE);
         btnEnter.waitForClick();
     }
+
+    // while(true)
+    // {
+    //     currentPos = M;
+    //     currentDirection = NORTH;
+    //     currentAlignment = CENTERED;
+
+    //     int count = 0;
+
+    //     fullRouteStandard(CR1);
+    //     if(humans[TRH].getColor() == RED || humans[TRH].getColor() == GREEN)
+    //     {
+    //         fullRouteStandard(TRH);
+    //         fullRouteStandard(rooms[humans[TRH].getColor()].getPosition());
+    //         releaseHuman();
+    //         count++;
+    //     }
+    //     fullRouteStandard(BR);
+    //     if(humans[BRH].getColor() == RED || humans[BRH].getColor() == GREEN)
+    //     {
+    //         fullRouteStandard(BRH);
+    //         fullRouteStandard(rooms[humans[BRH].getColor()].getPosition());    
+    //         releaseHuman();
+    //         count++;
+    //     }
+    //     if(humans[BRRH].getColor() == RED || humans[BRRH].getColor() == GREEN)
+    //     {
+    //         fullRouteStandard(BRRH);
+    //         fullRouteStandard(rooms[humans[BRRH].getColor()].getPosition());    
+    //         releaseHuman();
+    //         count++;
+    //     }
+
+    //     if(count < 2)
+    //     {
+    //         fullRouteStandard(TR);
+    //         if(humans[TRRH].getColor() == RED || humans[TRRH].getColor() == GREEN)
+    //         {
+    //             fullRouteStandard(TRRH);
+    //             fullRouteStandard(rooms[humans[TRRH].getColor()].getPosition());
+    //             releaseHuman();
+    //             count++;
+    //         }
+    //     }
+
+    //     fullRouteStandard(M);
+
+    //     robot.stop(BRAKE);
+    //     btnEnter.waitForClick();
+    // }
 
     // while(true)
     // {

@@ -10,6 +10,7 @@ human::human(matPos pos)
     color = NO_COLOR;
     position = pos;
     isColorSet = false;
+    isPicked = false;
     
     currentState = UNVISITED;
 
@@ -52,6 +53,12 @@ void human::report()
     DEBUGPRINT("is in state %d and of color %d\n", currentState, color);
 }
 
+void human::grabHuman()
+{
+    grabber.moveDegrees(600, 150, BRAKE);
+    isPicked = true; 
+}
+
 void initializeHumans()
 {
     humans.insert(pair<matPos, human>(TLLH, human(TLLH)));
@@ -91,10 +98,6 @@ void inferLastHuman()
     }
 }
 
-void grabHuman()
-{
-    grabber.moveDegrees(600, 150, BRAKE);
-}
 void loadHuman()
 {
     act_tsk(PICK_BLOCK_TASK);

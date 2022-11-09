@@ -139,14 +139,14 @@ orientation GR2_CR3(orientation dir);
 orientation RR1_CR2(orientation dir);
 orientation RR2_CR3(orientation dir);
 
-orientation M_TLH(orientation dir);
-orientation TLH_M(orientation dir);
+orientation TL_TLH(orientation dir);
+orientation TLH_TL(orientation dir);
 orientation M_TRH(orientation dir);
 orientation TRH_M(orientation dir);
 orientation TRH_CR1(orientation dir);
 orientation CR1_TRH(orientation dir);
-orientation M_BLH(orientation dir);
-orientation BLH_M(orientation dir);
+orientation BL_BLH(orientation dir);
+orientation BLH_BL(orientation dir);
 orientation BR_BRH(orientation dir);
 orientation BRH_BR(orientation dir);
 orientation TL_TLLH(orientation dir);

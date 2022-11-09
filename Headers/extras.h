@@ -22,6 +22,7 @@ private:
     char name[8];
     state currentState;
     bool isColorSet;
+    bool isPicked;
 
 public:
     human() {}
@@ -32,7 +33,11 @@ public:
     void setColor(ev3ys::colors color) 
     {
         if(!isColorSet)
+        {
             this->color = color; 
+            if(color == ev3ys::colors::NO_COLOR)
+                isPicked = true;
+        }
         isColorSet = true;
     }
     ev3ys::colors getColor() {return color;}
@@ -41,6 +46,10 @@ public:
     matPos getPos() {return position;}
 
     bool getColorSet() {return isColorSet;}
+
+    void grabHuman();
+
+    bool getIsPicked() {return isPicked;}
 };
 
 extern std::map<matPos, human> humans;
@@ -48,6 +57,5 @@ extern std::map<matPos, human> humans;
 void initializeHumans();
 void inferLastHuman();
 
-void grabHuman();
 void loadHuman();
 void releaseHuman();
