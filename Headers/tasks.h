@@ -114,9 +114,6 @@ ev3ys::colors scanLaundryBlock(ev3ys::colorSensor &scanner);
 ev3ys::colors scanCodeBlock(ev3ys::colorSensor &scanner);
 ev3ys::colors scanLaundryBasket(ev3ys::colorSensor &scanner);
 
-bool detectColorLine(ev3ys::colorSensor &sensor, ev3ys::colors target);
-bool detectWhiteRoomBed(ev3ys::colorSensor &sensor);
-
 void turnToBasket(baskets current, baskets target);
 
 extern matPos startPos;

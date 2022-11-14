@@ -135,6 +135,7 @@ void room::scanLaundry()
         // tslp_tsk(1);
     }
 
+    //Final forward movement (RED room is different)  
     robot.setLinearAccelParams(100, 30, 0);
     robot.straight(30, (color == RED) ? 5.8 : 6.4, COAST);
     laundry = scannedValue;
@@ -647,8 +648,8 @@ tasks findTask(colors color)
 {
     if(color == WHITE)
         return WATER;
-    else if(color == BLUE)
-        return BOTH;
+    // else if(color == BLUE)
+    //     return BOTH;
     else // if(color == GREEN)
         return BALL;
 }
@@ -771,29 +772,6 @@ colors scanLaundryBasket(colorSensor &scanner)
     if(rgb.green > 3) return YELLOW;
     if(rgb.red > 3) return RED;
     return BLACK;
-}
-
-bool detectColorLine(colorSensor &sensor, colors target)
-{
-    // switch(target)
-    // {
-    //     case RED:
-    //         return sensor.getReflected() > 50;
-    //     case GREEN:
-    //         return sensor.getReflected() < 20;
-    //     case BLUE:
-    //         return sensor.getReflected() < 20;
-    //     case YELLOW:
-    //         return sensor.getReflected() > 80;
-    // }
-    return abs(sensor.getReflected() - 33) > 5;
-}
-
-bool detectWhiteRoomBed(colorSensor &sensor)
-{
-    colorspaceRGB rgb = sensor.getRGB();
-    tslp_tsk(1);
-    return rgb.red > 200 && rgb.green > 200 && rgb.blue > 200;
 }
 
 void turnToBasket(baskets current, baskets target)
@@ -974,6 +952,8 @@ void scanLaundryBaskets()
         temp[1] = (temp[0] == RED) ? YELLOW : RED;
     }
 
+    laundryBaskets[BASKET_LEFT] = temp[0];
+    laundryBaskets[BASKET_RIGHT] = temp[1];
     laundryBaskets[BASKET_MIDDLE] = findTheLastColor(temp, 3);
 
 
@@ -1089,7 +1069,6 @@ void leaveLaundry()
 
     //Turn to the middle to leave and fix currentOrientation
     turnToBasket(currentBasket, BASKET_MIDDLE);
-    align(0.2);
     DEBUGPRINT("Finished leaving the laundry.\n");
 }
 
