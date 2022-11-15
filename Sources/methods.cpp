@@ -110,7 +110,7 @@ void emptyRampLaundry()
 {
     ramp.setMode(CONTROLLED);
     ramp.setUnregulatedDPS();
-    ramp.setAccelParams(2000, 800, 0);
+    ramp.setAccelParams(2000, 700, 0);
     ramp.moveDegrees(600, 260, COAST);
     timer::secDelay(0.1);
     act_tsk(CLOSE_RAMP_TASK);
@@ -175,6 +175,7 @@ void rightTurn(lifoRobotPosition endAlignment, ev3ys::breakMode stopMode)
 
 colors lifoRoute1Line(lifoRobotPosition alignment, double totalDistance, double extremePhase, double slowPhase, double controlledPhase, double maxSpeed, lineDetectionMode detectLine, const char* lifoTarget, ev3ys::breakMode stopMode)
 {
+    DEBUGPRINT("\nStarting route LIFO\t");
     //Set Lifo Params
     double normalPhase = totalDistance - extremePhase - slowPhase - controlledPhase;
 
@@ -189,18 +190,28 @@ colors lifoRoute1Line(lifoRobotPosition alignment, double totalDistance, double 
         setLifo("SL", "SR");
     //Follow Extreme 30 speed
     if(extremePhase != 0)
+    {
+        DEBUGPRINT("\tExtreme Phase\t");
         lifoUnregExtreme.distance(30, extremePhase, NONE);
+    }
     //Follow Normal at given speed
     if(normalPhase > 0)
-        lifoUnregNormal.distance(maxSpeed, normalPhase, NONE);
-    
-    if(controlledPhase == 0 && slowPhase > 0)
     {
+        DEBUGPRINT("\tNormal Phase\t");
+        lifoUnregNormal.distance(maxSpeed, normalPhase, NONE);
+    }
+    
+    if(controlledPhase == 0)
+    {
+        DEBUGPRINT("\tNormal Finisher\t");
         //Follow Normal slow (30) until line
         if(detectLine == NO_DETECT)
             lifoUnregNormal.distance(30, slowPhase, stopMode);
         else if(detectLine == NORMAL)
-            lifoUnregNormal.lines(30, 1, stopMode, slowPhase);
+        {
+            DEBUGPRINT("\t1 Line\t");
+            lifoUnregNormal.lines(30, 1, stopMode, slowPhase);            
+        }
         else if(detectLine == COLORED)
         {
             lifoUnregNormal.setSensorMode(WHITE_RGB);
@@ -212,7 +223,11 @@ colors lifoRoute1Line(lifoRobotPosition alignment, double totalDistance, double 
     {
         //Follow Normal slow (30)
         if(slowPhase > 0)
+        {
+            DEBUGPRINT("\tSlow Phase\t");
             lifoUnregNormal.distance(30, slowPhase, NONE);
+        }
+        DEBUGPRINT("\tControlled Finisher\t");
         //Switch to CONTROLLED 30 speed until line
         if(detectLine == NO_DETECT)
             lifoControlled.distance(30, controlledPhase, stopMode);
@@ -228,6 +243,7 @@ colors lifoRoute1Line(lifoRobotPosition alignment, double totalDistance, double 
 
     if(detectLine == SCANNER)
     {
+        DEBUGPRINT("\tScanner Mode\t");
         if(controlledPhase != 0)
         {
             lifoControlled.distance(30, controlledPhase, NONE);
@@ -274,6 +290,8 @@ colors lifoRoute1Line(lifoRobotPosition alignment, double totalDistance, double 
     }
 
     robot.stop(stopMode);
+
+    DEBUGPRINT("\tFinishing route LIFO\n");
 }
 
 void switchLifoRobotPosition(double speed, lifoRobotPosition startAlignment, lifoRobotPosition endAlignment)

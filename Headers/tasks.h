@@ -107,6 +107,7 @@ ev3ys::colors findColorOfItem(items item);
 items findItem(ev3ys::colors color);
 baskets findBasket(ev3ys::colors color);
 ev3ys::colors findTheLastColor(ev3ys::colors *cols, int numOfCols = 3);
+bool isRGBY(ev3ys::colors col);
 
 ev3ys::colors analyzeFrequency(std::map<ev3ys::colors, int> appearances, ev3ys::colors base);
 

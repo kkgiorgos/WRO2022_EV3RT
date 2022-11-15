@@ -55,8 +55,20 @@ void human::report()
 
 void human::grabHuman()
 {
-    grabber.moveDegrees(600, 150, BRAKE);
+    grabber.moveDegrees(600, 170, BRAKE);
     isPicked = true; 
+}
+
+void human::setColor(colors color) 
+{
+    if(!isColorSet)
+    {
+        this->color = color; 
+        if(color == ev3ys::colors::NO_COLOR)
+            isPicked = true;
+        DEBUGPRINT("Human %s is %d", name, static_cast<int>(color));
+    }
+    isColorSet = true;
 }
 
 void initializeHumans()

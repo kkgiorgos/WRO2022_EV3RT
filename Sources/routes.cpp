@@ -31,6 +31,11 @@ void graphInit()
     addEdge(IL, L);     routeMapping[make_pair(IL, L)] = IL_L;
     addEdge(L, S);      routeMapping[make_pair(L, S)] = L_S;
 
+    ADD_EDGE(CR3, R);
+    ADD_EDGE(CR3, G);
+    ADD_EDGE(CL3, B);
+    ADD_EDGE(CL3, Y);
+
     //Full (surprise) network
     ADD_EDGE(M, TM);
     ADD_EDGE(M, BM);
@@ -507,6 +512,102 @@ orientation L_S(orientation dir)
     return NORTH;
 }
 
+
+orientation CR3_R(orientation dir)
+{
+    DEBUGPRINT("\nCR3_R\n");
+
+    centralTurn(dir, NORTH);
+    setLifo("70", "SR");
+    lifoUnregNormal.distance(30, 12, NONE);
+
+    return NORTH;
+}
+orientation R_CR3(orientation dir)
+{
+    DEBUGPRINT("\nR_CR3\n");
+
+    centralTurn(dir, SOUTH);
+    setLifo("SL", "70");
+    lifoUnregExtreme.distance(30, 5, NONE);
+    lifoUnregExtreme.distance(40, 5, NONE);
+    lifoUnregNormal.lines(30, 1, NONE, 5);
+    setLifo("N", "N");
+    lifoUnregNormal.distance(30, 2, NONE);
+
+    return SOUTH;
+}
+orientation CR3_G(orientation dir)
+{
+    DEBUGPRINT("\nCR3_G\n");
+
+    centralTurn(dir, SOUTH);
+    setLifo("SL", "70");
+    lifoUnregNormal.distance(30, 12, NONE);
+
+    return SOUTH;
+}
+orientation G_CR3(orientation dir)
+{
+    DEBUGPRINT("\nG_CR3\n");
+
+    centralTurn(dir, NORTH);
+    setLifo("70", "SR");
+    lifoUnregExtreme.distance(30, 5, NONE);
+    lifoUnregExtreme.distance(40, 5, NONE);
+    lifoUnregNormal.lines(30, 1, NONE, 5);
+    setLifo("N", "N");
+    lifoUnregNormal.distance(30, 2, NONE);
+
+    return NORTH;
+}
+orientation CL3_B(orientation dir)
+{
+    DEBUGPRINT("\nCL3_B\n");
+
+    centralTurn(dir, SOUTH);
+    setLifo("70", "SR");
+    lifoUnregNormal.distance(30, 12, NONE);
+
+    return SOUTH;
+}
+orientation B_CL3(orientation dir)
+{
+    DEBUGPRINT("\nB_CL3\n");
+
+    centralTurn(dir, NORTH);
+    setLifo("SL", "70");
+    lifoUnregExtreme.distance(30, 5, NONE);
+    lifoUnregExtreme.distance(40, 5, NONE);
+    lifoUnregNormal.lines(30, 1, NONE, 5);
+    setLifo("N", "N");
+    lifoUnregNormal.distance(30, 2, NONE);
+
+    return NORTH;
+}
+orientation CL3_Y(orientation dir)
+{
+    DEBUGPRINT("\nCL3_Y\n");
+
+    centralTurn(dir, NORTH);
+    setLifo("SL", "70");
+    lifoUnregNormal.distance(30, 12, NONE);
+
+    return NORTH;
+}
+orientation Y_CL3(orientation dir)
+{
+    DEBUGPRINT("\nY_CL3\n");
+
+    centralTurn(dir, SOUTH);
+    setLifo("70", "SR");
+    lifoUnregNormal.distance(30, 12, NONE);
+    setLifo("N", "N");
+    lifoUnregNormal.distance(30, 2, NONE);
+
+    return SOUTH;
+}
+
 //Full network standard for surprise use
 
 //From and to M
@@ -516,9 +617,9 @@ orientation M_CL1(orientation dir)
 
     centralTurn(dir, WEST);
     robot.setLinearAccelParams(100, 0, 30);
-    robot.straight(45, 15, NONE);
+    robot.straight(45, 13, NONE);
     switchLifoRobotPosition(20, currentAlignment, CENTERED);
-    lifoRoute1Line(CENTERED, 18, 7, 5, 0, 40, NORMAL);
+    lifoRoute1Line(CENTERED, 15, 7, 5, 0, 40, NORMAL);
 
     return WEST;
 }
@@ -638,8 +739,12 @@ orientation CL1_TL(orientation dir)
 {
     DEBUGPRINT("\nCL1_TL\n");
 
+    double distance = 15;
+    if(dir == NORTH) distance += 5;
+    if(dir == EAST) distance -= 3;
+
     standardTurn(dir, NORTH, RIGHT_OF_LINE);
-    lifoRoute1Line(RIGHT_OF_LINE, 15, 3, 5, 0, 40, SCANNER);
+    lifoRoute1Line(RIGHT_OF_LINE, distance, 3, 5, 0, 40, SCANNER);
 
     humans[TLH].setColor(scannedValue);
     display.format("%  \n")%static_cast<int>(scannedValue);
@@ -649,8 +754,8 @@ orientation CL1_TL(orientation dir)
     robot.arc(45, 20, 25, COAST);
 
     setLifo("70", "SR");
-    lifoRoute1Line(OTHER, 8, 8, 0, 0, 30, SCANNER, "70", NONE);
-    lifoRoute1Line(OTHER, 7, 0, 0, 0, 30, NO_DETECT);
+    lifoRoute1Line(OTHER, 5, 5, 0, 0, 30, SCANNER, "70", NONE);
+    lifoRoute1Line(OTHER, 8, 0, 0, 0, 30, NO_DETECT);
 
     humans[TLLH].setColor(scannedValue);
     display.format("%  \n")%static_cast<int>(scannedValue);
@@ -670,7 +775,7 @@ orientation TL_CL1(orientation dir)
     }
     else
         standardTurn(dir, SOUTH, CENTERED);
-    lifoRoute1Line(CENTERED, 20, 0, 5, 0, 40, NORMAL);
+    lifoRoute1Line(CENTERED, 20, 7, 5, 0, 40, NORMAL);
 
     return SOUTH;
 }
@@ -678,12 +783,17 @@ orientation CL1_BL(orientation dir)
 {
     DEBUGPRINT("\nCL1_BL\n");
 
+    double distance = 17;
+    if(dir == SOUTH) distance += 5;
+    if(dir == EAST) distance += 3;
+
     standardTurn(dir, SOUTH, RIGHT_OF_LINE);
 
     setLifo("SR", "70");
-    lifoRoute1Line(OTHER, 15, 7, 5, 0, 40, SCANNER, "70", NONE);
+    lifoRoute1Line(OTHER, distance, 7, 5, 0, 40, SCANNER, "70", NONE);
 
     humans[BLLH].setColor(scannedValue);
+    inferLastHuman();
     display.format("%  \n")%static_cast<int>(scannedValue);
 
     lifoRoute1Line(OTHER, 10, 0, 5, 0, 30, NO_DETECT);
@@ -830,7 +940,7 @@ orientation TR_CR1(orientation dir)
     DEBUGPRINT("\nTR_CR1\n");
 
     standardTurn(dir, SOUTH, CENTERED);
-    lifoRoute1Line(CENTERED, 23, 3, 5, 0, 40, NORMAL);
+    lifoRoute1Line(CENTERED, 23, 7, 5, 0, 40, NORMAL);
 
     return SOUTH;
 }
@@ -869,7 +979,7 @@ orientation BR_CR1(orientation dir)
     }
 
     standardTurn(dir, NORTH, RIGHT_OF_LINE);
-    lifoRoute1Line(RIGHT_OF_LINE, 20, 5, 5, 0, 40, NORMAL);
+    lifoRoute1Line(RIGHT_OF_LINE, 17, 7, 5, 0, 40, NORMAL);
 
     return NORTH;
 }
@@ -988,7 +1098,7 @@ orientation TL_TLH(orientation dir)
     if(!humans[TLLH].getIsPicked())
         robot.straight(40, -17, COAST);
     else
-        robot.straight(40, -22, COAST);
+        robot.straight(40, -20, COAST);
     act_tsk(OPEN_GRABBER_TASK);
     tslp_tsk(1);
     robot.arc(45, 90, 0, COAST);
@@ -1120,9 +1230,11 @@ orientation BRH_BR(orientation dir)
 {
     DEBUGPRINT("\nBRH_BR\n");
 
-    robot.arc(45, 55, 5, COAST);
-    robot.setLinearAccelParams(100, 0, 30);
-    robot.straight(30, 10, NONE);
+    robot.arc(45, 90, 5, COAST);
+    robot.straight(40, 9, COAST);
+    robot.arc(45, -90, 0, COAST);
+    // robot.setLinearAccelParams(100, 0, 30);
+    // robot.straight(30, 10, NONE);
     currentAlignment = RIGHT_OF_LINE;
 
     return NORTH;
@@ -1134,11 +1246,11 @@ orientation TL_TLLH(orientation dir)
 
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(100, 0, -30);
-    robot.arc(30, -35, 4, NONE);
+    robot.arc(30, -55, 4, NONE);
     act_tsk(OPEN_GRABBER_TASK);
     tslp_tsk(1);
     robot.setLinearAccelParams(100, -30, 0);
-    robot.arc(45, -60, 4, COAST);
+    robot.arc(45, -35, 4, COAST);
     robot.setLinearAccelParams(100, 0, 0);
     robot.straight(40, 8, COAST);
 
@@ -1203,8 +1315,8 @@ orientation BL_BLLH(orientation dir)
     tslp_tsk(1);
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(100, 0, 0);
-    robot.arc(45, -90, -4, COAST);
-    robot.straight(40, 9, COAST);
+    robot.arc(45, -90, -6, COAST);
+    robot.straight(40, 11, COAST);
     
     humans[BLLH].grabHuman();
 

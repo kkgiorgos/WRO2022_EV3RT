@@ -30,16 +30,7 @@ public:
 
     void report();
 
-    void setColor(ev3ys::colors color) 
-    {
-        if(!isColorSet)
-        {
-            this->color = color; 
-            if(color == ev3ys::colors::NO_COLOR)
-                isPicked = true;
-        }
-        isColorSet = true;
-    }
+    void setColor(ev3ys::colors color);
     ev3ys::colors getColor() {return color;}
 
     void setPos(matPos pos) {position = pos;}

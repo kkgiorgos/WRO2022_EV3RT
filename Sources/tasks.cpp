@@ -283,7 +283,7 @@ void room::taskWater()
         robot.straight(25, 4, NONE);
 
         robot.setLinearAccelParams(100, 20, 25);
-        robot.arc(50, 100, 3, NONE);
+        robot.arc(50, 90, 3, NONE);
         robot.setLinearAccelParams(100, 25, 25);
         robot.arcUnlim(25, 3, FORWARD, true);
         while(rightSensor.getReflected() < 80 && abs(robot.getAngle()) < 15)
@@ -306,7 +306,7 @@ void room::taskWater()
         robot.straight(25, 4, NONE);
 
         robot.setLinearAccelParams(100, 20, 25);
-        robot.arc(50, 100, -3, NONE);
+        robot.arc(50, 90, -3, NONE);
         robot.setLinearAccelParams(100, 25, 25);
         robot.arcUnlim(25, -3, FORWARD, true);
         while(leftSensor.getReflected() < 80 && abs(robot.getAngle()) < 15)
@@ -725,6 +725,11 @@ colors findTheLastColor(colors *cols, int numOfCols)
         if(!hasAppeared[i])
             return available[i];
     }
+}
+
+bool isRGBY(colors col)
+{
+    return col == RED || col == BLUE || col == GREEN || col == YELLOW;
 }
 
 colors analyzeFrequency(map<colors, int> appearances, colors base)

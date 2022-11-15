@@ -81,6 +81,15 @@ orientation Y_IL(orientation dir);
 orientation IL_L(orientation dir);
 orientation L_S(orientation dir);
 
+orientation CR3_R(orientation dir);
+orientation R_CR3(orientation dir);
+orientation CR3_G(orientation dir);
+orientation G_CR3(orientation dir);
+orientation CL3_B(orientation dir);
+orientation B_CL3(orientation dir);
+orientation CL3_Y(orientation dir);
+orientation Y_CL3(orientation dir);
+
 //Full network standard for surprise use
 orientation M_CL1(orientation dir);
 orientation M_CR1(orientation dir);

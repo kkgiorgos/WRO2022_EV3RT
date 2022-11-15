@@ -136,7 +136,7 @@ void init()
 
     display.format("WAIT FOR SENSORS\n");
     btnEnter.waitForClick();
-    // act_tsk(INIT_TASK);
+    act_tsk(INIT_TASK);
     tslp_tsk(1);
 }
 
@@ -230,6 +230,7 @@ void water_grabber_task(intptr_t unused)
 void pick_block_task(intptr_t unused)
 {
     //RAISES GRABBER FULLY
+    grabberUsed = true;
     grabber.moveDegrees(1200, 350, NONE);
     grabber.moveUnlimited(700, true);
     while(grabber.getCurrentSpeed() > 600)
@@ -238,6 +239,7 @@ void pick_block_task(intptr_t unused)
         tslp_tsk(1);
     }
     grabber.stop(COAST);
+    grabberUsed = false;
 }
 
 void leave_ball_task(intptr_t unused)
@@ -410,18 +412,82 @@ void main_task(intptr_t unused)
     startData();
 
     //Random sensor debug code
-    // // leftScanner.setNormalisation(false);
-    // // rightScanner.setNormalisation(false);
+    // leftScanner.setNormalisation(false);
+    // rightScanner.setNormalisation(false);
+
+    // colorSensor rightScannerNew(SensorPort::S4, false, "WRO2022Aux");
+    // rightScannerNew.setNormalisation(false);
+
+    // //Min measurements done with BLACK block 4 STUDS away
+    // //Max measurements done with WHITE block 0.5 STUDS away
+    // double minR[4] = {0,0,0,0};
+    // double maxR[4] = {0,0,0,0};
+    // display.resetScreen();
+    // BrickButton right(BrickButtons::RIGHT);
+    // t.secDelay(1);
+    // colorspaceRGB sum = {0, 0, 0, 0};
+    // int times = 0;
+    // t.secDelay(1);
+    // display.format("Calibrating Right Scanner Min");
+    // while(!btnEnter.isPressed())
+    // {
+    //     while(!right.isPressed() && !btnEnter.isPressed());
+    //     colorspaceRGB r = rightScannerNew.getRGB();
+    //     format(bt, "LL: R: %  G: %  B: %  W:   \n") %r.red %r.green %r.blue;
+    //     sum.red += r.red;
+    //     sum.green += r.green;
+    //     sum.blue += r.blue;
+    //     sum.white += r.white;
+    //     times++;
+    //     while(right.isPressed());
+    // }
+    // minR[0] = sum.red / (double)times;
+    // minR[1] = sum.green / (double)times;
+    // minR[2] = sum.blue / (double)times;
+    // minR[3] = sum.white / (double)times;
+    // t.secDelay(1);
+    // sum.red = sum.green = sum.blue = sum.white = times = 0;
+    // display.resetScreen();
+    // display.format("Calibrating Right Scanner Max");
+    // while(!btnEnter.isPressed())
+    // {
+    //     while(!right.isPressed() && !btnEnter.isPressed());
+    //     colorspaceRGB r = rightScannerNew.getRGB();
+    //     format(bt, "LL: R: %  G: %  B: %  W:   \n") %r.red %r.green %r.blue;
+    //     sum.red += r.red;
+    //     sum.green += r.green;
+    //     sum.blue += r.blue;
+    //     sum.white += r.white;
+    //     times++;
+    //     while(right.isPressed());
+    // }
+    // maxR[0] = sum.red / (double)times;
+    // maxR[1] = sum.green / (double)times;
+    // maxR[2] = sum.blue / (double)times;
+    // maxR[3] = sum.white / (double)times;
+    // rightScannerNew.setRgbCalParams(minR, maxR);
+    // display.resetScreen();
+    // display.format("Calibration Right Scanner DONE");
+    // format(bt, "minR: R: %  G: %  B: %  W:   \nmaxR: R: %  G: %  B: %  W:   \n") %minR[0] %minR[1] %minR[2] %maxR[0] %maxR[1] %maxR[2];
+    
+    // // color_hue hues[5] = {{RED, 10, 20}, {RED, 350, 20}, {GREEN, 140, 80}, 
+    //                     // {BLUE, 225, 50}, {YELLOW, 35, 30}};
+    
+    // // rightScannerNew.setColorCalParams(hues, 5, 70, 15);
+
+    // rightScannerNew.setNormalisation(true);
+    // rightScannerNew.setNormalisation(false);
+
     // display.resetScreen();
     // while(true)
     // {
-    //     // colorspaceRGB l = leftScanner.getRGB();
-    //     // colorspaceRGB r = rightScanner.getRGB();
-    //     // format(bt, "L: R: %  G: %  B: %  W: %  \nR: R: %  G: %  B: %  W: %  \n") %l.red %l.green %l.blue %l.white %r.red %r.green %r.blue %r.white;
-    //     // colorspaceHSV l2 = leftScanner.getHSV();
-    //     // colorspaceHSV r2 = rightScanner.getHSV();
-    //     // format(bt, "L: H: %  S: %  V: %  \nR: H: %  S: %  V: %  \n\n") %l2.hue %l2.saturation %l2.value %r2.hue %r2.saturation %r2.value;
-    //     display.format("L: %  \nR: %  \n\n\n") %static_cast<int>(leftScanner.getColor()) %static_cast<int>(rightScanner.getColor());
+    //     colorspaceRGB l = rightScannerNew.getRGB();
+    //     tslp_tsk(1);
+    //     colorspaceHSV l2 = rightScannerNew.getHSV();
+    //     tslp_tsk(1);
+    //     format(bt, "R: %  G: %  B: %  W: %  \n") %l.red %l.green %l.blue %l.white;
+    //     format(bt, "H: %  S: %  V: %  \n") %l2.hue %l2.saturation %l2.value;
+    //     display.format("L:  \nR: %  \n\n\n") %static_cast<int>(rightScannerNew.getColor());
     //     tslp_tsk(10);
     // }
 
@@ -497,13 +563,43 @@ void main_task(intptr_t unused)
 
 
     //Code to quickly and repeatedly test rooms (RED-GREEN) (BLUE-YELLOW) with standard task markings
-    while(true)
-    {
-        robot.stop(BRAKE);
-        btnEnter.waitForClick();
-    }
-
-
+    // while(true)
+    // {
+    //     act_tsk(CLOSE_RAMP_TASK);
+    //     rampQueue.push(BOTTLE);
+    //     rampQueue.push(BOTTLE);
+    //     tslp_tsk(1);
+    // 
+    //     currentPos = IR;
+    //     fullRouteStandard(G);
+    //     rooms[GREEN].setTask(WHITE);
+    //     rooms[GREEN].executeAllActions();
+    //     fullRouteStandard(R);
+    //     rooms[RED].setTask(WHITE);
+    //     rooms[RED].executeAllActions();
+    //     fullRouteStandard(IR);
+    // 
+    //     robot.stop(BRAKE);
+    //     btnEnter.waitForClick();
+    // 
+    //     // act_tsk(CLOSE_RAMP_TASK);
+    //     // rampQueue.push(BOTTLE);
+    //     // rampQueue.push(BOTTLE);
+    //     // tslp_tsk(1);
+    // 
+    //     // currentPos = IL;
+    //     // fullRouteStandard(B);
+    //     // rooms[BLUE].setTask(WHITE);
+    //     // rooms[BLUE].executeAllActions();
+    //     // fullRouteStandard(Y);
+    //     // rooms[YELLOW].setTask(WHITE);
+    //     // rooms[YELLOW].executeAllActions();
+    //     // fullRouteStandard(IL);
+    //
+    //     // robot.stop(BRAKE);
+    //     // btnEnter.waitForClick();
+    // }
+    
     startProcedure();
     
     fullRouteStandard(W);
@@ -534,6 +630,7 @@ void main_task(intptr_t unused)
     format(bt, "\n\rENDING\n\r");
     bt.close();
 }
+
 //COLOR SENSOR TEST LOOPS
 /*leftScanner.setNormalisation(false);
 rightScanner.setNormalisation(true);
@@ -976,52 +1073,84 @@ vector<char*> ports = {"S1", "S2", "S3", "S4"};
     */
 
 //Sample human manipulation
-    // while(true)
-    // {
-    //     currentPos = M;
-    //     currentDirection = NORTH;
-    //     currentAlignment = CENTERED;
-    //
-    //     int count = 0;
-    //
-    //     fullRouteStandard(CR1);
-    //     if(humans[TRH].getColor() == RED || humans[TRH].getColor() == GREEN)
-    //     {
-    //         fullRouteStandard(TRH);
-    //         fullRouteStandard(rooms[humans[TRH].getColor()].getPosition());
-    //         releaseHuman();
-    //         count++;
-    //     }
-    //     fullRouteStandard(BR);
-    //     if(humans[BRH].getColor() == RED || humans[BRH].getColor() == GREEN)
-    //     {
-    //         fullRouteStandard(BRH);
-    //         fullRouteStandard(rooms[humans[BRH].getColor()].getPosition());    
-    //         releaseHuman();
-    //         count++;
-    //     }
-    //     if(humans[BRRH].getColor() == RED || humans[BRRH].getColor() == GREEN)
-    //     {
-    //         fullRouteStandard(BRRH);
-    //         fullRouteStandard(rooms[humans[BRRH].getColor()].getPosition());    
-    //         releaseHuman();
-    //         count++;
-    //     }
-    //
-    //     if(count < 2)
-    //     {
-    //         fullRouteStandard(TR);
-    //         if(humans[TRRH].getColor() == RED || humans[TRRH].getColor() == GREEN)
-    //         {
-    //             fullRouteStandard(TRRH);
-    //             fullRouteStandard(rooms[humans[TRRH].getColor()].getPosition());
-    //             releaseHuman();
-    //             count++;
-    //         }
-    //     }
-    //
-    //     fullRouteStandard(M);
-    //
-    //     robot.stop(BRAKE);
-    //     btnEnter.waitForClick();
-    // }
+// currentPos = M;
+// currentDirection = NORTH;
+// currentAlignment = CENTERED;
+//
+// int count = 0;
+//
+// fullRouteStandard(CR1);
+// if(isRGBY(humans[TRH].getColor()))
+// {
+//     fullRouteStandard(TRH);
+//     fullRouteStandard(rooms[humans[TRH].getColor()].getPosition());
+//     releaseHuman();
+//     count++;
+// }
+// fullRouteStandard(BR);
+// if(isRGBY(humans[BRRH].getColor()))
+// {
+//     fullRouteStandard(BRRH);
+//     fullRouteStandard(rooms[humans[BRRH].getColor()].getPosition());
+//     releaseHuman();
+//     count++;
+// }
+// if(isRGBY(humans[BRH].getColor()))
+// {
+//     fullRouteStandard(BRH);
+//     fullRouteStandard(rooms[humans[BRH].getColor()].getPosition());
+//     releaseHuman();
+//     count++;
+// }
+//
+// fullRouteStandard(TL);
+// if(isRGBY(humans[TLLH].getColor()))
+// {
+//     fullRouteStandard(TLLH);
+//     fullRouteStandard(rooms[humans[TLLH].getColor()].getPosition());
+//     releaseHuman();
+//     count++;
+// }
+// if(count < 4)
+// {
+//     if(isRGBY(humans[TLH].getColor()))
+//     {
+//         fullRouteStandard(TLH);
+//         fullRouteStandard(rooms[humans[TLH].getColor()].getPosition());
+//         releaseHuman();
+//         count++;
+//     }   
+// }
+// if(count < 4)
+// {
+//     fullRouteStandard(TR);
+//     if(isRGBY(humans[TRRH].getColor()))
+//     {
+//         fullRouteStandard(TRRH);
+//         fullRouteStandard(rooms[humans[TRRH].getColor()].getPosition());
+//         releaseHuman();
+//         count++;
+//     }   
+// }
+//
+// if(count < 4)
+// {
+//     fullRouteStandard(BL);
+//     if(isRGBY(humans[BLLH].getColor()))
+//     {
+//         fullRouteStandard(BLLH);
+//         fullRouteStandard(rooms[humans[BLLH].getColor()].getPosition());
+//         releaseHuman();
+//         count++;
+//     }  
+//     if(isRGBY(humans[BLH].getColor()))
+//     {
+//         fullRouteStandard(BLH);
+//         fullRouteStandard(rooms[humans[BLH].getColor()].getPosition());
+//         releaseHuman();
+//         count++;
+//     } 
+// }
+//
+// fullRouteStandard(M);
+// finishProcedure();
