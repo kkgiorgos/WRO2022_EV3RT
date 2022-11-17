@@ -436,10 +436,10 @@ void room::taskBallLaundry()
         robot.straight(40, 9.5, COAST);
         
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(40, 93, -3, COAST);
+        robot.arc(40, 90, -3, COAST);
 
         robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(40, 7.5, BRAKE);
+        robot.straight(40, 7.7, BRAKE); //7.5
         pickBall(2);
         robot.setLinearAccelParams(100, 0, 0);
         robot.arc(40, 80, -3, COAST);
@@ -450,7 +450,7 @@ void room::taskBallLaundry()
 
         robot.setLinearAccelParams(100, 0, 0);
         robot.straight(40, -9, COAST);
-        robot.arc(40, -100, 0, COAST);
+        robot.arc(40, -102, 0, COAST);
         robot.setLinearAccelParams(100, 0, 30);
         robot.straight(40, 20, COAST);
     }
@@ -470,13 +470,13 @@ void room::taskBallLaundry()
         robot.straight(40, 9.5, COAST);
         
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(40, 100, 3, COAST);
+        robot.arc(40, 97, 3, COAST);
 
         robot.setLinearAccelParams(100, 0, 0);
-        robot.straight(40, 7.5, BRAKE);
+        robot.straight(40, 7.7, BRAKE);
         pickBall(2);
         robot.setLinearAccelParams(100, 0, 0);
-        robot.arc(40, 80, 3, COAST);
+        robot.arc(40, 78, 3, COAST);
 
         robot.setLinearAccelParams(100, 0, 0);
         robot.straight(40, 21, COAST);

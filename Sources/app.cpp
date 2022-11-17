@@ -569,24 +569,24 @@ void main_task(intptr_t unused)
     //     rampQueue.push(BOTTLE);
     //     rampQueue.push(BOTTLE);
     //     tslp_tsk(1);
-    // 
+    //
     //     currentPos = IR;
     //     fullRouteStandard(G);
-    //     rooms[GREEN].setTask(WHITE);
+    //     rooms[GREEN].setTask(GREEN);
     //     rooms[GREEN].executeAllActions();
     //     fullRouteStandard(R);
-    //     rooms[RED].setTask(WHITE);
+    //     rooms[RED].setTask(GREEN);
     //     rooms[RED].executeAllActions();
     //     fullRouteStandard(IR);
-    // 
+    //
     //     robot.stop(BRAKE);
     //     btnEnter.waitForClick();
-    // 
+    //
     //     // act_tsk(CLOSE_RAMP_TASK);
     //     // rampQueue.push(BOTTLE);
     //     // rampQueue.push(BOTTLE);
     //     // tslp_tsk(1);
-    // 
+    //
     //     // currentPos = IL;
     //     // fullRouteStandard(B);
     //     // rooms[BLUE].setTask(WHITE);

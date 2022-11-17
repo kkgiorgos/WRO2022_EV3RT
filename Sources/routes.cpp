@@ -270,9 +270,14 @@ orientation W_IR(orientation dir)
     DEBUGPRINT("\nW_IR\n");
 
     setLifo("SL", "SR");
+    
+    grabber.moveDegrees(-500, 100, COAST, false);
+    tslp_tsk(1);
 
     lifoUnregExtreme.distance(30, 10, NONE);
     lifoUnregNormal.lines(40, 1, NONE, 10);
+    act_tsk(LEAVE_BALL_TASK);
+    tslp_tsk(1);
 
     //Special turn to go from TR to CR2(nearly) and scan red room task
     robot.setMode(CONTROLLED);
@@ -466,10 +471,15 @@ orientation Y_IL(orientation dir)
 {
     DEBUGPRINT("\nY_IL\n");
 
+    grabber.moveDegrees(-500, 100, COAST, false);
+    tslp_tsk(1);
+
     setLifo("70", "SR");
     lifoUnregExtreme.distance(30, 5, NONE);
     lifoUnregExtreme.distance(40, 5, NONE);
     lifoUnregNormal.lines(30, 1, NONE, 5);
+    act_tsk(LEAVE_BALL_TASK);
+    tslp_tsk(1);
 
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(100, 30, 30);
