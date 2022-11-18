@@ -402,6 +402,7 @@ void main_task(intptr_t unused)
     bt.open();
     format(bt, "\n\rSTARTING\n\r");
     format(bt, "Battery Voltage: %  \n\r")%ev3_battery_voltage_mV();
+    display.format("\nBattery Voltage: %  \n\r")%ev3_battery_voltage_mV();
     init();
     timer missionTimer;
 
@@ -618,7 +619,57 @@ void main_task(intptr_t unused)
     scanLaundryBaskets();
     leaveLaundry();
 
-    fullRouteStandard(S);
+    currentPos = BM;
+    currentAlignment = CENTERED;
+    currentDirection = NORTH;
+
+    bool blueDone = false, redDone = false;
+    for(auto x : rooms)
+    {
+        if(x.second.getTask() == WATER)
+        {
+            act_tsk(OPEN_GRABBER_TASK);
+            tslp_tsk(1);
+            fullRouteStandard(x.second.getPosition());
+            grabber.moveDegrees(600, 170, BRAKE);
+            if((x.first == BLUE || x.first == YELLOW) && !blueDone)
+            {
+                fullRouteStandard(BR1);
+                blueDone = true;
+            }
+            else if((x.first == RED || x.first == GREEN) && !redDone)
+            {
+                fullRouteStandard(RR1);
+                redDone = true;
+            }
+            else
+            {
+                if(blueDone)
+                {
+                    fullRouteStandard(RR1);
+                    redDone = true;
+                }
+                else
+                {
+                    fullRouteStandard(BR1);
+                    blueDone = true;
+                }
+            }
+            act_tsk(OPEN_GRABBER_TASK);
+            tslp_tsk(1);
+            robot.setMode(CONTROLLED);
+            robot.setLinearAccelParams(100, 0, 0);
+            robot.straight(40, 12, COAST);
+            robot.setLinearAccelParams(200, 0, -40);
+            robot.straight(40, -5, NONE);
+            robot.setLinearAccelParams(200, -40, 0);
+            act_tsk(PICK_BLOCK_TASK);
+            tslp_tsk(1);
+            robot.straight(40, -7, NONE);
+        }
+    }
+
+    fullRouteStandard(M);
     finishProcedure();
 
     robot.stop(BRAKE);

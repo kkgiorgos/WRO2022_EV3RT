@@ -739,7 +739,7 @@ orientation BM_M(orientation dir)
     lifoRoute1Line(CENTERED, 7, 5, 0, 2, 30, NORMAL);
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(100, 30, 0);
-    robot.straight(45, 21, COAST);
+    robot.straight(45, 22, COAST);
 
     return NORTH;
 }

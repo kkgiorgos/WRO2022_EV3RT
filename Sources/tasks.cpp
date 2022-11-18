@@ -395,7 +395,7 @@ void room::taskBall()
         leaveBall();
 
         robot.straight(40, -10, COAST);
-        robot.arc(40, -115, 0, COAST);
+        robot.arc(40, -112, 0, COAST);
         robot.setLinearAccelParams(100, 0, 30);
         robot.straight(40, 17, NONE);
     }
@@ -450,7 +450,7 @@ void room::taskBallLaundry()
 
         robot.setLinearAccelParams(100, 0, 0);
         robot.straight(40, -9, COAST);
-        robot.arc(40, -102, 0, COAST);
+        robot.arc(40, -100, 0, COAST);
         robot.setLinearAccelParams(100, 0, 30);
         robot.straight(40, 20, COAST);
     }
@@ -931,6 +931,8 @@ void scanLaundryBaskets()
     tslp_tsk(1);
 
     robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 20, 0);
+    robot.straight(20, 0.1, COAST);
     robot.setLinearAccelParams(100, 0, 0);
     robot.arc(45, 30, -8.5, COAST);
     robot.arc(45, -30, -8.5, COAST);
@@ -1074,6 +1076,7 @@ void leaveLaundry()
 
     //Turn to the middle to leave and fix currentOrientation
     turnToBasket(currentBasket, BASKET_MIDDLE);
+    align(0.2);
     DEBUGPRINT("Finished leaving the laundry.\n");
 }
 
