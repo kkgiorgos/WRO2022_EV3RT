@@ -129,3 +129,23 @@ void releaseHuman()
     tslp_tsk(1);
     robot.straight(40, -5, NONE);
 }
+
+void surprise(matPos from, matPos to)
+{
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    fullRouteStandard(from);
+    grabber.moveDegrees(600, 170, BRAKE);
+    fullRouteStandard(to);
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(40, 12, COAST);
+    robot.setLinearAccelParams(200, 0, -40);
+    robot.straight(40, -5, NONE);
+    robot.setLinearAccelParams(200, -40, 0);
+    act_tsk(PICK_BLOCK_TASK);
+    tslp_tsk(1);
+    robot.straight(40, -7, NONE);
+}

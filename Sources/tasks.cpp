@@ -12,6 +12,7 @@ using namespace std;
 //room class methods
 room::room(colors col)
 {
+    taskPicked = false;
     currentState = WAITING;
     doLaundry = false;
     color = col;
@@ -108,9 +109,19 @@ void room::setTask(colors code)
         DEBUGPRINT("to play a game.\n");
 }
 
+void room::setTaskPicked(bool isPicked)
+{
+    taskPicked = isPicked;
+}
+
 tasks room::getTask()
 {
     return task;
+}
+
+bool room::getTaskPicked()
+{
+    return taskPicked;
 }
 
 void room::scanLaundry()
@@ -931,8 +942,8 @@ void scanLaundryBaskets()
     tslp_tsk(1);
 
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 20, 0);
-    robot.straight(20, 0.1, COAST);
+    // robot.setLinearAccelParams(100, 20, 0);
+    // robot.straight(20, 0.1, COAST);
     robot.setLinearAccelParams(100, 0, 0);
     robot.arc(45, 30, -8.5, COAST);
     robot.arc(45, -30, -8.5, COAST);

@@ -59,6 +59,8 @@ private:
     bool doLaundry;
     state currentState;
 
+    bool taskPicked;
+
     void scanLaundry();
     void pickLaundry(int stage);
 
@@ -83,6 +85,8 @@ public:
 
     void setTask(ev3ys::colors code);
     tasks getTask();
+    void setTaskPicked(bool isPicked);
+    bool getTaskPicked();
 
     ev3ys::colors getLaundryColor();
 

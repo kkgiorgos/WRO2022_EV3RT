@@ -402,9 +402,7 @@ orientation IR_IL(orientation dir)
 {
     DEBUGPRINT("\nIR_IL\n");
 
-    setLifo("70", "SR");
-    lifoUnregExtreme.distance(30, 5, NONE);
-    lifoUnregExtreme.distance(40, 5, NONE);
+    
     lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
     lifoUnregNormal.distance(40, 17, NONE);
 
@@ -492,7 +490,7 @@ orientation IL_L(orientation dir)
     DEBUGPRINT("\nIL_L\n");
 
     setLifo("SL", "SR");
-    lifoUnregExtreme.distance(30, 7, NONE);
+    lifoUnregExtreme.distance(30, 5, NONE);
     lifoUnregNormal.lines(40, 2, NONE, 20, 2.5, false);
 
     robot.setMode(CONTROLLED);
@@ -853,7 +851,7 @@ orientation CL3_CL2(orientation dir)
     DEBUGPRINT("\nCL3_CL2\n");
 
     standardTurn(dir, EAST, CENTERED);
-    lifoRoute1Line(CENTERED, 8, 3, 5, 0, 30, NORMAL);
+    lifoRoute1Line(CENTERED, 5, 3, 0, 0, 30, NORMAL);
 
     return EAST;
 }
@@ -1027,7 +1025,7 @@ orientation CR3_CR2(orientation dir)
     DEBUGPRINT("\nCR3_CR2\n");
 
     standardTurn(dir, WEST, CENTERED);
-    lifoRoute1Line(CENTERED, 8, 3, 5, 0, 30, NORMAL);
+    lifoRoute1Line(CENTERED, 5, 3, 0, 0, 30, NORMAL);
 
     return WEST;
 }

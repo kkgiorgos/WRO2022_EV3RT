@@ -610,11 +610,77 @@ void main_task(intptr_t unused)
     rooms[GREEN].executeAllActions();
     fullRouteStandard(R);
     rooms[RED].executeAllActions();
+    currentPos = R;
+    currentAlignment = CENTERED;
+    currentDirection = SOUTH;
+    bool blueDone = false, redDone = false;
+    if(rooms[RED].getTask() == WATER)
+    {
+        surprise(RR1, RR1);
+        redDone = true;
+        rooms[RED].setTaskPicked(true);
+    }
+    else if(rooms[GREEN].getTask() == WATER)
+    {
+        surprise(GR1, RR1);
+        redDone = true;
+        rooms[GREEN].setTaskPicked(true);
+    }
+
+    //TODO : Switch back to main network
+    if(redDone)
+    {
+        fullRouteStandard(CR2);
+        robot.setMode(CONTROLLED);
+        robot.setLinearAccelParams(100, 30, 30);
+        robot.arc(45, 90, 10, NONE);
+        currentPos = IR;
+        currentDirection = WEST;
+        setLifo("70", "SR");
+        lifoUnregExtreme.distance(30, 5, NONE);
+        // lifoUnregExtreme.distance(40, 5, NONE);
+    }
+    else
+    {
+        R_IR(SOUTH);
+        currentPos = IR;
+        currentDirection = WEST;
+        setLifo("70", "SR");
+        lifoUnregExtreme.distance(30, 5, NONE);
+        lifoUnregExtreme.distance(40, 5, NONE);
+    }
+
     fullRouteStandard(B);
     rooms[BLUE].executeAllActions();
     fullRouteStandard(Y);
     rooms[YELLOW].executeAllActions();
-    fullRouteStandard(L);
+
+    currentPos = Y;
+    currentAlignment = CENTERED;
+    currentDirection = SOUTH;
+
+    if(rooms[BLUE].getTask() == WATER)
+    {
+        surprise(BR1, BR1);
+        blueDone = true;
+        rooms[BLUE].setTaskPicked(true);
+    }
+    else if(rooms[YELLOW].getTask() == WATER)
+    {
+        surprise(YR1, BR1);
+        blueDone = true;
+        rooms[YELLOW].setTaskPicked(true);
+    }
+
+    //TODO : Switch back to main network
+    if(blueDone)
+    {
+        fullRouteStandard(BM);
+    }
+    else
+    {
+        fullRouteStandard(L);
+    }
 
     scanLaundryBaskets();
     leaveLaundry();
@@ -623,10 +689,9 @@ void main_task(intptr_t unused)
     currentAlignment = CENTERED;
     currentDirection = NORTH;
 
-    bool blueDone = false, redDone = false;
     for(auto x : rooms)
     {
-        if(x.second.getTask() == WATER)
+        if(x.second.getTask() == WATER && !x.second.getTaskPicked())
         {
             act_tsk(OPEN_GRABBER_TASK);
             tslp_tsk(1);

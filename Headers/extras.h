@@ -50,3 +50,5 @@ void inferLastHuman();
 
 void loadHuman();
 void releaseHuman();
+
+void surprise(matPos from, matPos to);
