@@ -121,11 +121,11 @@ void releaseHuman()
     tslp_tsk(1);
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(100, 0, 0);
-    robot.straight(40, 10, COAST);
+    robot.straight(40, 7, COAST);
     robot.setLinearAccelParams(200, 0, -40);
     robot.straight(40, -5, NONE);
     robot.setLinearAccelParams(200, -40, 0);
     act_tsk(PICK_BLOCK_TASK);
     tslp_tsk(1);
-    robot.straight(40, -5, NONE);
+    robot.straight(40, -2, NONE);
 }

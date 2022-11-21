@@ -242,7 +242,7 @@ void rooms_vertical(orientation start, orientation target, int length, bool isTa
 
     if(length == 1)
     {
-        lifoRoute1Line(CENTERED, 9, 3, 5, 0, 30, detector);
+        lifoRoute1Line(CENTERED, 8, 3, 5, 0, 30, detector);
     }
     else if(length == 2)
     {
@@ -650,29 +650,10 @@ orientation M_CR1(orientation dir)
     DEBUGPRINT("\nM_CR1\n");
 
     centralTurn(dir, EAST);
-    if(currentAlignment == CENTERED)
-    {
-        robot.setLinearAccelParams(100, 0, 30);
-        robot.arc(30, 15, 20, NONE);
-        robot.setLinearAccelParams(100, 30, 30);
-        robot.straight(45, 12, NONE);
-        currentAlignment = RIGHT_OF_LINE;
-    }
-    else
-    {
-        robot.setLinearAccelParams(100, 0, 30);
-        robot.straight(45, 15, NONE);   
-    }
-    
-    
-    stopScanning = false;
-    act_tsk(HUMAN_SCAN_TASK);
-    tslp_tsk(1);
-    lifoRoute1Line(RIGHT_OF_LINE, 18, 7, 5, 0, 40, NORMAL);
-    stopScanning = true;
-
-    humans[TRH].setColor(scannedValue);
-    display.format("%  \n")%static_cast<int>(humans[TRH].getColor());
+    robot.setLinearAccelParams(100, 0, 30);
+    robot.straight(45, 13, NONE);
+    switchLifoRobotPosition(20, currentAlignment, CENTERED);
+    lifoRoute1Line(CENTERED, 15, 7, 5, 0, 40, NORMAL);
 
     return EAST;
 }
@@ -680,20 +661,11 @@ orientation CR1_M(orientation dir)
 {
     DEBUGPRINT("\nCR1_M\n");
 
-    standardTurn(dir, WEST, LEFT_OF_LINE);
-
-    stopScanning = false;
-    act_tsk(HUMAN_SCAN_TASK);
-    tslp_tsk(1);
-    lifoRoute1Line(LEFT_OF_LINE, 10, 5, 0, 3, 30, NORMAL);
-    stopScanning = true;
-
+    standardTurn(dir, WEST, CENTERED);
+    lifoRoute1Line(CENTERED, 10, 5, 0, 3, 30, NORMAL);
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 20, 0);
-    robot.straight(45, 20, COAST);
-
-    humans[TRH].setColor(scannedValue);
-    display.format("%  \n")%static_cast<int>(humans[TRH].getColor());
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(45, 21, COAST);
 
     return WEST;
 }
@@ -736,7 +708,7 @@ orientation BM_M(orientation dir)
     DEBUGPRINT("\nBM_M\n");
 
     standardTurn(dir, NORTH, CENTERED);
-    lifoRoute1Line(CENTERED, 7, 5, 0, 2, 30, NORMAL);
+    lifoRoute1Line(CENTERED, 5, 5, 0, 0, 30, NORMAL);
     robot.setMode(CONTROLLED);
     robot.setLinearAccelParams(100, 30, 0);
     robot.straight(45, 22, COAST);
@@ -749,26 +721,8 @@ orientation CL1_TL(orientation dir)
 {
     DEBUGPRINT("\nCL1_TL\n");
 
-    double distance = 15;
-    if(dir == NORTH) distance += 5;
-    if(dir == EAST) distance -= 3;
-
-    standardTurn(dir, NORTH, RIGHT_OF_LINE);
-    lifoRoute1Line(RIGHT_OF_LINE, distance, 3, 5, 0, 40, SCANNER);
-
-    humans[TLH].setColor(scannedValue);
-    display.format("%  \n")%static_cast<int>(scannedValue);
-
-    robot.setLinearAccelParams(100, 30, 30);
-    robot.arc(45, 45, -3, COAST);
-    robot.arc(45, 20, 25, COAST);
-
-    setLifo("70", "SR");
-    lifoRoute1Line(OTHER, 5, 5, 0, 0, 30, SCANNER, "70", NONE);
-    lifoRoute1Line(OTHER, 8, 0, 0, 0, 30, NO_DETECT);
-
-    humans[TLLH].setColor(scannedValue);
-    display.format("%  \n")%static_cast<int>(scannedValue);
+    standardTurn(dir, NORTH, CENTERED);
+    lifoRoute1Line(CENTERED, 15, 5, 3, 0, 30, NORMAL);
 
     return NORTH;
 }
@@ -861,7 +815,7 @@ orientation CL2_YR1(orientation dir)
 {
     DEBUGPRINT("\nCL2_YR1\n");
 
-    rooms_vertical(dir, NORTH, 1);
+    rooms_vertical(dir, NORTH, 1, true);
 
     return NORTH;
 }
@@ -895,7 +849,7 @@ orientation CL3_YR2(orientation dir)
 {
     DEBUGPRINT("\nCL3_YR2\n");
 
-    rooms_vertical(dir, NORTH, 1);
+    rooms_vertical(dir, NORTH, 1, true);
 
     return NORTH;
 }
@@ -1255,14 +1209,12 @@ orientation TL_TLLH(orientation dir)
     DEBUGPRINT("\nTL_TLLH\n");
 
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 0, -30);
-    robot.arc(30, -55, 4, NONE);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, -90, -8.5, COAST);
     act_tsk(OPEN_GRABBER_TASK);
     tslp_tsk(1);
-    robot.setLinearAccelParams(100, -30, 0);
-    robot.arc(45, -35, 4, COAST);
-    robot.setLinearAccelParams(100, 0, 0);
-    robot.straight(40, 8, COAST);
+    robot.arc(45, -90, 8.5, COAST);
+    robot.straight(45, 20, COAST);
 
     humans[TLLH].grabHuman();
 
@@ -1272,8 +1224,11 @@ orientation TLLH_TL(orientation dir)
 {
     DEBUGPRINT("\nTLLH_TL\n");
 
-    robot.straight(40, -10, COAST);
-    robot.arc(45, -90, 0, COAST);
+    robot.straight(45, -10, COAST);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, -180, 8.5, COAST);
 
     currentDirection = SOUTH;
     currentAlignment = CENTERED;

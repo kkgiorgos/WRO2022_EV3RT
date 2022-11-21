@@ -136,7 +136,7 @@ void init()
 
     display.format("WAIT FOR SENSORS\n");
     btnEnter.waitForClick();
-    act_tsk(INIT_TASK);
+    // act_tsk(INIT_TASK);
     tslp_tsk(1);
 }
 
@@ -412,265 +412,271 @@ void main_task(intptr_t unused)
     graphInit();
     startData();
 
-    //Random sensor debug code
-    // leftScanner.setNormalisation(false);
-    // rightScanner.setNormalisation(false);
 
-    // colorSensor rightScannerNew(SensorPort::S4, false, "WRO2022Aux");
-    // rightScannerNew.setNormalisation(false);
-
-    // //Min measurements done with BLACK block 4 STUDS away
-    // //Max measurements done with WHITE block 0.5 STUDS away
-    // double minR[4] = {0,0,0,0};
-    // double maxR[4] = {0,0,0,0};
-    // display.resetScreen();
-    // BrickButton right(BrickButtons::RIGHT);
-    // t.secDelay(1);
-    // colorspaceRGB sum = {0, 0, 0, 0};
-    // int times = 0;
-    // t.secDelay(1);
-    // display.format("Calibrating Right Scanner Min");
-    // while(!btnEnter.isPressed())
-    // {
-    //     while(!right.isPressed() && !btnEnter.isPressed());
-    //     colorspaceRGB r = rightScannerNew.getRGB();
-    //     format(bt, "LL: R: %  G: %  B: %  W:   \n") %r.red %r.green %r.blue;
-    //     sum.red += r.red;
-    //     sum.green += r.green;
-    //     sum.blue += r.blue;
-    //     sum.white += r.white;
-    //     times++;
-    //     while(right.isPressed());
-    // }
-    // minR[0] = sum.red / (double)times;
-    // minR[1] = sum.green / (double)times;
-    // minR[2] = sum.blue / (double)times;
-    // minR[3] = sum.white / (double)times;
-    // t.secDelay(1);
-    // sum.red = sum.green = sum.blue = sum.white = times = 0;
-    // display.resetScreen();
-    // display.format("Calibrating Right Scanner Max");
-    // while(!btnEnter.isPressed())
-    // {
-    //     while(!right.isPressed() && !btnEnter.isPressed());
-    //     colorspaceRGB r = rightScannerNew.getRGB();
-    //     format(bt, "LL: R: %  G: %  B: %  W:   \n") %r.red %r.green %r.blue;
-    //     sum.red += r.red;
-    //     sum.green += r.green;
-    //     sum.blue += r.blue;
-    //     sum.white += r.white;
-    //     times++;
-    //     while(right.isPressed());
-    // }
-    // maxR[0] = sum.red / (double)times;
-    // maxR[1] = sum.green / (double)times;
-    // maxR[2] = sum.blue / (double)times;
-    // maxR[3] = sum.white / (double)times;
-    // rightScannerNew.setRgbCalParams(minR, maxR);
-    // display.resetScreen();
-    // display.format("Calibration Right Scanner DONE");
-    // format(bt, "minR: R: %  G: %  B: %  W:   \nmaxR: R: %  G: %  B: %  W:   \n") %minR[0] %minR[1] %minR[2] %maxR[0] %maxR[1] %maxR[2];
-    
-    // // color_hue hues[5] = {{RED, 10, 20}, {RED, 350, 20}, {GREEN, 140, 80}, 
-    //                     // {BLUE, 225, 50}, {YELLOW, 35, 30}};
-    
-    // // rightScannerNew.setColorCalParams(hues, 5, 70, 15);
-
-    // rightScannerNew.setNormalisation(true);
-    // rightScannerNew.setNormalisation(false);
-
-    // display.resetScreen();
-    // while(true)
-    // {
-    //     colorspaceRGB l = rightScannerNew.getRGB();
-    //     tslp_tsk(1);
-    //     colorspaceHSV l2 = rightScannerNew.getHSV();
-    //     tslp_tsk(1);
-    //     format(bt, "R: %  G: %  B: %  W: %  \n") %l.red %l.green %l.blue %l.white;
-    //     format(bt, "H: %  S: %  V: %  \n") %l2.hue %l2.saturation %l2.value;
-    //     display.format("L:  \nR: %  \n\n\n") %static_cast<int>(rightScannerNew.getColor());
-    //     tslp_tsk(10);
-    // }
-
-
-    //Failed (as of yet) attempt at colored waters
-    // while(true)
-    // {
-    //     startProcedure();
-    //     currentPos = S;
-    //     fullRouteStandard(W);
-    // 
-    //     robot.setLinearAccelParams(100, 40, 30);
-    //     robot.straight(40, 5, NONE);
-    //     robot.setLinearAccelParams(100, 30, 0);
-    //     robot.straight(30, 3, COAST);
-    //
-    //     robot.setLinearAccelParams(100, 0, 0);
-    //     robot.straight(30, -2, COAST);
-    //     robot.arc(45, -125, 4, COAST);
-    //     robot.arc(45, -35, -8.5, COAST);
-    //     robot.straight(45, -9, COAST);
-    //
-    //     colors waters[3];
-    //     int idx=0;
-    //
-    //     rightScanner.setColorDataSat(rightScanner.getColorDataSat() / 2.0);
-    //
-    //     setLifo("SR", "50");
-    //     stopScanning = false;
-    //     act_tsk(HUMAN_SCAN_TASK);
-    //     tslp_tsk(1);
-    //     lifoUnregExtreme.distance(30, 5, NONE);
-    //     stopScanning = true;
-    //     waters[idx++] = scannedValue; 
-    //     stopScanning = false;
-    //     ter_tsk(HUMAN_SCAN_TASK);
-    //     tslp_tsk(1);
-    //     act_tsk(HUMAN_SCAN_TASK);
-    //     tslp_tsk(1);
-    //     lifoUnregNormal.lines(30, 1, NONE, 3, 2, true);
-    //     lifoUnregNormal.distance(30, 2.5, NONE);
-    //     stopScanning = true;
-    //     waters[idx++] = scannedValue; 
-    //     stopScanning = false;
-    //     ter_tsk(HUMAN_SCAN_TASK);
-    //     tslp_tsk(1);
-    //     act_tsk(HUMAN_SCAN_TASK);
-    //     tslp_tsk(1);
-    //     lifoUnregNormal.distance(30, 10, COAST);
-    //     stopScanning = true;
-    //     waters[idx++] = scannedValue; 
-    //     stopScanning = false;
-    //     ter_tsk(HUMAN_SCAN_TASK);
-    //     tslp_tsk(1);
-    //     act_tsk(INIT_TASK);
-    //     tslp_tsk(1);
-    //     robot.arc(45, -90, -8.5, COAST);
-    //
-    //     setLifo("SL", "SR");  
-    //     lifoUnregExtreme.lines(30, 1, NONE, 5);
-    //
-    //     display.resetScreen();
-    //     for(auto x : waters)
-    //     {
-    //         display.format("%  \n")%static_cast<int>(x);
-    //     }
-    //
-    //     pickWater();
-    //
-    //     robot.stop(BRAKE);
-    //     btnEnter.waitForClick();
-    // }
-
-
-    //Code to quickly and repeatedly test rooms (RED-GREEN) (BLUE-YELLOW) with standard task markings
-    // while(true)
-    // {
-    //     act_tsk(CLOSE_RAMP_TASK);
-    //     rampQueue.push(BOTTLE);
-    //     rampQueue.push(BOTTLE);
-    //     tslp_tsk(1);
-    //
-    //     currentPos = IR;
-    //     fullRouteStandard(G);
-    //     rooms[GREEN].setTask(GREEN);
-    //     rooms[GREEN].executeAllActions();
-    //     fullRouteStandard(R);
-    //     rooms[RED].setTask(GREEN);
-    //     rooms[RED].executeAllActions();
-    //     fullRouteStandard(IR);
-    //
-    //     robot.stop(BRAKE);
-    //     btnEnter.waitForClick();
-    //
-    //     // act_tsk(CLOSE_RAMP_TASK);
-    //     // rampQueue.push(BOTTLE);
-    //     // rampQueue.push(BOTTLE);
-    //     // tslp_tsk(1);
-    //
-    //     // currentPos = IL;
-    //     // fullRouteStandard(B);
-    //     // rooms[BLUE].setTask(WHITE);
-    //     // rooms[BLUE].executeAllActions();
-    //     // fullRouteStandard(Y);
-    //     // rooms[YELLOW].setTask(WHITE);
-    //     // rooms[YELLOW].executeAllActions();
-    //     // fullRouteStandard(IL);
-    //
-    //     // robot.stop(BRAKE);
-    //     // btnEnter.waitForClick();
-    // }
-    
-    startProcedure();
-    
-    fullRouteStandard(W);
-    pickWater();
-    
-    fullRouteStandard(G);
-    rooms[GREEN].executeAllActions();
-    fullRouteStandard(R);
-    rooms[RED].executeAllActions();
-    fullRouteStandard(B);
-    rooms[BLUE].executeAllActions();
-    fullRouteStandard(Y);
-    rooms[YELLOW].executeAllActions();
-    fullRouteStandard(L);
-
-    scanLaundryBaskets();
-    leaveLaundry();
-
-    currentPos = BM;
+    currentPos = M;
+    currentDirection = SOUTH;
     currentAlignment = CENTERED;
+
+    fullRouteStandard(BM);
+
+    {
+        act_tsk(OPEN_GRABBER_TASK);
+        tslp_tsk(1);
+        robot.setMode(CONTROLLED);
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.straight(40, -8, COAST);
+        robot.arc(45, 90, 0, COAST);
+        robot.setLinearAccelParams(100, 0, 40);
+        robot.straight(40, 15, NONE);
+        act_tsk(PICK_BLOCK_TASK);
+        tslp_tsk(1);
+        robot.setLinearAccelParams(100, 40, 0);
+        robot.straight(40, 5, COAST);
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.straight(40, -20, COAST);
+        robot.arc(45, -90, 0, COAST);
+        lifoRoute1Line(CENTERED, 10, 5, 5, 0, 30, NORMAL);
+        act_tsk(OPEN_GRABBER_TASK);
+        tslp_tsk(1);
+        robot.straight(40, -6, COAST);
+        robot.arc(45, -90, 0, COAST);
+        robot.setLinearAccelParams(100, 0, 40);
+        robot.straight(40, 28, NONE);
+        act_tsk(PICK_BLOCK_TASK);
+        tslp_tsk(1);
+        robot.setLinearAccelParams(100, 40, 30);
+        robot.straight(40, 5, COAST);
+        robot.straightUnlim(30, true);
+        while(rightSensor.getReflected() > 80)
+            robot.straightUnlim(30);
+        while(leftSensor.getReflected() > 80)
+            robot.straightUnlim(30);
+        rightTurn(CENTERED, COAST);
+        lifoUnregNormal.seconds(30, 0.7, COAST);
+        robot.setMode(CONTROLLED);
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.straight(40, -7, COAST);
+        robot.arc(45, -90, -8.5, COAST);
+        act_tsk(OPEN_GRABBER_TASK);
+        tslp_tsk(1);
+        robot.arc(45, -90, 6, COAST);
+        robot.straight(45, 15, COAST);
+
+        humans[BRRH].grabHuman();
+
+        currentPos = BRRH;
+    }
+
+    fullRouteStandard(YR2);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, 45, -8.5, COAST);
+    releaseHuman();
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, -45, -8.5, COAST);
+
+    currentPos = YR2;
+    currentDirection = NORTH;
+    currentAlignment = CENTERED;
+
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    fullRouteStandard(YR1);
+    act_tsk(WATER_GRABBER_TASK);
+    tslp_tsk(1);
+
+    robot.stop(BRAKE);
+    tslp_tsk(200);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(30, 17, COAST);
+
+    robot.arc(40, 12, -6, COAST);
+    robot.straight(30, 4.3, BRAKE);
+    grabber.moveDegrees(800, 200, NONE, true);
+    grabber.moveDegrees(400, 95, BRAKE, false);
+    robot.straight(30, -4.3, COAST);
+    robot.arc(40, -12, -6, COAST);
+
+    robot.arc(40, 180, 0, COAST);
+    robot.straight(40, 10, COAST);
+    robot.arc(30, -30, 0, BRAKE);
+    emptyRampLaundry();
+    robot.arc(30, 30, 0, COAST);
+    
+    currentDirection = SOUTH;
+    fullRouteStandard(BM);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(30, 3, BRAKE);
+    grabber.setMode(REGULATED);
+    grabber.moveDegrees(400, 50, COAST, true);
+    act_tsk(LEAVE_BALL_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(30, -5, COAST);
+
+    fullRouteStandard(BLLH);
+    fullRouteStandard(RR2);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(40, 7, COAST);
+    robot.arc(45, 150, 0, BRAKE);
+    emptyRampLaundry();
+    robot.arc(45, -150, 0, COAST);
+    robot.straight(40, -7, COAST);
+    robot.arc(45, 45, 8.5, COAST);
+    releaseHuman();
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, -45, 8.5, COAST);
+    
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    fullRouteStandard(GR1);
+
+    act_tsk(WATER_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.stop(BRAKE);
+    tslp_tsk(200);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(30, 17, COAST);
+
+    robot.arc(40, 12, -6, COAST);
+    robot.straight(30, 4.3, BRAKE);
+    grabber.moveDegrees(800, 200, NONE, true);
+    grabber.moveDegrees(400, 95, BRAKE, false);
+    robot.straight(30, -4.3, COAST);
+    robot.arc(40, -12, -6, COAST);
+
+    robot.arc(40, 180, 0, COAST);
+    robot.straight(40, 10, COAST);
+
+    currentDirection = NORTH;
+    fullRouteStandard(BM);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(35, -36, 0, COAST);
+    robot.straight(30, 7, BRAKE);
+    grabber.setMode(REGULATED);
+    grabber.moveDegrees(400, 50, COAST, true);
+    act_tsk(LEAVE_BALL_TASK);
+    tslp_tsk(1);
+    robot.straight(30, -7, BRAKE);
+    robot.arc(35, 36, 0, COAST);
+
+    fullRouteStandard(TL);
+    robot.setLinearAccelParams(100, 0, 0);
+    emptyRampWaterStage1(false);
+    robot.arc(40, -180, 4, COAST);
+    robot.straight(40, -7, COAST);
+    emptyRampWaterStage2();
+
+    robot.straight(30, 2, COAST);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, -90, 0, COAST);
+
+    act_tsk(CLOSE_RAMP_TASK);
+    tslp_tsk(1);
+
+    lifoUnregExtreme.distance(30, 5, COAST);
+    lifoUnregNormal.distance(40, 50, COAST);
+    lifoUnregNormal.lines(30, 1, COAST);
+
+    robot.setLinearAccelParams(100, 0, 0);
+    emptyRampWaterStage1(false);
+    robot.arc(40, 90, 0, COAST);
+    robot.straight(40, -3, COAST);
+    emptyRampWaterStage2();
+
+    robot.straight(35, 4, COAST);
+
+    act_tsk(CLOSE_RAMP_TASK);
+    tslp_tsk(1);
+
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.arc(45, 180, -12, COAST);
+    robot.straight(35, 7, COAST);
+
+    humans[TRRH].grabHuman();
+
+    robot.arc(45, -180, -8, COAST);
+
+    currentPos = TR;
+    currentDirection = SOUTH;
+
+    fullRouteStandard(BR2);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, 45, 8.5, COAST);
+    releaseHuman();
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, -45, 8.5, COAST);
+    
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+
+    fullRouteStandard(BR1);
+
+    act_tsk(WATER_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.stop(BRAKE);
+    tslp_tsk(200);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(30, 17, COAST);
+
+    robot.arc(40, 12, 6, COAST);
+    robot.straight(30, 4.3, BRAKE);
+    grabber.moveDegrees(800, 200, NONE, true);
+    grabber.moveDegrees(400, 95, BRAKE, false);
+    robot.straight(30, -4.3, COAST);
+    robot.arc(40, -12, 6, COAST);
+
+    robot.arc(40, 180, 0, COAST);
+    robot.straight(40, 10, COAST);
+
     currentDirection = NORTH;
 
-    bool blueDone = false, redDone = false;
-    for(auto x : rooms)
-    {
-        if(x.second.getTask() == WATER)
-        {
-            act_tsk(OPEN_GRABBER_TASK);
-            tslp_tsk(1);
-            fullRouteStandard(x.second.getPosition());
-            grabber.moveDegrees(600, 170, BRAKE);
-            if((x.first == BLUE || x.first == YELLOW) && !blueDone)
-            {
-                fullRouteStandard(BR1);
-                blueDone = true;
-            }
-            else if((x.first == RED || x.first == GREEN) && !redDone)
-            {
-                fullRouteStandard(RR1);
-                redDone = true;
-            }
-            else
-            {
-                if(blueDone)
-                {
-                    fullRouteStandard(RR1);
-                    redDone = true;
-                }
-                else
-                {
-                    fullRouteStandard(BR1);
-                    blueDone = true;
-                }
-            }
-            act_tsk(OPEN_GRABBER_TASK);
-            tslp_tsk(1);
-            robot.setMode(CONTROLLED);
-            robot.setLinearAccelParams(100, 0, 0);
-            robot.straight(40, 12, COAST);
-            robot.setLinearAccelParams(200, 0, -40);
-            robot.straight(40, -5, NONE);
-            robot.setLinearAccelParams(200, -40, 0);
-            act_tsk(PICK_BLOCK_TASK);
-            tslp_tsk(1);
-            robot.straight(40, -7, NONE);
-        }
-    }
+    fullRouteStandard(BM);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(35, 36, 0, COAST);
+    robot.straight(30, 7, BRAKE);
+    grabber.setMode(REGULATED);
+    grabber.moveDegrees(400, 50, COAST, true);
+    act_tsk(LEAVE_BALL_TASK);
+    tslp_tsk(1);
+    robot.straight(30, -7, BRAKE);
+    robot.arc(35, -36, 0, COAST);
+
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    fullRouteStandard(RR1);
+
+    robot.straight(40, 5, NONE);
+    robot.setLinearAccelParams(100, 40, 40);
+    act_tsk(PICK_BLOCK_TASK);
+    tslp_tsk(1);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 40, 0);
+    robot.straight(30, 5, COAST);
+
+    robot.straight(30, -10, COAST);
 
     fullRouteStandard(M);
     finishProcedure();
+
+    //go green human
+    //go green room
+    //pick green block red room
+    //finish
+
 
     robot.stop(BRAKE);
 
