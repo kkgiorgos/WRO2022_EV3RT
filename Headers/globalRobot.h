@@ -11,14 +11,19 @@ extern ev3ys::colorSensor leftSensor;
 extern ev3ys::colorSensor rightSensor;
 extern ev3ys::colorSensor leftScanner;
 extern ev3ys::colorSensor rightScanner;
-extern ev3ys::lineFollower lifo;
+extern ev3ys::lineFollower lifo, lifoControlled, lifoUnregNormal, lifoUnregExtreme;
 extern ev3cxx::Bluetooth bt;
 extern ev3ys::timer universalTimer;
 
+
 extern FILE* bluetooth;
 
-extern bool grabberUsed, startPicking, stopScanning;
-extern int scanStage;
+extern bool grabberUsed, stopScanning;
+extern int roomScanStage;
+
+extern ev3ys::colorSensor *scanner;
+extern ev3ys::colors scannedValue;
+extern ev3ys::colorSensor *lineDetector;
 
 #define DEBUG_BLUETOOTH
 //#define DEBUG_FILE

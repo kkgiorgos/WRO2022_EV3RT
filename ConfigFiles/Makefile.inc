@@ -1,6 +1,6 @@
 APPL_COBJS += 
 
-APPL_CXXOBJS += methods.o routes.o tasks.o
+APPL_CXXOBJS += methods.o routes.o tasks.o extras.o
 
 SRCLANG := c++
 

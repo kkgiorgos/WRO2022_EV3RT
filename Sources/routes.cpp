@@ -4,6 +4,7 @@
 #include "ev3ys.h"
 #include "globalRobot.h"
 #include <cstdlib>
+#include "extras.h"
 
 using namespace std;
 using namespace ev3ys;
@@ -18,43 +19,83 @@ void addEdge(int u, int v)
 void graphInit()
 {
     //Main network
-    addEdge(S, W);
-    addEdge(W, G);
-    addEdge(G, R);
-    addEdge(R, B);
-    addEdge(B, Y);
-    addEdge(Y, L);
-    addEdge(L, S);
+    addEdge(S, W);      routeMapping[make_pair(S, W)] = S_W;
+    addEdge(W, IR);     routeMapping[make_pair(W, IR)] = W_IR;
+    addEdge(IR, G);     routeMapping[make_pair(IR, G)] = IR_G;
+    addEdge(G, R);      routeMapping[make_pair(G, R)] = G_R;
+    addEdge(R, IR);     routeMapping[make_pair(R, IR)] = R_IR;
+    addEdge(IR, IL);    routeMapping[make_pair(IR, IL)] = IR_IL;
+    addEdge(IL, B);     routeMapping[make_pair(IL, B)] = IL_B;
+    addEdge(B, Y);      routeMapping[make_pair(B, Y)] = B_Y;
+    addEdge(Y, IL);     routeMapping[make_pair(Y, IL)] = Y_IL;
+    addEdge(IL, L);     routeMapping[make_pair(IL, L)] = IL_L;
+    addEdge(L, S);      routeMapping[make_pair(L, S)] = L_S;
+
+    ADD_EDGE(CR3, R);
+    ADD_EDGE(CR3, G);
+    ADD_EDGE(CL3, B);
+    ADD_EDGE(CL3, Y);
 
     //Full (surprise) network
-    addEdge(M, TM);
-    addEdge(M, BM);
-    addEdge(M, CL1);
-    addEdge(M, CR1);
-    addEdge(CL1, TL);
-    addEdge(CL1, BL);
-    addEdge(CR1, TR);
-    addEdge(CR1, BR);
-    addEdge(CL1, CL2);
-    addEdge(CR1, CR2);
-    addEdge(CL2, CL3);
-    addEdge(CR2, CR3);
-    addEdge(CL2, YR1);
-    addEdge(CL2, BR1);
-    addEdge(CR2, GR1);
-    addEdge(CR2, RR1);
-    addEdge(CL3, YR2);
-    addEdge(CL3, BR2);
-    addEdge(CR3, GR2);
-    addEdge(CR3, RR2);
-    addEdge(M, TLH);
-    addEdge(M, TRH);
-    addEdge(M, BLH);
-    addEdge(M, BRH);
-    addEdge(TL, TLLH);
-    addEdge(TR, TRRH);
-    addEdge(BL, BLLH);
-    addEdge(BL, BRRH);
+    ADD_EDGE(M, TM);
+    ADD_EDGE(M, BM);
+    ADD_EDGE(M, CL1);
+    ADD_EDGE(M, CR1);
+    ADD_EDGE(CL1, TL);
+    ADD_EDGE(CL1, BL);
+    ADD_EDGE(CR1, TR);
+    ADD_EDGE(CR1, BR);
+    ADD_EDGE(CL1, CL2);
+    ADD_EDGE(CR1, CR2);
+    ADD_EDGE(CL2, CL3);
+    ADD_EDGE(CR2, CR3);
+    ADD_EDGE(CL2, YR1);
+    ADD_EDGE(CL2, BR1);
+    ADD_EDGE(CR2, GR1);
+    ADD_EDGE(CR2, RR1);
+    ADD_EDGE(CL3, YR2);
+    ADD_EDGE(CL3, BR2);
+    ADD_EDGE(CR3, GR2);
+    ADD_EDGE(CR3, RR2);
+    ADD_EDGE(TL, TLH);
+    ADD_EDGE(M, TRH);
+    ADD_EDGE(CR1, TRH);
+    ADD_EDGE(BL, BLH);
+    ADD_EDGE(BR, BRH);
+    ADD_EDGE(TL, TLLH);
+    ADD_EDGE(TR, TRRH);
+    ADD_EDGE(BL, BLLH);
+    ADD_EDGE(BR, BRRH);
+
+    // //Secondary routing (faster, but may require higher maintenance)
+    // //Vertical
+    // addEdge(BM, TM);    routeMapping[make_pair(BM, TM)] = BM_TM;        routeMapping[make_pair(TM, BM)] = TM_BM;
+    // addEdge(BL, TL);    routeMapping[make_pair(BL, TL)] = BL_TL;        routeMapping[make_pair(TL, BL)] = TL_BL;
+    // addEdge(BR, TR);    routeMapping[make_pair(BR, TR)] = BR_TR;        routeMapping[make_pair(TR, BR)] = TR_BR;
+    ADD_EDGE(BR1, YR1);
+    ADD_EDGE(BR2, YR2);
+    ADD_EDGE(GR1, RR1);
+    ADD_EDGE(GR2, RR2);
+    // //Double skips
+    ADD_EDGE(CL3, CL1);
+    // addEdge(CL2, M);    routeMapping[make_pair(CL2, M)] = CL2_M;        routeMapping[make_pair(M, CL2)] = M_CL2;
+    // addEdge(CL1, CR1);  routeMapping[make_pair(CL1, CR1)] = CL1_CR1;    routeMapping[make_pair(CR1, CL1)] = CR1_CL1;
+    // addEdge(M, CR2);    routeMapping[make_pair(M, CR2)] = M_CR2;        routeMapping[make_pair(CR2, M)] = CR2_M;
+    ADD_EDGE(CR1, CR3);
+    // //Triple skips
+    // addEdge(CL3, M);    routeMapping[make_pair(CL3, M)] = CL3_M;        routeMapping[make_pair(M, CL3)] = M_CL3;
+    // addEdge(CL2, CR1);  routeMapping[make_pair(CL2, CR1)] = CL2_CR1;    routeMapping[make_pair(CR1, CL2)] = CR1_CL2;
+    // addEdge(CL1, CR2);  routeMapping[make_pair(CL1, CR2)] = CL1_CR2;    routeMapping[make_pair(CR2, CL1)] = CR2_CL1;
+    // addEdge(M, CR3);    routeMapping[make_pair(M, CR3)] = M_CR3;        routeMapping[make_pair(CR3, M)] = CR3_M;
+    // //Quadruple skips
+    // addEdge(CL3, CR1);  routeMapping[make_pair(CL3, CR1)] = CL3_CR1;    routeMapping[make_pair(CR1, CL3)] = CR1_CL3;
+    // addEdge(CL2, CR2);  routeMapping[make_pair(CL2, CR2)] = CL2_CR2;    routeMapping[make_pair(CR2, CL2)] = CR2_CL2;
+    // addEdge(CL1, CR3);  routeMapping[make_pair(CL1, CR3)] = CL1_CR3;    routeMapping[make_pair(CR3, CL1)] = CR3_CL1;
+    // //Quintuple skips   
+    // addEdge(CL3, CR2);  routeMapping[make_pair(CL3, CR2)] = CL3_CR2;    routeMapping[make_pair(CR2, CL3)] = CR2_CL3;
+    // addEdge(CL2, CR3);  routeMapping[make_pair(CL2, CR3)] = CL2_CR3;    routeMapping[make_pair(CR3, CL2)] = CR3_CL2;
+    // //Sixtuple skips
+    // addEdge(CL3, CR3);  routeMapping[make_pair(CL3, CR3)] = CL3_CR3;    routeMapping[make_pair(CR3, CL3)] = CR3_CL3;
 }
 
 int dijkstra(int source, int target, vector<int> *path)
@@ -114,177 +155,7 @@ void constructRoute(routeFunc *route, vector<int> *pathNodes, int distance)
     {
         int firstNode = (*pathNodes)[i];
         int secondNode = (*pathNodes)[i+1];
-        if(firstNode == S)
-        {
-            if(secondNode == W) route[i] = S_W;
-        }
-        else if(firstNode == W)
-        {
-            if(secondNode == G) route[i] = W_G;
-        }
-        else if(firstNode == L)
-        {
-            if(secondNode == S) route[i] = L_S;
-        }
-        else if(firstNode == G)
-        {
-            if(secondNode == R) route[i] = G_R;
-        }
-        else if(firstNode == R)
-        {
-            if(secondNode == B) route[i] = R_B;
-        }
-        else if(firstNode == B)
-        {
-            if(secondNode == Y) route[i] = B_Y;
-        }
-        else if(firstNode == Y)
-        {
-            if(secondNode == L) route[i] = Y_L;
-        }
-        else if(firstNode == M)
-        {
-            if(secondNode == TM) route[i] = M_TM;
-            else if(secondNode == BM) route[i] = M_BM;
-            else if(secondNode == CL1) route[i] = M_CL1;
-            else if(secondNode == CR1) route[i] = M_CR1;
-            else if(secondNode == TLH) route[i] = M_TLH;
-            else if(secondNode == TRH) route[i] = M_TRH;
-            else if(secondNode == BLH) route[i] = M_BLH;
-            else if(secondNode == BRH) route[i] = M_BRH;
-        }
-        else if(firstNode == TM)
-        {
-            if(secondNode == M) route[i] = TM_M;
-        }
-        else if(firstNode == BM)
-        {
-            if(secondNode == M) route[i] = BM_M;
-        }
-        else if(firstNode == CL1)
-        {
-            if(secondNode == M) route[i] = CL1_M;
-            else if(secondNode == CL2) route[i] = CL1_CL2;
-            else if(secondNode == TL) route[i] = CL1_TL;
-            else if(secondNode == BL) route[i] = CL1_BL;
-        }
-        else if(firstNode == CR1)
-        {
-            if(secondNode == M) route[i] = CR1_M;
-            else if(secondNode == CR2) route[i] = CR1_CR2;
-            else if(secondNode == TR) route[i] = CR1_TR;
-            else if(secondNode == BR) route[i] = CR1_BR;
-        }
-        else if(firstNode == TL)
-        {
-            if(secondNode == CL1) route[i] = TL_CL1;
-            else if(secondNode == TLLH) route[i] = TL_TLLH;
-        }
-        else if(firstNode == TR)
-        {
-            if(secondNode == CR1) route[i] = TR_CR1;
-            else if(secondNode == TRRH) route[i] = TR_TRRH;
-        }
-        else if(firstNode == BL)
-        {
-            if(secondNode == CL1) route[i] = BL_CL1;
-            else if(secondNode == BLLH) route[i] = BL_BLLH;
-        }
-        else if(firstNode == BR)
-        {
-            if(secondNode == CR1) route[i] = BR_CR1;
-            else if(secondNode == BRRH) route[i] = BR_BRRH;
-        }
-        else if(firstNode == CL2)
-        {
-            if(secondNode == CL1) route[i] = CL2_CL1;
-            else if(secondNode == CL3) route[i] = CL2_CL3;
-            else if(secondNode == YR1) route[i] = CL2_YR1;
-            else if(secondNode == BR1) route[i] = CL2_BR1;
-        }
-        else if(firstNode == CR2)
-        {
-            if(secondNode == CR1) route[i] = CR2_CR1;
-            else if(secondNode == CR3) route[i] = CR2_CR3;
-            else if(secondNode == GR1) route[i] = CR2_GR1;
-            else if(secondNode == RR1) route[i] = CR2_RR1;
-        }
-        else if(firstNode == CL3)
-        {
-            if(secondNode == CL2) route[i] = CL3_CL2;
-            else if(secondNode == YR2) route[i] = CL3_YR2;
-            else if(secondNode == BR2) route[i] = CL3_BR2;
-        }
-        else if(firstNode == CR3)
-        {
-            if(secondNode == CR2) route[i] = CR3_CR2;
-            else if(secondNode == GR2) route[i] = CR3_GR2;
-            else if(secondNode == RR2) route[i] = CR3_RR2;
-        }
-        else if(firstNode == YR1)
-        {
-            if(secondNode == CL2) route[i] = YR1_CL2;
-        }
-        else if(firstNode == YR2)
-        {
-            if(secondNode == CL3) route[i] = YR2_CL3;
-        }
-        else if(firstNode == BR1)
-        {
-            if(secondNode == CL2) route[i] = BR1_CL2;
-        }
-        else if(firstNode == BR2)
-        {
-            if(secondNode == CL3) route[i] = BR2_CL3;
-        }
-        else if(firstNode == GR1)
-        {
-            if(secondNode == CR2) route[i] = GR1_CR2;
-        }
-        else if(firstNode == GR2)
-        {
-            if(secondNode == CR3) route[i] = GR2_CR3;
-        }
-        else if(firstNode == RR1)
-        {
-            if(secondNode == CR2) route[i] = RR1_CR2;
-        }
-        else if(firstNode == RR2)
-        {
-            if(secondNode == CR3) route[i] = RR2_CR3;
-        }
-        else if(firstNode == TLH)
-        {
-            if(secondNode == M) route[i] = TLH_M;
-        }
-        else if(firstNode == TRH)
-        {
-            if(secondNode == M) route[i] = TRH_M;
-        }
-        else if(firstNode == BLH)
-        {
-            if(secondNode == M) route[i] = BLH_M;
-        }
-        else if(firstNode == BRH)
-        {
-            if(secondNode == M) route[i] = BRH_M;
-        }
-        else if(firstNode == TLLH)
-        {
-            if(secondNode == TL) route[i] = TLLH_TL;
-        }
-        else if(firstNode == TRRH)
-        {
-            if(secondNode == TR) route[i] = TRRH_TR;
-        }
-        else if(firstNode == BLLH)
-        {
-            if(secondNode == BL) route[i] = BLLH_BL;
-        }
-        else if(firstNode == BRRH)
-        {
-            if(secondNode == BR) route[i] = BRRH_BR;
-        }
+        route[i] = routeMapping[make_pair(static_cast<matPos>(firstNode), static_cast<matPos>(secondNode))];
     }
 }
 
@@ -335,7 +206,7 @@ void standardTurn(orientation start, orientation finish, lifoRobotPosition endAl
     else if(endAlignment != currentAlignment)
     {
         DEBUGPRINT("Changing Lifo Alignment\n");
-        switchLifoRobotPosition(20, currentAlignment, endAlignment);
+        switchLifoRobotPosition(30, currentAlignment, endAlignment);
     }
     currentAlignment = endAlignment;
 }
@@ -349,12 +220,12 @@ void centralTurn(orientation start, orientation finish)
     if(turnDifference == -1 || turnDifference == 3)
     {
         DEBUGPRINT("Turning left 90 (Central)\n");
-        robot.arc(45, -90, 0, COAST);
+        robot.arc(45, -92, 0, COAST);
     }
     else if(turnDifference == 1 || turnDifference == -3)
     {
         DEBUGPRINT("Turning right 90 (Central)\n");
-        robot.arc(45, 90, 0, COAST);
+        robot.arc(45, 92, 0, COAST);
     }
     else if(turnDifference == -2 || turnDifference == 2)
     {
@@ -363,129 +234,135 @@ void centralTurn(orientation start, orientation finish)
     }
 }
 
+//length = 1 -> room <-> midpoint || length = 2 -> room <-> room
+void rooms_vertical(orientation start, orientation target, int length, bool isTargetRed)
+{
+    lineDetectionMode detector = isTargetRed ? COLORED : NORMAL;
+    standardTurn(start, target, CENTERED);
+
+    if(length == 1)
+    {
+        lifoRoute1Line(CENTERED, 9, 3, 5, 0, 30, detector);
+    }
+    else if(length == 2)
+    {
+        lifoRoute1Line(CENTERED, 28, 3, 5, 0, 40, detector);
+    }
+    else
+    {
+        DEBUGPRINT("ERROR, route length specified for vertical room tranfer incompatible!!");
+    }
+}
+
 //Main network
 orientation S_W(orientation dir)
 {
     DEBUGPRINT("\nS_W\n");
 
-    resetLifo();
-    // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
-    lifo.setPIDparams(3, 3, 120, 1);
-    lifo.distance(robot.cmToTacho(35), 10, NONE);
-    setLifoSlow();
-    lifo.setAccelParams(150, 20, 20);
-    lifo.distance(20, 3, NONE);
-    lifo.lines(20, 1, NONE);
+    setLifo("SL", "SR");
+    lifoUnregExtreme.distance(30, 8, NONE);
+    lifoUnregNormal.lines(40, 1, NONE, 5);
 
     return NORTH;
 }
-orientation W_G(orientation dir)
+orientation W_IR(orientation dir)
 {
-    DEBUGPRINT("\nW_G\n");
+    DEBUGPRINT("\nW_IR\n");
 
-    //Complex turn to go from one area to another
-    robot.setLinearAccelParams(100, 35, 45);
+    setLifo("SL", "SR");
+    
+    grabber.moveDegrees(-500, 100, COAST, false);
+    tslp_tsk(1);
+
+    lifoUnregExtreme.distance(30, 10, NONE);
+    lifoUnregNormal.lines(40, 1, NONE, 10);
+    act_tsk(LEAVE_BALL_TASK);
+    tslp_tsk(1);
+
+    //Special turn to go from TR to CR2(nearly) and scan red room task
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 40, 45);
     robot.arc(45, 30, 15, NONE);
-    robot.setLinearAccelParams(100, 45, 25);
+    robot.setLinearAccelParams(100, 45, 45);
     robot.arc(45, 20, 40, NONE);
-    robot.setLinearAccelParams(100, 35, 35);
-    robot.arcUnlim(45, 15, FORWARD, true);
-    //Scan left (red room) task block while turning
-    colors current = BLACK;
-    map<colors, int> appearances;
-    while(robot.getAngle() < 40)
-    {
-        if((current = scanCodeBlock(leftScanner)) != BLACK)
-        {
-            appearances[current]++;
-        }
-        robot.arcUnlim(45, 15, FORWARD, false);
-    }
-    current = analyzeFrequency(appearances, BLACK);
-    rooms[RED].setTask(current);
-    display.resetScreen();
-    display.format("%  \n")%static_cast<int>(current);
+    robot.setLinearAccelParams(100, 45, 35);
 
-    //Get in position to scan green room task.
-    robot.setLinearAccelParams(100, 20, 45);
+    stopScanning = false;
+    scanner = &leftScanner;
+    act_tsk(ROOM_TASK_SCAN_TASK);
+    tslp_tsk(1);
+    robot.arc(45, 50, 15, NONE);
+    stopScanning = true;
+
+    robot.setLinearAccelParams(100, 35, 45);
+    robot.straight(45, 5, NONE);
+
+    rooms[RED].setTask(scannedValue);
+    display.resetScreen();
+    display.format("%  \n")%static_cast<int>(scannedValue);
+    
+    //Straight move but uses lines for location help
+    leftSensor.resetFiltering();
+    robot.setLinearAccelParams(100, 45, 45);
     robot.straightUnlim(45, true);
-    do{
+    do
+    {
         leftSensor.getReflected();
         robot.straightUnlim(45);
-    }while(!leftSensor.getLineDetected());
-    robot.resetPosition();
-    while(robot.getPosition() < 1) robot.straightUnlim(45);
-    while(leftSensor.getReflected() > 80) robot.straightUnlim(45);
+    } while (!leftSensor.getLineDetected());
+    robot.straight(45, 7, NONE);
+    leftSensor.resetFiltering();
+    robot.straightUnlim(45, true);
+    do
+    {
+        leftSensor.getReflected();
+        robot.straightUnlim(45);
+    } while (!leftSensor.getLineDetected());
     robot.setLinearAccelParams(100, 45, 0);
-    robot.straight(45, 12, COAST);
-    
+    robot.straight(45, 8.5, COAST);
+
+    //Turn wide back and limit with line
     robot.setLinearAccelParams(100, 0, -25);
-    robot.arc(45, -75, 3.5, COAST);
+    robot.arc(45, -85, 3.5, NONE);
     robot.setLinearAccelParams(100, -25, -25);
     robot.arcUnlim(25, 3.5, BACKWARD, true);
-    while(leftSensor.getReflected() < 50)
+    while(leftSensor.getReflected() < 50 && abs(robot.getAngle()) < 10)
         robot.arcUnlim(25, 3.5, BACKWARD, false);
+    robot.stop(COAST);
+ 
+    return EAST;
+}
+orientation IR_G(orientation dir)
+{
+    DEBUGPRINT("\nIR_G\n");
 
+    stopScanning = false;
+    scanner = &rightScanner;
+    act_tsk(ROOM_TASK_SCAN_TASK);
+    tslp_tsk(1);
 
-    //Lifo until right before task block (green room)
-    resetLifo();
-    setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(30), 5, NONE);
-    setLifoLeft();
-    while(rightSensor.getReflected() < 60)
-        executeLifoLeftUnlim(robot.cmToTacho(30));
+    setLifo("SL", "70");
+    lifoUnregNormal.lines(30, 1, NONE, 4, 8.5, true);
+    stopScanning = true;
+    lifoUnregNormal.distance(30, 5, NONE);
+    lifoControlled.lines(30, 1, NONE, 5);
 
-    //Scan (right) green room task while moving forwards on route to get in the room.
-    current = BLACK;
-    appearances.clear();
-    robot.resetPosition();
-    lifo.setDoubleFollowMode("N", "N");
-    lifo.unlimited(robot.cmToTacho(40), true);
-    while(robot.getPosition() < 8)
-    {
-        if((current = scanCodeBlock(rightScanner)) != BLACK)
-        {
-            appearances[current]++;
-        }
-        lifo.unlimited(robot.cmToTacho(40));
-    }
-    current = analyzeFrequency(appearances, BLACK);
-    rooms[GREEN].setTask(current);
-    display.format("%  \n")%static_cast<int>(current);
+    rooms[GREEN].setTask(scannedValue);
+    display.format("%  \n")%static_cast<int>(scannedValue);
 
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(30, 8, COAST);
 
-    //Get to the intersection
-    robot.resetPosition();
-    timer t;
-    t.reset();
-    resetLifo();
-    setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(35), 8, NONE);
-    double speed = robot.getPosition()/t.secElapsed();
+    robot.setLinearAccelParams(100, 0, -25);
+    robot.arc(50, -85, -5, NONE);
+    robot.setLinearAccelParams(100, -25, -25);
+    robot.arcUnlim(25, -5, BACKWARD, true);
+    while(leftSensor.getReflected() > 80 && abs(robot.getAngle()) < 10)
+        robot.arcUnlim(25, -5, BACKWARD, false);
+    robot.stop(COAST);
 
-    setLifoLeft();
-    while(rightSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(35));
-
-    robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(150, speed, 0);
-    robot.straight(35, 7, NONE);
-
-    //Turn towards green room
-    robot.setLinearAccelParams(100, 0, -20);
-    robot.arc(45, -80, -4, NONE);
-    robot.arcUnlim(20, -4, BACKWARD, true);
-    while(leftSensor.getReflected() > 60)
-        robot.arcUnlim(20, -4, BACKWARD);  
-
-    //Lifo until right before green room's entrance
-    resetLifo();
-    setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(30), 9, NONE);
-    setLifoSlow();
-    setLifoLeft(true);
-    lifo.setAccelParams(100, 20, 20);
-    lifo.distance(20, 4, NONE);
+    setLifo("SL", "70");
+    lifoUnregNormal.distance(30, 12, NONE);
 
     return SOUTH;
 }
@@ -493,151 +370,86 @@ orientation G_R(orientation dir)
 {
     DEBUGPRINT("\nG_R\n");
     
-    //Lifo till the middle (intersection)
-    resetLifo();
-    setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
-    setLifoRight();
-    while(leftSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(35));
-    lifo.setDoubleFollowMode("N", "N");
-    lifo.distance(robot.cmToTacho(35), 8, NONE);
-
-
-    //Lifo till right before the entrance of the red room
-    resetLifo();
-    setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(30), 9, NONE);
-    setLifoSlow();
-    setLifoRight(true);
-    lifo.setAccelParams(100, 20, 20);
-    lifo.distance(20, 4, NONE);
+    setLifo("70", "SR");
+    lifoUnregExtreme.distance(30, 5, NONE);
+    lifoUnregExtreme.distance(40, 5, NONE);
+    lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
+    lifoUnregNormal.distance(30, 12, NONE);
 
     return NORTH;
 }
-orientation R_B(orientation dir)
+orientation R_IR(orientation dir)
 {
-    DEBUGPRINT("\nR_B\n");
+    DEBUGPRINT("\nR_IR\n");
 
-    //Lifo exit red room till white part of intersection 
-    resetLifo();
-    setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
-    setLifoLeft();
-    while(rightSensor.getReflected() < 60)
-        executeLifoLeftUnlim(robot.cmToTacho(30));
-
-
-    //Complex turn to pass all the difficult lifo parts and get ready to cross
-    robot.setMode(REGULATED);
-    robot.arc(35, 30, 8.5, NONE); 
-    robot.arc(35, 60, 19.5, NONE);
-    robot.arcUnlim(35, 19.5, FORWARD, true);
-    while(rightSensor.getReflected() < 60)
-        robot.arcUnlim(35, 19.5, FORWARD);
-
-
-    //Lifo slower speed to correct from turn
-    robot.setMode(CONTROLLED);    
-    resetLifo();
-    setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
-    //Increase speed until the intersection
-    setLifoRight();
-    lifo.unlimited(robot.cmToTacho(45), true);
-    while(leftSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(45));
-    //Move until right before the start/finish square
-    lifo.setDoubleFollowMode("N", "N");
-    lifo.distance(robot.cmToTacho(45), 8, NONE);
-    setLifoRight();
-    robot.resetPosition();
-    timer t;
-    while(robot.getPosition() < 17)
-        lifo.unlimited(robot.cmToTacho(45));
-    double speed = robot.getPosition() / t.secElapsed();    //Real speed calculation because of unreg/reg discrepancy
-    //Pass the square (no lifo here)
-    robot.setLinearAccelParams(100, speed, speed);
-    robot.straight(speed, 33, NONE);    
-    //Continue lifo high speed till the intersection and half way to the blue room scan area
-    setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(35), 6, NONE);
-    setLifoRight();
-    while(leftSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(45));
-    lifo.setDoubleFollowMode("N", "N");
-    lifo.distance(robot.cmToTacho(45), 8, NONE);
-    setLifoRight();
-    lifo.distance(robot.cmToTacho(45), 12, NONE);
-
-    //Slow down to correct possible mistakes and get to right before scan area
-    resetLifo();
-    setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(35), 5, NONE);
-    setLifoRight();
-    while(leftSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(40));
-
-    //Continue forwards scanning left (blue room) same way as green just mirrored
-    colors current = BLACK;
-    map<colors, int> appearances;
-    robot.resetPosition();
-    lifo.setDoubleFollowMode("N", "N");
-    lifo.unlimited(robot.cmToTacho(40), true);
-    while(robot.getPosition() < 8)
-    {
-        if((current = scanCodeBlock(leftScanner)) != BLACK)
-        {
-            appearances[current]++;
-        }
-        lifo.unlimited(robot.cmToTacho(40));
-    }
-    current = analyzeFrequency(appearances, BLACK);
-    rooms[BLUE].setTask(current);
-    display.format("%  \n")%static_cast<int>(current);
-
-    //Infer Yellow Room's task.
-    int waterTasks = 0;
-    if(rooms[RED].getTask() == WATER)
-        waterTasks++;
-    if(rooms[GREEN].getTask() == WATER)
-        waterTasks++;  
-    if(rooms[BLUE].getTask() == WATER)
-        waterTasks++;
-    rooms[YELLOW].setTask(waterTasks == 2 ? GREEN : WHITE);
-
-
-    //Move to the intersection 
-    robot.resetPosition();
-    t.reset();
-    resetLifo();
-    setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(35), 8, NONE);
-    speed = robot.getPosition()/t.secElapsed();
-
-    setLifoRight();
-    while(leftSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(35));
+    setLifo("SL", "70");
+    lifoUnregExtreme.distance(30, 5, NONE);
+    lifoUnregExtreme.distance(40, 5, NONE);
+    lifoUnregNormal.lines(30, 1, NONE, 5);
 
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(150, speed, 0);
-    robot.straight(35, 7, NONE);
+    robot.setLinearAccelParams(100, 30, 30);
+    robot.arc(45, 40, 8.5, NONE);
+    robot.setLinearAccelParams(100, 40, 25);
+    robot.arc(45, 55, 18, NONE);
+    robot.arcUnlim(25, 18, FORWARD, true);
+    while(rightSensor.getReflected() < 80 && abs(robot.getAngle()) < 10)
+        robot.arcUnlim(25, 18, FORWARD, false);
 
-    //Turn towards blue room
-    robot.setLinearAccelParams(100, 0, -20);
-    robot.arc(45, -80, 4, NONE);
-    robot.arcUnlim(20, 4, BACKWARD, true);
-    while(rightSensor.getReflected() > 60)
-        robot.arcUnlim(20, 4, BACKWARD);  
+    return WEST;
+}
+orientation IR_IL(orientation dir)
+{
+    DEBUGPRINT("\nIR_IL\n");
 
-    //Lifo until right before blue room's entrance
-    resetLifo();
-    setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(30), 9, NONE);
-    setLifoSlow();
-    setLifoRight(true);
-    lifo.setAccelParams(100, 20, 20);
-    lifo.distance(20, 4, NONE);
+    
+    lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
+    lifoUnregNormal.distance(40, 17, NONE);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 40, 30);
+    robot.straight(50, 34, NONE);
+
+    lifoUnregExtreme.distance(30, 5, NONE);
+    lifoUnregExtreme.distance(40, 5, NONE);
+    lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
+    
+    return WEST;
+
+}
+orientation IL_B(orientation dir)
+{
+    DEBUGPRINT("\nIL_B\n");
+
+    stopScanning = false;
+    scanner = &leftScanner;
+    act_tsk(ROOM_TASK_SCAN_TASK);
+    tslp_tsk(1);
+
+    setLifo("70", "SR");
+    lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
+    stopScanning = true;
+    lifoUnregNormal.distance(30, 5, NONE);
+    lifoControlled.lines(30, 1, NONE, 5);
+
+    rooms[BLUE].setTask(scannedValue);
+    display.format("%  \n")%static_cast<int>(scannedValue);
+
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(30, 8, COAST);
+
+    robot.setLinearAccelParams(100, 0, -25);
+    robot.arc(50, -85, 5, NONE);
+    robot.setLinearAccelParams(100, -25, -25);
+    robot.arcUnlim(25, 5, BACKWARD, true);
+    while(rightSensor.getReflected() > 80 && abs(robot.getAngle()) < 10)
+        robot.arcUnlim(25, 5, BACKWARD, false);
+    robot.stop(COAST);
+
+    setLifo("70", "SR");
+    lifoUnregNormal.distance(30, 12, NONE);
+
+    inferYellowRoomTask();
 
     return SOUTH;
 }
@@ -645,547 +457,812 @@ orientation B_Y(orientation dir)
 {
     DEBUGPRINT("\nB_Y\n");
 
-    //Lifo until intersection
-    resetLifo();
-    setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
-    setLifoLeft();
-    while(rightSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(35));
-    lifo.setDoubleFollowMode("N", "N");
-    lifo.distance(robot.cmToTacho(35), 8, NONE);
-
-    //Lifo until right before yellow room entrance
-    resetLifo();
-    setLifoLeftExtreme();
-    lifo.distance(robot.cmToTacho(30), 9, NONE);
-    setLifoSlow();
-    setLifoLeft(true);
-    lifo.setAccelParams(100, 20, 20);
-    lifo.distance(20, 4, NONE);
+    setLifo("SL", "70");
+    lifoUnregExtreme.distance(30, 5, NONE);
+    lifoUnregExtreme.distance(40, 5, NONE);
+    lifoUnregNormal.lines(40, 1, NONE, 5, 8.5, true);
+    lifoUnregNormal.distance(30, 12, NONE);
 
     return NORTH;
 }
-orientation Y_L(orientation dir)
+orientation Y_IL(orientation dir)
 {
-    DEBUGPRINT("\nY_L\n");
+    DEBUGPRINT("\nY_IL\n");
 
-    //Exit yellow room
-    resetLifo();
-    setLifoRightExtreme();
-    lifo.distance(robot.cmToTacho(30), 10, NONE);
-    setLifoRight();
-    while(leftSensor.getReflected() < 60)
-        lifo.unlimited(robot.cmToTacho(30));
+    grabber.moveDegrees(-500, 100, COAST, false);
+    tslp_tsk(1);
 
-    
-    //Special turn to pass through trouble and put line between the two sensors
-    robot.setLinearAccelParams(100, 30, 30);
-    robot.arc(45, 90, -8.5, COAST);
+    setLifo("70", "SR");
+    lifoUnregExtreme.distance(30, 5, NONE);
+    lifoUnregExtreme.distance(40, 5, NONE);
+    lifoUnregNormal.lines(30, 1, NONE, 5);
+    act_tsk(LEAVE_BALL_TASK);
+    tslp_tsk(1);
 
-    //Correct turn mistakes with slow lifo
-    resetLifo();
-    // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
-    lifo.setPIDparams(3, 3, 120, 1);
-    lifo.distance(robot.cmToTacho(35), 5, NONE);
-
-    //Lifo until the intersection
-    timer t;
-    resetLifo();
-    lifo.distance(robot.cmToTacho(45), 10, NONE);
-    lifo.lines(robot.cmToTacho(45), 1, NONE);
-
-    //Lifo until right before the start/finish square
-    robot.resetPosition();
-    t.reset();
-    lifo.distance(robot.cmToTacho(45), 22, NONE);
-
-    double speed = robot.getPosition() / t.secElapsed(); //Speed calculation for unreg/reg behaviour
-    //Complex arc turn to get into the right position before the laundry baskets
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(150, speed, speed);
-    robot.straight(speed, 6, NONE);
-    robot.setLinearAccelParams(100, speed, speed);
-    robot.arc(45, 90, 17.5, COAST);
+    robot.setLinearAccelParams(100, 30, 30);
+    robot.arc(45, 90, -8.5, NONE);
 
-    //Lifo until the intersection
-    resetLifo();
-    // lifo.setPIDparams(KP * 1.2, KI * 0.7, KD*1.5, 1);
-    lifo.setPIDparams(3, 3, 120, 1);
-    lifo.distance(robot.cmToTacho(35), 10, NONE);
-    setLifoSlow();
-    lifo.setAccelParams(150, 20, 20);
-    lifo.distance(20, 3, NONE);
-    lifo.lines(20, 1, BRAKE);
+    return EAST;
+}
+orientation IL_L(orientation dir)
+{
+    DEBUGPRINT("\nIL_L\n");
+
+    setLifo("SL", "SR");
+    lifoUnregExtreme.distance(30, 5, NONE);
+    lifoUnregNormal.lines(40, 2, NONE, 20, 2.5, false);
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 40, 30);
+    robot.straight(40, 5, NONE);
+
+    robot.setLinearAccelParams(100, 30, 40);
+    robot.arc(45, 90, 16, NONE);
+
+    lifoUnregExtreme.distance(30, 5, NONE);
+    lifoUnregNormal.distance(40, 5, NONE);
+    lifoControlled.lines(30, 1, COAST, 5);
 
     return SOUTH;
 }
 orientation L_S(orientation dir)
 {
     DEBUGPRINT("\nL_S\n");
+    
+    lifoUnregExtreme.distance(30, 5, NONE);
+    lifoUnregNormal.lines(40, 1, NONE, 5);
 
-    //Get to right before the start/finish square
-    lifo1LineDist(CENTERED, 7, 2, 2, 3, SPECIAL_REF, NONE);
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 20, 0);
+    robot.setLinearAccelParams(100, 40, 0);
     robot.straight(45, 21, COAST);
 
     return NORTH;
 }
 
+
+orientation CR3_R(orientation dir)
+{
+    DEBUGPRINT("\nCR3_R\n");
+
+    centralTurn(dir, NORTH);
+    setLifo("70", "SR");
+    lifoUnregNormal.distance(30, 12, NONE);
+
+    return NORTH;
+}
+orientation R_CR3(orientation dir)
+{
+    DEBUGPRINT("\nR_CR3\n");
+
+    centralTurn(dir, SOUTH);
+    setLifo("SL", "70");
+    lifoUnregExtreme.distance(30, 5, NONE);
+    lifoUnregExtreme.distance(40, 5, NONE);
+    lifoUnregNormal.lines(30, 1, NONE, 5);
+    setLifo("N", "N");
+    lifoUnregNormal.distance(30, 2, NONE);
+
+    return SOUTH;
+}
+orientation CR3_G(orientation dir)
+{
+    DEBUGPRINT("\nCR3_G\n");
+
+    centralTurn(dir, SOUTH);
+    setLifo("SL", "70");
+    lifoUnregNormal.distance(30, 12, NONE);
+
+    return SOUTH;
+}
+orientation G_CR3(orientation dir)
+{
+    DEBUGPRINT("\nG_CR3\n");
+
+    centralTurn(dir, NORTH);
+    setLifo("70", "SR");
+    lifoUnregExtreme.distance(30, 5, NONE);
+    lifoUnregExtreme.distance(40, 5, NONE);
+    lifoUnregNormal.lines(30, 1, NONE, 5);
+    setLifo("N", "N");
+    lifoUnregNormal.distance(30, 2, NONE);
+
+    return NORTH;
+}
+orientation CL3_B(orientation dir)
+{
+    DEBUGPRINT("\nCL3_B\n");
+
+    centralTurn(dir, SOUTH);
+    setLifo("70", "SR");
+    lifoUnregNormal.distance(30, 12, NONE);
+
+    return SOUTH;
+}
+orientation B_CL3(orientation dir)
+{
+    DEBUGPRINT("\nB_CL3\n");
+
+    centralTurn(dir, NORTH);
+    setLifo("SL", "70");
+    lifoUnregExtreme.distance(30, 5, NONE);
+    lifoUnregExtreme.distance(40, 5, NONE);
+    lifoUnregNormal.lines(30, 1, NONE, 5);
+    setLifo("N", "N");
+    lifoUnregNormal.distance(30, 2, NONE);
+
+    return NORTH;
+}
+orientation CL3_Y(orientation dir)
+{
+    DEBUGPRINT("\nCL3_Y\n");
+
+    centralTurn(dir, NORTH);
+    setLifo("SL", "70");
+    lifoUnregNormal.distance(30, 12, NONE);
+
+    return NORTH;
+}
+orientation Y_CL3(orientation dir)
+{
+    DEBUGPRINT("\nY_CL3\n");
+
+    centralTurn(dir, SOUTH);
+    setLifo("70", "SR");
+    lifoUnregNormal.distance(30, 12, NONE);
+    setLifo("N", "N");
+    lifoUnregNormal.distance(30, 2, NONE);
+
+    return SOUTH;
+}
+
 //Full network standard for surprise use
+
+//From and to M
 orientation M_CL1(orientation dir)
 {
     DEBUGPRINT("\nM_CL1\n");
 
-    centralTurn(currentDirection, WEST);
-    robot.setLinearAccelParams(100, 0, 20);
-    robot.straight(45, 15, NONE);
+    centralTurn(dir, WEST);
+    robot.setLinearAccelParams(100, 0, 30);
+    robot.straight(45, 13, NONE);
     switchLifoRobotPosition(20, currentAlignment, CENTERED);
-    lifo1LineDist(CENTERED, 20, 7, 8);
+    lifoRoute1Line(CENTERED, 15, 7, 5, 0, 40, NORMAL);
 
     return WEST;
+}
+orientation CL1_M(orientation dir)
+{
+    DEBUGPRINT("\nCL1_M\n");
+
+    standardTurn(dir, EAST, CENTERED);
+    lifoRoute1Line(CENTERED, 10, 5, 0, 3, 30, NORMAL);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(45, 21, COAST);
+    
+    return EAST;
 }
 orientation M_CR1(orientation dir)
 {
     DEBUGPRINT("\nM_CR1\n");
 
-    centralTurn(currentDirection, EAST);
-    robot.setLinearAccelParams(100, 0, 20);
-    robot.arc(20, 15, 20, NONE);
-    robot.setLinearAccelParams(100, 20, 20);
-    robot.straight(45, 12, NONE);
-    currentAlignment = RIGHT_OF_LINE;
-    lifo1LineDist(RIGHT_OF_LINE, 20, 7, 8);
+    centralTurn(dir, EAST);
+    if(currentAlignment == CENTERED)
+    {
+        robot.setLinearAccelParams(100, 0, 30);
+        robot.arc(30, 15, 20, NONE);
+        robot.setLinearAccelParams(100, 30, 30);
+        robot.straight(45, 12, NONE);
+        currentAlignment = RIGHT_OF_LINE;
+    }
+    else
+    {
+        robot.setLinearAccelParams(100, 0, 30);
+        robot.straight(45, 15, NONE);   
+    }
+    
+    
+    stopScanning = false;
+    act_tsk(HUMAN_SCAN_TASK);
+    tslp_tsk(1);
+    lifoRoute1Line(RIGHT_OF_LINE, 18, 7, 5, 0, 40, NORMAL);
+    stopScanning = true;
+
+    humans[TRH].setColor(scannedValue);
+    display.format("%  \n")%static_cast<int>(humans[TRH].getColor());
 
     return EAST;
+}
+orientation CR1_M(orientation dir)
+{
+    DEBUGPRINT("\nCR1_M\n");
+
+    standardTurn(dir, WEST, LEFT_OF_LINE);
+
+    stopScanning = false;
+    act_tsk(HUMAN_SCAN_TASK);
+    tslp_tsk(1);
+    lifoRoute1Line(LEFT_OF_LINE, 10, 5, 0, 3, 30, NORMAL);
+    stopScanning = true;
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 20, 0);
+    robot.straight(45, 20, COAST);
+
+    humans[TRH].setColor(scannedValue);
+    display.format("%  \n")%static_cast<int>(humans[TRH].getColor());
+
+    return WEST;
 }
 orientation M_TM(orientation dir)
 {
     DEBUGPRINT("\nM_TM\n");
 
-    centralTurn(currentDirection, NORTH);
-    robot.setLinearAccelParams(100, 0, 20);
+    centralTurn(dir, NORTH);
+    robot.setLinearAccelParams(100, 0, 30);
     robot.straight(45, 17, NONE);
-    lifo1LineDist(CENTERED, 15, 5, 5);
+    lifoRoute1Line(CENTERED, 13, 7, 5, 0, 30, NORMAL);
 
     return NORTH;
+}
+orientation TM_M(orientation dir)
+{
+    DEBUGPRINT("\nTM_M\n");
+
+    standardTurn(dir, SOUTH, CENTERED);
+    lifoRoute1Line(CENTERED, 7, 5, 0, 2, 30, NORMAL);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(45, 21, COAST);
+
+    return SOUTH;
 }
 orientation M_BM(orientation dir)
 {
     DEBUGPRINT("\nM_BM\n");
 
-    centralTurn(currentDirection, SOUTH);
-    robot.setLinearAccelParams(100, 0, 20);
-    robot.straight(45, 15, NONE);
-    lifo1LineDist(CENTERED, 15, 5, 5);
+    centralTurn(dir, SOUTH);
+    robot.setLinearAccelParams(100, 0, 30);
+    robot.straight(45, 17, NONE);
+    lifoRoute1Line(CENTERED, 13, 7, 5, 0, 30, NORMAL);
 
     return SOUTH;
 }
-
-orientation CL1_M(orientation dir)
+orientation BM_M(orientation dir)
 {
-    DEBUGPRINT("\nCL1_M\n");
+    DEBUGPRINT("\nBM_M\n");
 
-    standardTurn(currentDirection, EAST, CENTERED);
-    lifo1LineDist(CENTERED, 15, 5, 5, 5, SPECIAL_REF, NONE);
+    standardTurn(dir, NORTH, CENTERED);
+    lifoRoute1Line(CENTERED, 7, 5, 0, 2, 30, NORMAL);
     robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 20, 0);
-    robot.straight(45, 21, COAST);
-    
-    return EAST;
-}
-orientation CL1_CL2(orientation dir)
-{
-    DEBUGPRINT("\nCL1_CL2\n");
+    robot.setLinearAccelParams(100, 30, 0);
+    robot.straight(45, 22, COAST);
 
-    standardTurn(currentDirection, WEST, CENTERED);
-    lifo1LineDist(CENTERED, 20, 10, 5, 5);
-
-    return WEST;
+    return NORTH;
 }
+
+//From and to CL1
 orientation CL1_TL(orientation dir)
 {
     DEBUGPRINT("\nCL1_TL\n");
 
-    standardTurn(currentDirection, NORTH, CENTERED);
-    lifo1LineDist(CENTERED, 25);
+    double distance = 15;
+    if(dir == NORTH) distance += 5;
+    if(dir == EAST) distance -= 3;
+
+    standardTurn(dir, NORTH, RIGHT_OF_LINE);
+    lifoRoute1Line(RIGHT_OF_LINE, distance, 3, 5, 0, 40, SCANNER);
+
+    humans[TLH].setColor(scannedValue);
+    display.format("%  \n")%static_cast<int>(scannedValue);
+
+    robot.setLinearAccelParams(100, 30, 30);
+    robot.arc(45, 45, -3, COAST);
+    robot.arc(45, 20, 25, COAST);
+
+    setLifo("70", "SR");
+    lifoRoute1Line(OTHER, 5, 5, 0, 0, 30, SCANNER, "70", NONE);
+    lifoRoute1Line(OTHER, 8, 0, 0, 0, 30, NO_DETECT);
+
+    humans[TLLH].setColor(scannedValue);
+    display.format("%  \n")%static_cast<int>(scannedValue);
 
     return NORTH;
+}
+orientation TL_CL1(orientation dir)
+{
+    DEBUGPRINT("\nTL_CL1\n");
+
+    if(dir == NORTH)
+    {
+        robot.setMode(CONTROLLED);
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.straight(40, -5, COAST);
+        robot.arc(45, -180, 2.5, COAST);        
+    }
+    else
+        standardTurn(dir, SOUTH, CENTERED);
+    lifoRoute1Line(CENTERED, 20, 7, 5, 0, 40, NORMAL);
+
+    return SOUTH;
 }
 orientation CL1_BL(orientation dir)
 {
     DEBUGPRINT("\nCL1_BL\n");
 
-    standardTurn(currentDirection, SOUTH, CENTERED);
-    lifo1LineDist(CENTERED, 25);
+    double distance = 17;
+    if(dir == SOUTH) distance += 5;
+    if(dir == EAST) distance += 3;
+
+    standardTurn(dir, SOUTH, RIGHT_OF_LINE);
+
+    setLifo("SR", "70");
+    lifoRoute1Line(OTHER, distance, 7, 5, 0, 40, SCANNER, "70", NONE);
+
+    humans[BLLH].setColor(scannedValue);
+    inferLastHuman();
+    display.format("%  \n")%static_cast<int>(scannedValue);
+
+    lifoRoute1Line(OTHER, 10, 0, 5, 0, 30, NO_DETECT);
 
     return SOUTH;
 }
-
-orientation CR1_M(orientation dir)
-{
-    DEBUGPRINT("\nCR1_M\n");
-    standardTurn(currentDirection, WEST, LEFT_OF_LINE);
-    lifo1LineDist(LEFT_OF_LINE, 12, 2, 5, 5, SPECIAL_REF, NONE);
-    robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 20, 0);
-    robot.straight(45, 21, COAST);
-
-    return WEST;
-}
-orientation CR1_CR2(orientation dir)
-{
-    DEBUGPRINT("\nCR1_CR2\n");
-
-    standardTurn(currentDirection, EAST, CENTERED);
-    lifo1LineDist(CENTERED, 20, 10, 5, 5);
-
-    return EAST;
-}
-orientation CR1_TR(orientation dir)
-{
-    DEBUGPRINT("\nCR1_TR\n");
-
-    standardTurn(currentDirection, NORTH, CENTERED);
-    lifo1LineDist(CENTERED, 25);
-
-    return NORTH;
-}
-orientation CR1_BR(orientation dir)
-{
-    DEBUGPRINT("\nCR1_BR\n");
-
-    standardTurn(currentDirection, SOUTH, LEFT_OF_LINE);
-    lifo1LineDist(LEFT_OF_LINE, 40, 10, 10, 5, NO_DETECT);
-
-    return SOUTH;
-}
-
-orientation TM_M(orientation dir)
-{
-    DEBUGPRINT("\nTM_M\n");
-
-    standardTurn(currentDirection, SOUTH, CENTERED);
-    lifo1LineDist(CENTERED, 7, 2, 2, 3, SPECIAL_REF, NONE);
-    robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 20, 0);
-    robot.straight(45, 21, COAST);
-
-    return SOUTH;
-}
-
-orientation BM_M(orientation dir)
-{
-    DEBUGPRINT("\nBM_M\n");
-
-    standardTurn(currentDirection, NORTH, CENTERED);
-    lifo1LineDist(CENTERED, 7, 2, 2, 3, SPECIAL_REF, NONE);
-    robot.setMode(CONTROLLED);
-    robot.setLinearAccelParams(100, 20, 0);
-    robot.straight(45, 21, COAST);
-
-    return NORTH;
-}
-
-orientation TL_CL1(orientation dir)
-{
-    DEBUGPRINT("\nTL_CL1\n");
-
-    standardTurn(currentDirection, SOUTH, CENTERED);
-    lifo1LineDist(CENTERED, 25);
-
-    return SOUTH;
-}
-
-orientation TR_CR1(orientation dir)
-{
-    DEBUGPRINT("\nTR_CR1\n");
-
-    standardTurn(currentDirection, SOUTH, CENTERED);
-    lifo1LineDist(CENTERED, 25);
-
-    return SOUTH;
-}
-
 orientation BL_CL1(orientation dir)
 {
     DEBUGPRINT("\nBL_CL1\n");
 
-    standardTurn(currentDirection, NORTH, CENTERED);
-    lifo1LineDist(CENTERED, 25);
+    standardTurn(dir, NORTH, CENTERED);
+    lifoRoute1Line(CENTERED, 16, 3, 5, 0, 40, NORMAL);
 
     return NORTH;
 }
-
-orientation BR_CR1(orientation dir)
+orientation CL1_CL2(orientation dir)
 {
-    DEBUGPRINT("\nBR_CR1\n");
+    DEBUGPRINT("\nCL1_CL2\n");
 
-    standardTurn(currentDirection, NORTH, RIGHT_OF_LINE);
-    lifo1LineDist(RIGHT_OF_LINE, 25);
+    standardTurn(dir, WEST, CENTERED);
+    lifoRoute1Line(CENTERED, 17, 3, 5, 0, 40, NORMAL);
 
-    return NORTH;
+    return WEST;
 }
-
 orientation CL2_CL1(orientation dir)
 {
     DEBUGPRINT("\nCL2_CL1\n");
 
-    standardTurn(currentDirection, EAST, CENTERED);
-    lifo1LineDist(CENTERED, 20, 10, 5, 5);
+    standardTurn(dir, EAST, CENTERED);
+    lifoRoute1Line(CENTERED, 17, 3, 5, 0, 40, NORMAL);
 
     return EAST;
 }
+
+//From and to CL2
 orientation CL2_CL3(orientation dir)
 {
     DEBUGPRINT("\nCL2_CL3\n");
 
-    standardTurn(currentDirection, WEST, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5);
+    standardTurn(dir, WEST, CENTERED);
+    lifoRoute1Line(CENTERED, 8, 3, 5, 0, 30, NORMAL);
 
     return WEST;
+}
+orientation CL3_CL2(orientation dir)
+{
+    DEBUGPRINT("\nCL3_CL2\n");
+
+    standardTurn(dir, EAST, CENTERED);
+    lifoRoute1Line(CENTERED, 5, 3, 0, 0, 30, NORMAL);
+
+    return EAST;
 }
 orientation CL2_YR1(orientation dir)
 {
     DEBUGPRINT("\nCL2_YR1\n");
 
-    standardTurn(currentDirection, NORTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5, SPECIAL_REF);
+    rooms_vertical(dir, NORTH, 1);
 
     return NORTH;
+}
+orientation YR1_CL2(orientation dir)
+{
+    DEBUGPRINT("\nYR1_CL2\n");
+
+    rooms_vertical(dir, SOUTH, 1);
+
+    return SOUTH;
 }
 orientation CL2_BR1(orientation dir)
 {
     DEBUGPRINT("\nCL2_BR1\n");
 
-    standardTurn(currentDirection, SOUTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5, SPECIAL_REF);
+    rooms_vertical(dir, SOUTH, 1);
 
     return SOUTH;
 }
-
-orientation CR2_CR1(orientation dir)
+orientation BR1_CL2(orientation dir)
 {
-    DEBUGPRINT("\nCR2_CR1\n");
+    DEBUGPRINT("\nBR1_CL2\n");
 
-    standardTurn(currentDirection, WEST, CENTERED);
-    lifo1LineDist(CENTERED, 20, 10, 5, 5);
-
-    return WEST;
-}
-orientation CR2_CR3(orientation dir)
-{
-    DEBUGPRINT("\nCR2_CR3\n");
-
-    standardTurn(currentDirection, EAST, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5);
-
-    return EAST;
-}
-orientation CR2_GR1(orientation dir)
-{
-    DEBUGPRINT("\nCR2_GR1\n");
-
-    standardTurn(currentDirection, SOUTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5, SPECIAL_REF);
-
-    return SOUTH;
-}
-orientation CR2_RR1(orientation dir)
-{
-    DEBUGPRINT("\nCR2_RR1\n");
-
-    standardTurn(currentDirection, NORTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5, COLORED);
+    rooms_vertical(dir, NORTH, 1);
 
     return NORTH;
 }
 
-orientation CL3_CL2(orientation dir)
-{
-    DEBUGPRINT("\nCL3_CL2\n");
-
-    standardTurn(currentDirection, EAST, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5);
-
-    return EAST;
-}
+//From and to CL3
 orientation CL3_YR2(orientation dir)
 {
     DEBUGPRINT("\nCL3_YR2\n");
 
-    standardTurn(currentDirection, NORTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5, SPECIAL_REF);
-
+    rooms_vertical(dir, NORTH, 1);
 
     return NORTH;
-}
-orientation CL3_BR2(orientation dir)
-{
-    DEBUGPRINT("\nCL3_BR2\n");
-
-    standardTurn(currentDirection, SOUTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5, SPECIAL_REF);
-
-    return SOUTH;
-}
-
-orientation CR3_CR2(orientation dir)
-{
-    DEBUGPRINT("\nCR3_CR2\n");
-
-    standardTurn(currentDirection, WEST, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5);
-
-    return WEST;
-}
-orientation CR3_GR2(orientation dir)
-{
-    DEBUGPRINT("\nCR3_GR2\n");
-
-    standardTurn(currentDirection, SOUTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5, SPECIAL_REF);
-
-    return SOUTH;
-}
-orientation CR3_RR2(orientation dir)
-{
-    DEBUGPRINT("\nCR3_RR2\n");
-
-    standardTurn(currentDirection, NORTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5, COLORED);
-
-    return NORTH;
-}
-
-orientation YR1_CL2(orientation dir)
-{
-    DEBUGPRINT("\nYR1_CL2\n");
-
-    standardTurn(currentDirection, SOUTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5);
-
-    return SOUTH;
 }
 orientation YR2_CL3(orientation dir)
 {
     DEBUGPRINT("\nYR2_CL3\n");
 
-    standardTurn(currentDirection, SOUTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5);
+    rooms_vertical(dir, SOUTH, 1);
 
     return SOUTH;
 }
-
-orientation BR1_CL2(orientation dir)
+orientation CL3_BR2(orientation dir)
 {
-    DEBUGPRINT("\nBR1_CL2\n");
+    DEBUGPRINT("\nCL3_BR2\n");
 
-    standardTurn(currentDirection, NORTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5);
+    rooms_vertical(dir, SOUTH, 1);
 
-    return NORTH;
+    return SOUTH;
 }
 orientation BR2_CL3(orientation dir)
 {
     DEBUGPRINT("\nBR2_CL3\n");
 
-    standardTurn(currentDirection, NORTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5);
+    rooms_vertical(dir, NORTH, 1);
 
     return NORTH;
 }
 
+//From and to CR1
+orientation CR1_TR(orientation dir)
+{
+    DEBUGPRINT("\nCR1_TR\n");
+
+    double distance = 15;
+    if(dir == NORTH) distance += 5;
+    if(dir == WEST) distance -= 2;
+
+    standardTurn(dir, NORTH, CENTERED);
+    lifoRoute1Line(CENTERED, distance, 3, 5, 0, 40, NO_DETECT);
+
+    switchLifoRobotPosition(30, currentAlignment, RIGHT_OF_LINE);
+    setLifo("SR", "70");
+    lifoRoute1Line(OTHER, 12, 5, 0, 0, 30, SCANNER);
+
+    humans[TRRH].setColor(scannedValue);
+    display.format("%  \n")%static_cast<int>(scannedValue);
+
+    return NORTH;
+}
+orientation TR_CR1(orientation dir)
+{
+    DEBUGPRINT("\nTR_CR1\n");
+
+    standardTurn(dir, SOUTH, CENTERED);
+    lifoRoute1Line(CENTERED, 23, 7, 5, 0, 40, NORMAL);
+
+    return SOUTH;
+}
+orientation CR1_BR(orientation dir)
+{
+    DEBUGPRINT("\nCR1_BR\n");
+
+    double distance = 8;
+    if(dir == SOUTH) distance += 10;
+    if(dir == WEST) distance += 6;
+
+    standardTurn(dir, SOUTH, LEFT_OF_LINE);
+
+    setLifo("70", "SL");
+    lifoRoute1Line(OTHER, distance, 5, 3, 0, 30, SCANNER);
+    humans[BRH].setColor(scannedValue);
+    display.format("%  \n")%static_cast<int>(scannedValue);
+
+    lifoRoute1Line(LEFT_OF_LINE, 18, 0, 0, 0, 30, SCANNER);
+    humans[BRRH].setColor(scannedValue);
+    display.format("%  \n")%static_cast<int>(scannedValue);
+
+    // lifoRoute1Line(LEFT_OF_LINE, 35, 5, 5, 0, 40, NO_DETECT);
+
+    return SOUTH;
+}
+orientation BR_CR1(orientation dir)
+{
+    DEBUGPRINT("\nBR_CR1\n");
+
+    if(dir == SOUTH)
+    {
+        robot.setMode(CONTROLLED);
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.straight(40, -5, COAST);
+    }
+
+    standardTurn(dir, NORTH, RIGHT_OF_LINE);
+    lifoRoute1Line(RIGHT_OF_LINE, 17, 7, 5, 0, 40, NORMAL);
+
+    return NORTH;
+}
+orientation CR1_CR2(orientation dir)
+{
+    DEBUGPRINT("\nCR1_CR2\n");
+
+    standardTurn(dir, EAST, CENTERED);
+    lifoRoute1Line(CENTERED, 17, 3, 5, 0, 40, NORMAL);
+
+    return EAST;
+}
+orientation CR2_CR1(orientation dir)
+{
+    DEBUGPRINT("\nCR2_CR1\n");
+
+    standardTurn(dir, WEST, CENTERED);
+    lifoRoute1Line(CENTERED, 17, 3, 5, 0, 40, NORMAL);
+
+    return WEST;
+}
+
+//From and to CR2
+orientation CR2_CR3(orientation dir)
+{
+    DEBUGPRINT("\nCR2_CR3\n");
+
+    standardTurn(dir, EAST, CENTERED);
+    lifoRoute1Line(CENTERED, 8, 3, 5, 0, 30, NORMAL);
+
+    return EAST;
+}
+orientation CR3_CR2(orientation dir)
+{
+    DEBUGPRINT("\nCR3_CR2\n");
+
+    standardTurn(dir, WEST, CENTERED);
+    lifoRoute1Line(CENTERED, 5, 3, 0, 0, 30, NORMAL);
+
+    return WEST;
+}
+orientation CR2_GR1(orientation dir)
+{
+    DEBUGPRINT("\nCR2_GR1\n");
+
+    rooms_vertical(dir, SOUTH, 1);
+
+    return SOUTH;
+}
 orientation GR1_CR2(orientation dir)
 {
     DEBUGPRINT("\nGR1_CR2\n");
 
-    standardTurn(currentDirection, NORTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5);
+    rooms_vertical(dir, NORTH, 1);
 
     return NORTH;
+}
+orientation CR2_RR1(orientation dir)
+{
+    DEBUGPRINT("\nCR2_RR1\n");
+
+    rooms_vertical(dir, NORTH, 1, true);
+
+    return NORTH;
+}
+orientation RR1_CR2(orientation dir)
+{
+    DEBUGPRINT("\nRR1_CR2\n");
+
+    rooms_vertical(dir, SOUTH, 1);
+
+    return SOUTH;
+}
+
+//From and to CR3
+orientation CR3_GR2(orientation dir)
+{
+    DEBUGPRINT("\nCR3_GR2\n");
+
+    rooms_vertical(dir, SOUTH, 1);
+
+    return SOUTH;
 }
 orientation GR2_CR3(orientation dir)
 {
     DEBUGPRINT("\nGR2_CR3\n");
 
-    standardTurn(currentDirection, NORTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5);
+    rooms_vertical(dir, NORTH, 1);
 
     return NORTH;
 }
-
-orientation RR1_CR2(orientation dir)
+orientation CR3_RR2(orientation dir)
 {
-    DEBUGPRINT("\nRR1_CR2\n");
+    DEBUGPRINT("\nCR3_RR2\n");
 
-    standardTurn(currentDirection, SOUTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5);
+    rooms_vertical(dir, NORTH, 1, true);
 
-    return SOUTH;
+    return NORTH;
 }
 orientation RR2_CR3(orientation dir)
 {
     DEBUGPRINT("\nRR2_CR3\n");
 
-    standardTurn(currentDirection, SOUTH, CENTERED);
-    lifo1LineDist(CENTERED, 10, 0, 5, 5);
+    rooms_vertical(dir, SOUTH, 1);
 
     return SOUTH;
 }
 
-orientation M_TLH(orientation dir)
+//Human Routes
+orientation TL_TLH(orientation dir)
 {
-    DEBUGPRINT("\nM_TLH\n");
+    DEBUGPRINT("\nTL_TLH\n");
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    if(!humans[TLLH].getIsPicked())
+        robot.straight(40, -17, COAST);
+    else
+        robot.straight(40, -20, COAST);
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.arc(45, 90, 0, COAST);
+    robot.straight(40, 11, COAST);
+
+    humans[TLH].grabHuman();
 
     return NO;
 }
-orientation TLH_M(orientation dir)
+orientation TLH_TL(orientation dir)
 {
-    DEBUGPRINT("\nTLH_M\n");
+    DEBUGPRINT("\nTLH_TL\n");
 
-    return NORTH;
+    robot.straight(40, -7, COAST);
+    robot.arc(45, 90, 0, COAST);
+    currentAlignment = CENTERED;
+
+    return SOUTH;
 }
+
 orientation M_TRH(orientation dir)
 {
     DEBUGPRINT("\nM_TRH\n");
+
+    dir = M_CR1(dir);
+
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, -90, 10, COAST);
+    robot.straight(45, 15, COAST);
+
+    humans[TRH].grabHuman();
 
     return NO;
 }
 orientation TRH_M(orientation dir)
 {
-    DEBUGPRINT("\nTRH_M\n");
+    dir = TRH_CR1(dir);
+    return CR1_M(dir);
+}
+orientation TRH_CR1(orientation dir)
+{
+    DEBUGPRINT("\nTRH_CR1\n");
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, -90, -5, COAST);
+
+    lifoRoute1Line(RIGHT_OF_LINE, 10, 5, 5, 0, 40, NORMAL);
+
+    return EAST;
+}
+orientation CR1_TRH(orientation dir)
+{
+    if(dir == EAST)
+    {
+        act_tsk(OPEN_GRABBER_TASK);
+        tslp_tsk(1);
+        
+        robot.setMode(CONTROLLED);
+        robot.setLinearAccelParams(100, 0, 0);
+        robot.arc(45, -90, 10, COAST);
+        robot.straight(45, 15, COAST);
+
+        humans[TRH].grabHuman();
+        return NO;
+    } 
+    else
+    {
+        dir = CR1_M(dir);
+        return M_TRH(dir);
+    }
+}
+
+orientation BL_BLH(orientation dir)
+{
+    DEBUGPRINT("\nBL_BLH\n");
+
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    if(!humans[BLLH].getIsPicked())
+        robot.straight(40, -14, COAST);
+    else
+        robot.straight(40, -16.5, COAST);
+    robot.arc(45, -90, 0, COAST);
+    robot.straight(40, 13, COAST);
+
+    humans[BLH].grabHuman();
+
+    return NO;
+}
+orientation BLH_BL(orientation dir)
+{
+    DEBUGPRINT("\nBLH_BL\n");
+
+    robot.straight(40, -11, COAST);
+
+    robot.arc(45, -90, 0, COAST);
+
+    currentAlignment = CENTERED;
 
     return NORTH;
 }
-orientation M_BLH(orientation dir)
+
+orientation BR_BRH(orientation dir)
 {
-    DEBUGPRINT("\nM_BLH\n");
+    DEBUGPRINT("\nBR_BRH\n");
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(40, -6, COAST);
+
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.arc(45, 183, 6.5, COAST);
+
+    robot.straight(40, 5, COAST);
+
+    humans[BRH].grabHuman();
 
     return NO;
 }
-orientation BLH_M(orientation dir)
+orientation BRH_BR(orientation dir)
 {
-    DEBUGPRINT("\nBLH_M\n");
+    DEBUGPRINT("\nBRH_BR\n");
 
-    return SOUTH;
-}
-orientation M_BRH(orientation dir)
-{
-    DEBUGPRINT("\nM_BRH\n");
+    robot.arc(45, 90, 5, COAST);
+    robot.straight(40, 9, COAST);
+    robot.arc(45, -90, 0, COAST);
+    // robot.setLinearAccelParams(100, 0, 30);
+    // robot.straight(30, 10, NONE);
+    currentAlignment = RIGHT_OF_LINE;
 
-    return NO;
+    return NORTH;
 }
-orientation BRH_M(orientation dir)
-{
-    DEBUGPRINT("\nBRH_M\n");
 
-    return SOUTH;
-}
 orientation TL_TLLH(orientation dir)
 {
     DEBUGPRINT("\nTL_TLLH\n");
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, -30);
+    robot.arc(30, -55, 4, NONE);
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, -30, 0);
+    robot.arc(45, -35, 4, COAST);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(40, 8, COAST);
+
+    humans[TLLH].grabHuman();
 
     return NO;
 }
@@ -1193,11 +1270,36 @@ orientation TLLH_TL(orientation dir)
 {
     DEBUGPRINT("\nTLLH_TL\n");
 
+    robot.straight(40, -10, COAST);
+    robot.arc(45, -90, 0, COAST);
+
+    currentDirection = SOUTH;
+    currentAlignment = CENTERED;
+
     return SOUTH;
 }
+
 orientation TR_TRRH(orientation dir)
 {
     DEBUGPRINT("\nTR_TRRH\n");
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(45, 7, COAST);
+
+    robot.setLinearAccelParams(100, 0, -20);
+    robot.arc(20, -20, -2, NONE);
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.setLinearAccelParams(100, -20, 0);
+    robot.arc(45, -75, -2, COAST);
+
+    while(grabberUsed) tslp_tsk(1);
+
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(45, 7, COAST);
+
+    humans[TRRH].grabHuman();
 
     return NO;
 }
@@ -1205,11 +1307,26 @@ orientation TRRH_TR(orientation dir)
 {
     DEBUGPRINT("\nTRRH_TR\n");
 
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.straight(45, -9, COAST);
+
+    robot.arc(45, 90, 0, COAST);
+
     return SOUTH;
 }
+
 orientation BL_BLLH(orientation dir)
 {
     DEBUGPRINT("\nBL_BLLH\n");
+
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, -90, -6, COAST);
+    robot.straight(40, 11, COAST);
+    
+    humans[BLLH].grabHuman();
 
     return NO;
 }
@@ -1217,11 +1334,27 @@ orientation BLLH_BL(orientation dir)
 {
     DEBUGPRINT("\nBLLH_BL\n");
 
+     robot.straight(40, -8, COAST);
+    robot.arc(45, 90, 0, COAST);
+
+    currentAlignment = CENTERED;
+
     return NORTH;
 }
+
 orientation BR_BRRH(orientation dir)
 {
     DEBUGPRINT("\nBR_BRRH\n");
+
+    robot.setMode(CONTROLLED);
+    robot.setLinearAccelParams(100, 0, 0);
+    robot.arc(45, -90, -8.5, COAST);
+    act_tsk(OPEN_GRABBER_TASK);
+    tslp_tsk(1);
+    robot.arc(45, -90, 4, COAST);
+    robot.straight(45, 10, COAST);
+
+    humans[BRRH].grabHuman();
 
     return NO;
 }
@@ -1229,5 +1362,318 @@ orientation BRRH_BR(orientation dir)
 {
     DEBUGPRINT("\nBRRH_BR\n");
 
+    robot.arc(45, -180, 6, COAST);
+    currentAlignment = RIGHT_OF_LINE;
+
     return NORTH;
+}
+
+
+//Secondary routing (faster, but may require higher maintenance)
+//Vertical
+orientation BM_TM(orientation dir)
+{
+    DEBUGPRINT("\nBM_TM\n");
+
+    return NORTH;
+}
+orientation TM_BM(orientation dir)
+{
+    DEBUGPRINT("\nTM_BM\n");
+
+    return SOUTH;
+}
+
+orientation BL_TL(orientation dir)
+{
+    DEBUGPRINT("\nBL_TL\n");
+
+    return NORTH;
+}
+orientation TL_BL(orientation dir)
+{
+    DEBUGPRINT("\nTL_BL\n");
+
+    return SOUTH;
+}
+
+orientation BR_TR(orientation dir)
+{
+    DEBUGPRINT("\nBR_TR\n");
+
+    return NORTH;
+}
+orientation TR_BR(orientation dir)
+{
+    DEBUGPRINT("\nTR_BR\n");
+
+    return SOUTH;
+}
+
+orientation BR1_YR1(orientation dir)
+{
+    DEBUGPRINT("\nBR1_YR1\n");
+
+    rooms_vertical(dir, NORTH, 2);
+
+    return NORTH;
+}
+orientation YR1_BR1(orientation dir)
+{
+    DEBUGPRINT("\nYR1_BR1\n");
+
+    rooms_vertical(dir, SOUTH, 2);
+
+    return SOUTH;
+}
+orientation BR2_YR2(orientation dir)
+{
+    DEBUGPRINT("\nBR2_YR2\n");
+
+    rooms_vertical(dir, NORTH, 2);
+
+    return NORTH;
+}
+orientation YR2_BR2(orientation dir)
+{
+    DEBUGPRINT("\nYR2_BR2\n");
+
+    rooms_vertical(dir, SOUTH, 2);
+
+    return SOUTH;
+}
+
+orientation GR1_RR1(orientation dir)
+{
+    DEBUGPRINT("\nGR1_RR1\n");
+
+    rooms_vertical(dir, NORTH, 2, true);
+
+    return NORTH;
+}
+orientation RR1_GR1(orientation dir)
+{
+    DEBUGPRINT("\nRR1_GR1\n");
+
+    rooms_vertical(dir, SOUTH, 2);
+
+    return SOUTH;
+}
+orientation GR2_RR2(orientation dir)
+{
+    DEBUGPRINT("\nGR2_RR2\n");
+
+    rooms_vertical(dir, NORTH, 2, true);
+
+    return NORTH;
+}
+orientation RR2_GR2(orientation dir)
+{
+    DEBUGPRINT("\nRR2_GR2\n");
+
+    rooms_vertical(dir, SOUTH, 2);
+
+    return SOUTH;
+}
+
+//Double skips
+orientation CL3_CL1(orientation dir)
+{
+    DEBUGPRINT("\nCL3_CL1\n");
+
+    standardTurn(dir, EAST, CENTERED);
+    lifoRoute1Line(CENTERED, 38, 3, 5, 0, 40, NORMAL);
+
+    return EAST;
+}
+orientation CL1_CL3(orientation dir)
+{
+    DEBUGPRINT("\nCL1_CL3\n");
+
+    standardTurn(dir, WEST, CENTERED);
+    lifoRoute1Line(CENTERED, 38, 3, 5, 0, 40, NORMAL);
+
+    return WEST;
+}
+orientation CL2_M(orientation dir)
+{
+    DEBUGPRINT("\nCL2_M\n");
+
+    return EAST;
+}
+orientation M_CL2(orientation dir)
+{
+    DEBUGPRINT("\nM_CL2\n");
+
+    return WEST;
+}
+orientation CL1_CR1(orientation dir)
+{
+    DEBUGPRINT("\nCL1_CR1\n");
+
+    return EAST;
+}
+orientation CR1_CL1(orientation dir)
+{
+    DEBUGPRINT("\nCR1_CL1\n");
+
+    return WEST;
+}
+orientation M_CR2(orientation dir)
+{
+    DEBUGPRINT("\nM_CR2\n");
+
+    return EAST;
+}
+orientation CR2_M(orientation dir)
+{
+    DEBUGPRINT("\nCR2_M\n");
+
+    return WEST;
+}
+orientation CR1_CR3(orientation dir)
+{
+    DEBUGPRINT("\nCR1_CR3\n");
+
+    standardTurn(dir, EAST, CENTERED);
+    lifoRoute1Line(CENTERED, 38, 3, 5, 0, 40, NORMAL);
+
+    return EAST;
+}
+orientation CR3_CR1(orientation dir)
+{
+    DEBUGPRINT("\nCR3_CR1\n");
+
+    standardTurn(dir, WEST, CENTERED);
+    lifoRoute1Line(CENTERED, 38, 3, 5, 0, 40, NORMAL);
+
+    return WEST;
+}
+
+//Triple skips
+orientation CL3_M(orientation dir)
+{
+    DEBUGPRINT("\nCL3_M\n");
+
+    return EAST;
+}
+orientation M_CL3(orientation dir)
+{
+    DEBUGPRINT("\nM_CL3\n");
+
+    return WEST;
+}
+orientation CL2_CR1(orientation dir)
+{
+    DEBUGPRINT("\nCL2_CR1\n");
+
+    return EAST;
+}
+orientation CR1_CL2(orientation dir)
+{
+    DEBUGPRINT("\nCR1_CL2\n");
+
+    return WEST;
+}
+orientation CL1_CR2(orientation dir)
+{
+    DEBUGPRINT("\nCL1_CR2\n");
+
+    return EAST;
+}
+orientation CR2_CL1(orientation dir)
+{
+    DEBUGPRINT("\nCR2_CL1\n");
+
+    return WEST;
+}
+orientation M_CR3(orientation dir)
+{
+    DEBUGPRINT("\nM_CR3\n");
+
+    return EAST;
+}
+orientation CR3_M(orientation dir)
+{
+    DEBUGPRINT("\nCR3_M\n");
+
+    return WEST;
+}
+
+//Quadruple skips
+orientation CL3_CR1(orientation dir)
+{
+    DEBUGPRINT("\nCL3_CR1\n");
+
+    return EAST;
+}
+orientation CR1_CL3(orientation dir)
+{
+    DEBUGPRINT("\nCR1_CL3\n");
+
+    return WEST;
+}
+orientation CL2_CR2(orientation dir)
+{
+    DEBUGPRINT("\nCL2_CR2\n");
+
+    return EAST;
+}
+orientation CR2_CL2(orientation dir)
+{
+    DEBUGPRINT("\nCR2_CL2\n");
+
+    return WEST;
+}
+orientation CL1_CR3(orientation dir)
+{
+    DEBUGPRINT("\nCL1_CR3\n");
+
+    return EAST;
+}
+orientation CR3_CL1(orientation dir)
+{
+    DEBUGPRINT("\nCR3_CL1\n");
+
+    return WEST;
+}
+
+//Quintuple skips
+orientation CL3_CR2(orientation dir)
+{
+    DEBUGPRINT("\nCL3_CR2\n");
+
+    return EAST;
+}
+orientation CR2_CL3(orientation dir)
+{
+    DEBUGPRINT("\nCR2_CL3\n");
+
+    return WEST;
+}
+orientation CL2_CR3(orientation dir)
+{
+    DEBUGPRINT("\nCL2_CR3\n");
+
+    return EAST;
+}
+orientation CR3_CL2(orientation dir)
+{
+    DEBUGPRINT("\nCR3_CL2\n");
+
+    return WEST;
+}
+
+//Sixtuple skips
+orientation CL3_CR3(orientation dir)
+{
+    DEBUGPRINT("\nCL3_CR3\n");
+
+    return EAST;
+}
+orientation CR3_CL3(orientation dir)
+{
+    DEBUGPRINT("\nCR3_CL3\n");
+
+    return WEST;
 }
